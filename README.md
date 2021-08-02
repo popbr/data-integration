@@ -7,7 +7,7 @@
 
 Sites use their own verson of fancy text with its own operators.
 Google Docs uses... 
-* ctrl + i for *italics*
+* <kbd>ctrl</kbd> + i for *italics*
 * ctrl + b for **bold**
 * ctrl + u for underline
 * etc... 
