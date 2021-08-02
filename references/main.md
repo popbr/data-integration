@@ -28,10 +28,10 @@ Normally, you can compile this file into a pdf using
 pandoc --pdf-engine=xelatex --citeproc -o main.pdf main.md
 -->
 
-# Workflow:
+# Workflow
 
 #. Find reference / article,
-#. Add it to citations.bib, (to obtain citation from webpages, you can use <https://zbib.org/>),
+#. Add it to citations.bib, (to obtain citation from webpages, you can use <https://zbib.org/>, look for "export" -> "download bibtex", and more generally, refer to <https://tex.stackexchange.com/questions/143/what-are-good-sites-to-find-citations-in-bibtex-format>),
 #. Reference it below and add a few notes about that article.
 
 # Example
