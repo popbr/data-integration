@@ -36,7 +36,10 @@ pandoc --pdf-engine=xelatex --citeproc -o main.pdf main.md
 
 # Example
 
-From [@noauthor_understanding_2020], I have learned that…
+From [@noauthor_understanding_2020], I learned about the "data analysis project lifecycle",  which is the timeline a DAP (data analysis project) follows. There are 6 steps
+From [@university_404_nodate], I found a wealth of projects in data analytics that I can peruse and get a better foundation of the ways my project/paper can be done. For example, the "Learning to skim text" project was one of my favorites, was one about teaching an AI to be able to skim through text to be able to better aggregate data for data aquisition.
+From [@bharadwa_7_2021], I learned of the "7 steps to a sucessful data science project". From step 1, the problem statement, I believe that my problem statement will be something along the lines of "Is it possible to measure the effectiveness of a researcher by finding and examining papers/research and the amount of usage it see". This will likely be changed after August 12th.
+
 
 # References 
 
