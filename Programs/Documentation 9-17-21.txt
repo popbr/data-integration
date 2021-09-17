@@ -1,0 +1,9 @@
+Test User: DBTestUser
+     Password: wali0e^23
+
+
+Using:
+MySQL Server 8.0
+MySQL Workbench 8.0
+Microsoft Visual Studio Code
+mysql-connector-java-8.0.23
