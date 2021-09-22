@@ -6,9 +6,9 @@ import java.util.Scanner;  // Import the Scanner class
 public class Prospectus_Connect_To_DB {
   public static void main(String[] args) {
     try (Connection conn = 
-          DriverManager.getConnection("jdbc:mysql://localhost:3306/Prospectus_DB"
-          + "?user=DBTestUser"
-          + "&password=wali0e^23"
+          DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB"
+          + "?user=testuser"
+          + "&password=password"
           + "&allowMultiQueries=true"
           + "&createDatabaseIfNotExist=true"
           + "&useSSL=true"); 

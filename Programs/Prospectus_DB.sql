@@ -1,6 +1,6 @@
-DROP SCHEMA IF EXISTS Prospectus_DB;
-CREATE SCHEMA Prospectus_DB;
-USE Prospectus_DB;
+DROP SCHEMA IF EXISTS HW_Prospectus_DB;
+CREATE SCHEMA HW_Prospectus_DB;
+USE HW_Prospectus_DB;
 
 CREATE TABLE CompanyDB (
   Name VARCHAR(255) PRIMARY KEY,
