@@ -42,7 +42,7 @@ public class Prospectus_Write_to_Excel
     }
   
     // writing the workbook into the file
-    FileOutputStream out = new FileOutputStream( new File("C:/savedexcel/GFGsheet.xlsx")); //C:\Users\sleep\Desktop\Excel
+    FileOutputStream out = new FileOutputStream( new File("./GFGsheet.xlsx")); //C:\Users\sleep\Desktop\Excel
     workbook.write(out);
     out.close();
   }
