@@ -1,7 +1,7 @@
-#. Download Apache's POI from <https://www.apache.org/dyn/closer.lua/poi/release/bin/poi-bin-5.0.0-20210120.tar.gz>
-#. (Optional) Verify [the file's integrity](https://www.apache.org/dyn/closer.cgi#verify)
-#. Compile `Prospectus_Write_to_Excel.java`, adding `poi-5.0.0/poi-5.0.0.jar:poi-5.0.0/poi-examples-5.0.0.jar:poi-5.0.0/poi-excelant-5.0.0.jar:poi-5.0.0/poi-integration-5.0.0.jar:poi-5.0.0/poi-ooxml-5.0.0.jar:poi-5.0.0/poi-ooxml-full-5.0.0.jar:poi-5.0.0/poi-ooxml-lite-5.0.0.jar:poi-5.0.0/poi-scratchpad-5.0.0.jar:poi-5.0.0/lib/commons-codec-1.15.jar:poi-5.0.0/lib/commons-collections4-4.4.jar:poi-5.0.0/lib/commons-math3-3.6.1.jar:poi-5.0.0/lib/SparseBitSet-1.2.jar:poi-5.0.0/ooxml-lib/commons-compress-1.20.jar:poi-5.0.0/ooxml-lib/curvesapi-1.06.jar:poi-5.0.0/ooxml-lib/xmlbeans-4.0.0.jar` to the classpath.
-#. Execute (with the same class path) and enjoy! The file "./GFGsheet.xls" should appear in the same folder.
+1. Download Apache's POI from <https://www.apache.org/dyn/closer.lua/poi/release/bin/poi-bin-5.0.0-20210120.tar.gz>
+2. (Optional) Verify [the file's integrity](https://www.apache.org/dyn/closer.cgi#verify)
+3. Compile `Prospectus_Write_to_Excel.java`, adding `poi-5.0.0/poi-5.0.0.jar:poi-5.0.0/poi-examples-5.0.0.jar:poi-5.0.0/poi-excelant-5.0.0.jar:poi-5.0.0/poi-integration-5.0.0.jar:poi-5.0.0/poi-ooxml-5.0.0.jar:poi-5.0.0/poi-ooxml-full-5.0.0.jar:poi-5.0.0/poi-ooxml-lite-5.0.0.jar:poi-5.0.0/poi-scratchpad-5.0.0.jar:poi-5.0.0/lib/commons-codec-1.15.jar:poi-5.0.0/lib/commons-collections4-4.4.jar:poi-5.0.0/lib/commons-math3-3.6.1.jar:poi-5.0.0/lib/SparseBitSet-1.2.jar:poi-5.0.0/ooxml-lib/commons-compress-1.20.jar:poi-5.0.0/ooxml-lib/curvesapi-1.06.jar:poi-5.0.0/ooxml-lib/xmlbeans-4.0.0.jar` to the classpath.
+4. Execute (with the same class path) and enjoy! The file "./GFGsheet.xls" should appear in the same folder.
 
 On Dr. Aubert's set-up, this gives
 
