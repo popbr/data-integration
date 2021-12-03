@@ -25,6 +25,7 @@ public class Prospectus_Write_to_Excel
     ReschData.put("3", new Object[] { "Dr. Aubert", "AU Compuster and Cyber Science", "Teacher & Researcher" });
     ReschData.put("4", new Object[] { "Dr. Balas", "AU Allied Health", "Teacher & Researcher" });
     ReschData.put("5", new Object[] { "Sleeper", "Best Redhead in AU", "Student" });
+    ReschData.put("5", new Object[] { "Elton", "yes", "Student" });
   
     Set<String> keyid = ReschData.keySet();
     int rowid = 0;
