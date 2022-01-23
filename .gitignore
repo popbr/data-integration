@@ -4,10 +4,5 @@
 *.xlsx
 *.class
 
-Programs/Prospectus_Downloaded_DB_to_Excel/.settings/*
-Programs/Prospectus_Downloaded_DB_to_Excel/.bin/*
-
-Programs/Prospectus_Write_to_Excel_from_Sql/.settings/*
-Programs/Prospectus_Write_to_Excel_from_Sql/.bin/*
-
-Programs/Prospectus_Write_to_Excel_from_java/.bin/*
+**/.settings/*
+**/bin/*
