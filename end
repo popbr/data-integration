@@ -1,0 +1,73 @@
+[33mcommit 2fc641597bc9a13a2da4354e9d521bbe6ef2c974[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m
+Author: MNSleeper <sleepernoahspam@gmail.com>
+Date:   Wed Aug 11 17:13:13 2021 -0400
+
+    Deleted CONTRIBUTIONS.md
+
+[33mcommit a9f87c036d463edb5d0b90e5f7ba70ca839ac7cd[m
+Author: MNSleeper <sleepernoahspam@gmail.com>
+Date:   Wed Aug 11 17:07:05 2021 -0400
+
+    Testing from windows git bash
+
+[33mcommit d129fb5e85fdb7e2e50bf9befc7410acd58a6b27[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: caubert <aubert@math.cnrs.fr>
+Date:   Mon Aug 2 13:45:41 2021 -0400
+
+    Light edits to main.md
+
+[33mcommit 9483f81ed91d3ddfcb4ba2a875ee8ecbd7a33955[m
+Author: caubert <aubert@math.cnrs.fr>
+Date:   Mon Aug 2 13:43:01 2021 -0400
+
+    Added example for references.
+
+[33mcommit 1e821939a8ef7d399b82948583087e42f6830355[m
+Author: Clément Aubert <Clement.Aubert@math.cnrs.fr>
+Date:   Mon Aug 2 13:25:20 2021 -0400
+
+    Added kbd
+    
+    You can use strange mixes, like here `html`, in markdown.
+
+[33mcommit bcff964f8b8f3d438dc380bdc180c4af6236527f[m
+Author: MNSleeper <88173825+MNSleeper@users.noreply.github.com>
+Date:   Mon Aug 2 13:05:05 2021 -0400
+
+    Update README.md
+
+[33mcommit 4147cbd9d8bc0eec39816d88b13ae716f9cd9776[m
+Author: MNSleeper <88173825+MNSleeper@users.noreply.github.com>
+Date:   Mon Aug 2 13:03:48 2021 -0400
+
+    Update README.md
+
+[33mcommit 6480ec2a11d96d08b6b370c901d6d5a607c84bf0[m
+Author: MNSleeper <88173825+MNSleeper@users.noreply.github.com>
+Date:   Mon Aug 2 13:03:15 2021 -0400
+
+    Update README.md
+
+[33mcommit e57fd62f9a8cd113a076b1df522fc98cacf63a06[m
+Author: MNSleeper <88173825+MNSleeper@users.noreply.github.com>
+Date:   Mon Aug 2 12:59:40 2021 -0400
+
+    Update README.md
+
+[33mcommit 4b11c06462dfd2e4a4bc0d45bde0ddde83444a6f[m
+Author: MNSleeper <88173825+MNSleeper@users.noreply.github.com>
+Date:   Mon Aug 2 12:59:10 2021 -0400
+
+    Update README.md
+
+[33mcommit 5a9503f4ac8009fb849505746b6f6f42591fc5b3[m
+Author: MNSleeper <88173825+MNSleeper@users.noreply.github.com>
+Date:   Mon Aug 2 12:58:14 2021 -0400
+
+    Update README.md
+
+[33mcommit 2069f68ec6ec44fa28a8d737395dbcfed04e8899[m
+Author: MNSleeper <88173825+MNSleeper@users.noreply.github.com>
+Date:   Mon Aug 2 12:51:18 2021 -0400
+
+    Initial commit

@@ -28,7 +28,8 @@ public class Prospectus_XML_to_Excel
 
 		Scanner myObj = new Scanner(System.in);
 		XSSFWorkbook workbook = new XSSFWorkbook(); // workbook object
-		String fileLocation[] = {"RePORTER_PRJ_X_FY2022_002.xml", "RePORTER_PRJ_C_FY2021_053.csv", "SearchResults.tsv"};
+		String fileLocation[] = {"RePORTER_PRJ_C_FY2021_053.csv", "SearchResults.tsv"};
+		// "RePORTER_PRJ_X_FY2022_002.xml", 
 		String fType, Table;
 		Class.forName("com.mysql.jdbc.Driver");
 		String[] TagList = { "APPLICATION_ID", "ORG_CITY", "PI_NAMEs" };
@@ -55,7 +56,7 @@ public class Prospectus_XML_to_Excel
 		txtFieldsLine.useDelimiter(Delim);
 
 		int index = 0;
-		int Limit = 50 + 1;
+		int Limit = 9050 + 1;
 
 		while (txtFile.hasNextLine()) {
 			index++;
@@ -155,7 +156,7 @@ public class Prospectus_XML_to_Excel
 			
 		} while (txtFile.hasNextLine() && indexTracker < Limit);
 
-		if (true) 
+		if (false) 
 		{
 			for (int i = 0; i<Limit; i++) {
 				System.out.print(i + ": ");
