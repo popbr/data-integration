@@ -6,11 +6,3 @@
 
 **/.settings/*
 **/bin/*
-
-git rm --cached Programs/Prospectus_Downloaded_DB_to_Excel/bin/Prospectus_Write_to_Excel/Prospectus_Write_to_Excel.class 
-git rm --cached Programs/xml_to_sql_to_excel/RePORTER_PRJ_X_FY2022_002.xml 
-git rm --cached Programs/dependencies_test/GFGsheet.xlsx
-git rm --cached Programs/dependencies_test/RePORTER_PRJ_C_FY2021_053.csv
-git rm --cached Programs/dependencies_test/RePORTER_PRJ_X_FY2022_002.xml
-git rm --cached Programs/dependencies_test/SearchResults.tsv
-git rm --cached Programs/Prospectus_Write_to_Excel_from_Sql/Database_Downloads/
