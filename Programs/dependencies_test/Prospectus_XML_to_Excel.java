@@ -22,33 +22,65 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import java.io.File;
 
-public class Prospectus_XML_to_Excel 
-{
+public class Prospectus_XML_to_Excel {
 	public static void main(String[] args) throws Exception {
 
+		System.out.println("");
 		Scanner myObj = new Scanner(System.in);
 		XSSFWorkbook workbook = new XSSFWorkbook(); // workbook object
-		String fileLocation[] = {"RePORTER_PRJ_C_FY2021_053.csv", "SearchResults.tsv"};
-		// "RePORTER_PRJ_X_FY2022_002.xml", 
+
+		File s = new File("f.txt");
+		System.out.println(s.getAbsolutePath());
+		String FilePath = "";
+		char[] tempChar = s.getAbsolutePath().toCharArray();
+		char[] newChar = new char[tempChar.length - 6];
+			for (int i = 0; i < newChar.length; i++) {
+				newChar[i] = tempChar[i];
+			}
+			FilePath = String.valueOf(newChar) + "\\Downloads\\";
+
+			System.out.println(FilePath);
+		File f = new File(FilePath);
+		
+		File[] fileNames = f.listFiles();
+		//String fileLocation[] = { "RePORTER_PRJ_C_FY2021_053.csv" };
+		//String[] fileList = 
+		// "RePORTER_PRJ_X_FY2022_002.xml", , "SearchResults.tsv"
 		String fType, Table;
 		Class.forName("com.mysql.jdbc.Driver");
-		String[] TagList = { "APPLICATION_ID", "ORG_CITY", "PI_NAMEs" };
+		String[] TagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAMEs" };
 		String[] tsvTagList = { "Title", "Status", "Locations" };
+		String[] Search = {"Medical University of South Carolina", "ORG_NAME"}; // plug this into all parsing methods
+		for (int i = 0; i<fileNames.length; i++) {
+			System.out.println("File path Is:"+fileNames[i].getPath()+".");
+			fType = FilenameUtils.getExtension(fileNames[i].getName());
+			Table = fType + (i + 1);
+			if (fType.equals("xml"))
+				ParseFromXML(fileNames[i].getPath(), Table, TagList);
+			else if (fType.equals("csv"))
+				ParseFromtxt(fileNames[i].getPath(), Table, "\",\"", TagList, Search);
+			else if (fType.equals("tsv"))
+				ParseFromtxt(fileNames[i].getPath(), Table, "	", tsvTagList, null);
 
-		for (int i = 0; i < fileLocation.length; i++) 
-		{
+			WriteToExcel("*", Table, workbook, fileNames[i].getName());
+		}
+
+		/*
+		for (int i = 0; i < fileLocation.length; i++) {
 			fType = FilenameUtils.getExtension(fileLocation[i]);
-			Table = fType + (i+1);
-			if (fType.equals("xml")) ParseFromXML(fileLocation[i], Table, TagList);
-			else if (fType.equals("csv")) ParseFromtxt(fileLocation[i], Table, "\",\"", TagList);
-			else if (fType.equals("tsv")) ParseFromtxt(fileLocation[i], Table, "	", tsvTagList);
+			Table = fType + (i + 1);
+			if (fType.equals("xml"))
+				ParseFromXML(fileLocation[i], Table, TagList);
+			else if (fType.equals("csv"))
+				ParseFromtxt(fileLocation[i], Table, "\",\"", TagList, Search);
+			else if (fType.equals("tsv"))
+				ParseFromtxt(fileLocation[i], Table, "	", tsvTagList, null);
 
 			WriteToExcel("*", Table, workbook, fileLocation[i]);
-		} 
+		}*/
 	}
 
-	public static void ParseFromtxt(String txtlocation, String Table, String Delim, String[] TagList) throws Exception 
-	{
+	public static void ParseFromtxt(String txtlocation, String Table, String Delim, String[] TagList, String Search[]) throws Exception {
 		Scanner txtFile = new Scanner(new File(txtlocation));
 
 		String txtFields = txtFile.nextLine();
@@ -62,7 +94,8 @@ public class Prospectus_XML_to_Excel
 			index++;
 			txtFile.nextLine();
 		}
-		if (index<Limit) Limit = (index+1);
+		if (index < Limit)
+			Limit = (index + 1);
 		index = 0;
 		txtFile.reset();
 		txtFile = new Scanner(new File(txtlocation));
@@ -75,7 +108,6 @@ public class Prospectus_XML_to_Excel
 		String currentWord = "";
 		String currentLine = "";
 
-		
 		int[] TagIndex = new int[TagList.length];
 		String[][] data = new String[Limit][TagList.length];
 
@@ -95,7 +127,7 @@ public class Prospectus_XML_to_Excel
 				}
 				currentWord = String.valueOf(newChar);
 			}
-			if (!(txtFieldsLine.hasNext())) { // makes sure the last tag will no have  a " at the end
+			if (!(txtFieldsLine.hasNext())) { // makes sure the last tag will no have a " at the end
 				char[] tempChar = currentWord.toCharArray();
 				char[] newChar = new char[tempChar.length - 1];
 				for (int i = 0; i < newChar.length; i++) {
@@ -111,71 +143,125 @@ public class Prospectus_XML_to_Excel
 			}
 			index++;
 		}
+		indexTracker = 0;
+		//System.out.print(indexTracker + ": ");
+		//for (int i = 0; i < TagList.length -1; i++) {
+		//	System.out.print(data[indexTracker][i]+ ", ");
+		//}
+		//System.out.println(data[indexTracker][TagList.length-1]);
+		//data[indexTracker][0]+ ", " data[indexTracker][1]+ ", " + data[indexTracker][2]);
 		indexTracker = 1;
-		do 
-		{
+			
+		do {
 			index = 0;
 			currentLine = txtFile.nextLine();
 			txtFieldsLine = new Scanner(currentLine);
 			txtFieldsLine.useDelimiter(Delim);
 			char quote = '"';
-			while (txtFieldsLine.hasNext()) 
-			{
+			while (txtFieldsLine.hasNext()) {
 				currentWord = txtFieldsLine.next();
 				if (index == 0) {
-			
+
 					char[] tempChar = currentWord.toCharArray();
-					if (tempChar[0] == quote){
+					if (tempChar[0] == quote) {
 						char[] newChar = new char[tempChar.length - 1];
 
 						for (int i = 1; i < newChar.length + 1; i++) {
 							newChar[i - 1] = tempChar[i];
-						}	
+						}
 						currentWord = String.valueOf(newChar);
 					}
 				}
 				if (index == (TagList.length - 1)) {
 					char[] tempChar = currentWord.toCharArray();
+					if (tempChar == null || tempChar.length == 0) { //this deals with entries such as " , ;"
+						currentWord = "null";
+					} 
+					else {
 					char[] newChar = new char[tempChar.length - 1];
 					for (int i = 0; i < newChar.length; i++) {
 						newChar[i] = tempChar[i];
 					}
 					currentWord = String.valueOf(newChar);
-				}
-	
+				} }
+
 				for (int ind = 0; ind < TagIndex.length; ind++) {
 					if (index == TagIndex[ind]) {
 						data[indexTracker][ind] = currentWord;
-					}	
+					}
 				}
-				index++;			
+				index++;
 			}
-			//System.out.println(indexTracker + ": " + data[indexTracker][0]+ ", " + data[indexTracker][1]+ ", " + data[indexTracker][2]);
-			
+			//System.out.println(indexTracker + ": " + data[indexTracker][0] + ", " +
+			//data[indexTracker][1] + ", " + data[indexTracker][2] + ", " + data[indexTracker][3]);
+
 			indexTracker++;
-			
+
 		} while (txtFile.hasNextLine() && indexTracker < Limit);
+		// so, Noah, problem here is that some fields only have ", ;" in them. If that field happens to be looked at and edited
+		// then that'sgoing to trip an alarm, becausethe field
 
-		if (false) 
+
+
+		/*
+		 * if (true)
+		 * {
+		 * for (int i = 0; i<Limit; i++) {
+		 * System.out.print(i + ": ");
+		 * for (int j = 0; j<3; j++) {
+		 * System.out.print(data[i][j]+", ");
+		 * }
+		 * System.out.println();
+		 * }
+		 * }
+		 */
+		if (Search != null) 
 		{
-			for (int i = 0; i<Limit; i++) {
-				System.out.print(i + ": ");
-				for (int j = 0; j<3; j++) {
-					System.out.print(data[i][j]+", ");
-				}
-				System.out.println();
+			int searchIndex = 0;
+			for (int i = 0; i<TagIndex.length; i++) {
+				if (Search[1].equalsIgnoreCase(data[0][i])) {
+					searchIndex = i; 
+				} 
 			}
-		}
-		WriteToSQL(Table, data, TagList, Limit);
 
+			int searchHits = 0;
+			for (int i = 1; i<Limit; i++) {
+				if (Search[0].equalsIgnoreCase(data[i][searchIndex])) {
+					searchHits++; 
+				} //Search = {"Medical University of South Carolina", 3};
+			}
+			//System.out.println("Number of hits is "+searchHits);
+
+			String[][] SearchData = new String[searchHits+1][TagIndex.length];
+
+			for (int i = 0; i<TagIndex.length; i++) {
+				SearchData[0][i] = data[0][i];
+			}
+			int max = searchHits;
+			searchHits = 0;
+			for (int i = 0; i<Limit; i++) {
+				if (data[i][searchIndex].equalsIgnoreCase(Search[0])) {
+					for(int j = 0; j<TagIndex.length; j++) {
+						SearchData[searchHits+1][j] = data[i][j];
+					}
+					searchHits++;
+					//System.out.println("Hit found at "+ i);
+					if (searchHits == max) break;
+				} //Search = {"Medical University of South Carolina", 3};
+			}
+
+		 WriteToSQL(Table, SearchData, TagList, searchHits+1);
+		} 
+		else 
+		{
+			WriteToSQL(Table, data, TagList, Limit);
+		}
 		txtFile.close();
 		txtFieldsLine.close();
-		
+
 	}
 
-
-	public static void ParseFromExcel(String ExcelLocation, String Table, String[] TagList) throws Exception 
-	{
+	public static void ParseFromExcel(String ExcelLocation, String Table, String[] TagList) throws Exception {
 		try {
 
 			// FileInputStream inputStream = new FileInputStream(new File(ExcelLocation));
@@ -282,23 +368,25 @@ public class Prospectus_XML_to_Excel
 			String DropTable, CreateTable, Statement;
 
 			DropTable = "DROP TABLE IF EXISTS " + TableName + ";";
-			System.out.println(DropTable);
+			//System.out.println(DropTable);
 			CreateTable = "CREATE TABLE " + TableName + " (" + TagName[0] + " VARCHAR(255) PRIMARY KEY, ";
 
-			for (int j = 0; j < TagName.length - 1; j++) // creates the SWL table based on the number of strings in TagName
+			for (int j = 0; j < TagName.length - 1; j++) // creates the SWL table based on the number of strings in
+															// TagName
 			{
 				CreateTable = CreateTable + TagName[j + 1] + " VARCHAR(255)";
 				if (j != TagName.length - 2)
 					CreateTable = CreateTable + ", ";
 			}
 			CreateTable = CreateTable + ")";
-			System.out.println(CreateTable);
-			
+			//System.out.println(CreateTable);
+
 			stmt.execute(DropTable);
 			stmt.execute(CreateTable);
 
 			Statement = "INSERT INTO " + TableName + " VALUES (";
-			for (int j = 1; j < TagName.length; j++) // creates the Prepared Statement based on the number of strings in TagName
+			for (int j = 1; j < TagName.length; j++) // creates the Prepared Statement based on the number of strings in
+														// TagName
 			{
 				Statement = Statement + "?, ";
 			}
@@ -324,10 +412,11 @@ public class Prospectus_XML_to_Excel
 				+ "&useSSL=true");
 				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
 
-			//XSSFSheet spreadsheet = workbook.createSheet("Research Data; " + location); // spreadsheet object
+			// XSSFSheet spreadsheet = workbook.createSheet("Research Data; " + location);
+			// // spreadsheet object
 			int sheetNum = 0;
 			for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-				if (workbook.getSheetAt(i).getSheetName().equals(location)){
+				if (workbook.getSheetAt(i).getSheetName().equals(location)) {
 					workbook.removeSheetAt(i);
 					sheetNum = i;
 					i--;
