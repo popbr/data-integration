@@ -34,18 +34,16 @@ public class Prospectus_XML_to_Excel {
 		String FilePath = "";
 		char[] tempChar = s.getAbsolutePath().toCharArray();
 		char[] newChar = new char[tempChar.length - 6];
-			for (int i = 0; i < newChar.length; i++) {
-				newChar[i] = tempChar[i];
-			}
-			FilePath = String.valueOf(newChar) + "\\Downloads\\";
-
-			System.out.println(FilePath);
+		for (int i = 0; i < newChar.length; i++) {
+			newChar[i] = tempChar[i];
+		}
+		
+		FilePath = String.valueOf(newChar) + "\\Downloads\\";
+		//System.out.println(FilePath);
 		File f = new File(FilePath);
 		
 		File[] fileNames = f.listFiles();
-		//String fileLocation[] = { "RePORTER_PRJ_C_FY2021_053.csv" };
-		//String[] fileList = 
-		// "RePORTER_PRJ_X_FY2022_002.xml", , "SearchResults.tsv"
+
 		String fType, Table;
 		Class.forName("com.mysql.jdbc.Driver");
 		String[] TagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAMEs" };
@@ -61,9 +59,15 @@ public class Prospectus_XML_to_Excel {
 				ParseFromtxt(fileNames[i].getPath(), Table, "\",\"", TagList, Search);
 			else if (fType.equals("tsv"))
 				ParseFromtxt(fileNames[i].getPath(), Table, "	", tsvTagList, null);
+			else if (fType.equals("txt") && fileNames[i].getName().equals("ReadMeDownloads.txt")) {
+				//intentionally blank
+			}
+				
 
+			if (!fileNames[i].getName().equals("ReadMeDownloads.txt")) 
 			WriteToExcel("*", Table, workbook, fileNames[i].getName());
 		}
+		
 
 		/*
 		for (int i = 0; i < fileLocation.length; i++) {
