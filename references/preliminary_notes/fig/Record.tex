@@ -1,0 +1,96 @@
+\documentclass[border=20pt]{standalone}
+\input{template.def}
+
+\begin{tikzpicture}[node distance=1.5cm]
+	% Top row 
+	\node[entity] (PUBLICATION) {PUBLICATION};
+	\node[entity] [right = 2cm of PUBLICATION] (AWARD) {AWARD};	
+	\node[entity] [right = 2cm of AWARD] (TRIAL) {TRIAL};	
+	\node[entity] [right = 2cm of TRIAL] (PATENT) {PATENT};	
+	\node[entity] [right = 2cm of PATENT] (LICENCING) {LICENCING};	
+	
+	% Bottom row 
+	\node[entity] [below right =  5cm and -3cm of PUBLICATION] (RESEARCHER) {RESEARCHER};
+	\node[entity] [right = 3cm of RESEARCHER] (PROJECT) {PROJECT};	
+	\node[entity] [right = 3cm of PROJECT] (LAB) {LAB.};	
+	\node[entity] [right = 3cm of LAB] (UNIV) {UNIV.};	
+	
+	% Relations
+	%% Middle
+	\node[relationship] (AUTHOREDBY) [below left = 1.3cm and 0cm of PUBLICATION] {AUTHORED\_BY} edge (RESEARCHER) edge (PUBLICATION);
+	\node[relationship] (SUPPORTEDBY) [below right = 1.3cm and 1cm of PUBLICATION] {SUPPORTED\_BY} edge (PROJECT) edge (PUBLICATION);	
+	\node[relationship] () [below right = 2.8cm and 1cm of AWARD] {FUNDED} edge (PROJECT) edge (AWARD);	
+	\node[relationship] () [below left = 3cm and 1.8cm of AWARD] {GRANTED\_TO} edge (RESEARCHER) edge [bend left] (AWARD);	
+	\node[relationship] () [below right = 1.3cm and -2cm of TRIAL] {DIRECTED\_BY} edge (RESEARCHER) edge (TRIAL);
+	\node[relationship] () [below right = 2cm and -2cm of PATENT] {ASSIGNED\_TO} edge (RESEARCHER) edge (PATENT);
+	\node[relationship] () [below right = 3cm and -3.6cm of LICENCING] {GRANTED\_TO} edge (RESEARCHER) edge (LICENCING);
+	\node[relationship] () [below right = 3cm and 0.3cm of LICENCING] {GRANTED\_TO} edge (UNIV) edge (LICENCING);
+	%% Below
+	\node[relationship] [below right = .5cm and 0cm of RESEARCHER] {PARTICIPATES\_IN} edge (RESEARCHER) edge (PROJECT);
+	\node[relationship] [below right = .5cm and 0cm of PROJECT] {HOSTED\_BY} edge (LAB) edge (PROJECT);
+	\node[relationship] [below right = .5cm and 0cm of LAB] {BELONGS\_TO} edge (LAB) edge (UNIV);
+	\node[relationship] [below right = 2cm and -.8cm of RESEARCHER] {MEMBER\_OF} edge [bend left] (RESEARCHER) edge [bend right] (LAB);
+	\node[relationship] [below right = 3.8cm and -1.5cm of RESEARCHER] {MEMBER\_OF} edge [bend left] (RESEARCHER) edge [bend right] (UNIV);
+	% Comment
+	\node [left = 3cm of PUBLICATION] (Outcomes) {Outcomes};
+	\node [below = 5cm of Outcomes] (Producers) {Producers};	
+	
+	\node [below right = 7cm and -2cm of Producers] {Attributes are not represented for concision. Every relationship has a cardinality ratio of \(M:N\) and no participation constraint.};	
+	
+%	\node[attribute] [above of=LABEL] {\key{Name}} edge (LABEL);
+%	\node[attribute] [right = .5cm of LABEL] {Phone} edge (LABEL);
+%	\node[multi attribute] [above right = .5cm of LABEL] {Genre} edge (LABEL);
+%	%
+%	
+%	%
+%	\node[entity] (RECORDING) [left = 1.5cm of RELEASEDBY] {RECORDING} edge[total] node[above, pos=0.6]{$\cM$} (RELEASEDBY);
+%	\node[attribute] [above of = RECORDING] {\key{Title}} edge (RECORDING);
+%	%
+%	\node[ident relationship] (USES) [below =0.8cm of LABEL] {USES} edge [total] node[right, pos=0.4] {$1$} (LABEL);
+%	\node[attribute] [above = .5cm of RELEASEDBY] {Date} edge (RELEASEDBY);
+%	%
+%	\node[weak entity] (LOGO) [below = 3cm of LABEL] {LOGO} edge [total] node[right, pos=0.4] {$1$} (USES);
+%	\node[attribute] [right = .5cm of LOGO] {\pkey{Name}} edge (LOGO);
+%	\node[attribute] [below = .5cm of LOGO] {Color} edge (LOGO);
+%	%
+%%	\node[relationship] (REPAIREDBY) [below right =3cm of RECORDING] {REPAIRED\_BY} edge node[below, pos=0.6] {$\cM$} (RECORDING) edge node[below, pos=0.6] {$1$} (LOGO);
+%%
+%	
+%		\node[relationship] (ISSOLDAT) [below left = 1.5cm of RECORDING] {IS\_SOLD\_AT} edge node[above, pos=0.4] {$\cN$} (RECORDING);
+%		\node[attribute] [left = .5cm of ISSOLDAT] {Number of copies} edge (ISSOLDAT);
+%		
+%	\node[entity] (SHOP) [below  = 5cm of RECORDING] {RECORD SHOP} edge[total] node[right, pos=0.4]{$\cM$} (ISSOLDAT);
+%	
+%		\node[attribute] (Address) [left = 0.5cm of SHOP] {Address} edge (SHOP);
+%	\node[attribute] [above left of = Address] {Zip} edge (Address);
+%	\node[attribute] [below left of = Address] {Street Name} edge (Address);
+%	\node[attribute] [left = .6cm of Address] {City} edge (Address);	
+%	
+%			\node[relationship] (ISPLAYEDAT) [below right = 1.5cm and 0cm of RECORDING] {IS\_AN\_EXCLUSIVITY\_OF} edge node[right, pos=0.4] {$\cN$} (RECORDING) edge node[left]{$1$} (SHOP);
+%	
+%		\node[attribute] [below of = SHOP] {\key{Name}} edge (SHOP);
+
+%\node[entity] (LABEL) {LABEL};
+%
+%
+%
+%\node[relationship] (SPEAKS) [below right of=LABEL] {SPEAKS} edge node[right, pos=0.4] {$M$} (LABEL);
+%\node[entity] (LANGUAGE) [below right of=SPEAKS] {LANGUAGE} edge node[right, pos=0.5] {$N$} (SPEAKS);
+%\node[attribute] (code) [left of = LANGUAGE] {\key{Code}} edge (LANGUAGE);
+%\node[attribute] (symbol) [right of = LANGUAGE] {Name} edge (LANGUAGE);
+%
+%\node[relationship] (BWF) [below of = LANGUAGE] {B\_W\_F};
+%\draw (LANGUAGE) to node[left, pos=0.6] {$N$} (BWF.west);
+%\draw (LANGUAGE) to node[right, pos=0.6] {$M$} (BWF.east);
+%
+%
+%\node[multi attribute] (color) [right =1cm of anthem] {Creator} edge (anthem);
+
+%
+%\node[relationship] (WIN) [above right of =LANGUAGE] {W\_IN};
+%\draw (LANGUAGE) to node[left, pos=0.6] {$N$} (WIN);
+%\draw (anthem) to node[right, pos=0.6] {$M$} (WIN);
+
+\end{tikzpicture}
+
+\end{document}
