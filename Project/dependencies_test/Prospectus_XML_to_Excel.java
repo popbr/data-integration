@@ -42,49 +42,47 @@ public class Prospectus_XML_to_Excel {
 		//System.out.println(FilePath);
 		File f = new File(FilePath);
 		
-		File[] fileNames = f.listFiles();
+		File[] fileN = f.listFiles();
+		File[] fileNames = new File[fileN.length-1];
+		int txtCatch = 0;
+		for (int i = 0; i < fileN.length; i++) {
+			if (!fileN[i].getName().equals("ReadMeDownloads.txt")) {
+				fileNames[txtCatch] = fileN[i];
+				txtCatch++;
+			}
+		}
 
-		String fType, Table;
+		String fType;
+		String source = ""; 
+		String[] Table = new String[fileNames.length];
 		Class.forName("com.mysql.jdbc.Driver");
 		String[] TagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAMEs" };
 		String[] tsvTagList = { "Title", "Status", "Locations" };
 		String[] Search = {"Medical University of South Carolina", "ORG_NAME"}; // plug this into all parsing methods
-		for (int i = 0; i<fileNames.length; i++) {
-			System.out.println("File path Is:"+fileNames[i].getPath()+".");
+		System.out.println();
+
+		for (int i = 0; i < fileNames.length; i++) {
+			//System.out.println("File path Is:"+fileNames[i].getPath()+".");
 			fType = FilenameUtils.getExtension(fileNames[i].getName());
-			Table = fType + (i + 1);
+				Table[i] = fType + (i + 1); // this stores the tables names in a retrievable list. 
+				source = fileNames[i].getName();
+			fType = FilenameUtils.getExtension(fileNames[i].getName());
 			if (fType.equals("xml"))
-				ParseFromXML(fileNames[i].getPath(), Table, TagList);
+				ParseFromXML(fileNames[i].getPath(), Table[i], TagList, source);
 			else if (fType.equals("csv"))
-				ParseFromtxt(fileNames[i].getPath(), Table, "\",\"", TagList, Search);
+				ParseFromtxt(fileNames[i].getPath(), Table[i], "\",\"", TagList, Search, source);
 			else if (fType.equals("tsv"))
-				ParseFromtxt(fileNames[i].getPath(), Table, "	", tsvTagList, null);
-			else if (fType.equals("txt") && fileNames[i].getName().equals("ReadMeDownloads.txt")) {
-				//intentionally blank
-			}
-				
-
-			if (!fileNames[i].getName().equals("ReadMeDownloads.txt")) 
-			WriteToExcel("*", Table, workbook, fileNames[i].getName());
+				ParseFromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source);
 		}
-		
 
-		/*
-		for (int i = 0; i < fileLocation.length; i++) {
-			fType = FilenameUtils.getExtension(fileLocation[i]);
-			Table = fType + (i + 1);
-			if (fType.equals("xml"))
-				ParseFromXML(fileLocation[i], Table, TagList);
-			else if (fType.equals("csv"))
-				ParseFromtxt(fileLocation[i], Table, "\",\"", TagList, Search);
-			else if (fType.equals("tsv"))
-				ParseFromtxt(fileLocation[i], Table, "	", tsvTagList, null);
-
-			WriteToExcel("*", Table, workbook, fileLocation[i]);
-		}*/
+		for(int i = 0; i < fileNames.length; i++) {
+			//if (!fileNames[i].getName().equals("ReadMeDownloads.txt")) 
+		}
+		//PrintList(Table);
+		WriteToExcel("*", Table, workbook);
 	}
 
-	public static void ParseFromtxt(String txtlocation, String Table, String Delim, String[] TagList, String Search[]) throws Exception {
+	public static void ParseFromtxt(String txtlocation, String Table, String Delim, String[] TagList, String Search[], String source) throws Exception {
 		Scanner txtFile = new Scanner(new File(txtlocation));
 
 		String txtFields = txtFile.nextLine();
@@ -148,12 +146,6 @@ public class Prospectus_XML_to_Excel {
 			index++;
 		}
 		indexTracker = 0;
-		//System.out.print(indexTracker + ": ");
-		//for (int i = 0; i < TagList.length -1; i++) {
-		//	System.out.print(data[indexTracker][i]+ ", ");
-		//}
-		//System.out.println(data[indexTracker][TagList.length-1]);
-		//data[indexTracker][0]+ ", " data[indexTracker][1]+ ", " + data[indexTracker][2]);
 		indexTracker = 1;
 			
 		do {
@@ -205,20 +197,6 @@ public class Prospectus_XML_to_Excel {
 		// so, Noah, problem here is that some fields only have ", ;" in them. If that field happens to be looked at and edited
 		// then that'sgoing to trip an alarm, becausethe field
 
-
-
-		/*
-		 * if (true)
-		 * {
-		 * for (int i = 0; i<Limit; i++) {
-		 * System.out.print(i + ": ");
-		 * for (int j = 0; j<3; j++) {
-		 * System.out.print(data[i][j]+", ");
-		 * }
-		 * System.out.println();
-		 * }
-		 * }
-		 */
 		if (Search != null) 
 		{
 			int searchIndex = 0;
@@ -238,7 +216,7 @@ public class Prospectus_XML_to_Excel {
 
 			String[][] SearchData = new String[searchHits+1][TagIndex.length];
 
-			for (int i = 0; i<TagIndex.length; i++) {
+			for (int i = 0; i < TagIndex.length; i++) {
 				SearchData[0][i] = data[0][i];
 			}
 			int max = searchHits;
@@ -254,11 +232,15 @@ public class Prospectus_XML_to_Excel {
 				} //Search = {"Medical University of South Carolina", 3};
 			}
 
-		 WriteToSQL(Table, SearchData, TagList, searchHits+1);
+			String[][] DataList = AddTagAndData(SearchData, "Source", source);
+			//PrintList(DataList);
+			WriteToSQL(Table, DataList);
 		} 
 		else 
 		{
-			WriteToSQL(Table, data, TagList, Limit);
+			String[][] DataList = AddTagAndData(data, "Source", source);
+			//PrintList(DataList);
+			WriteToSQL(Table, DataList);
 		}
 		txtFile.close();
 		txtFieldsLine.close();
@@ -312,7 +294,7 @@ public class Prospectus_XML_to_Excel {
 				}
 			}
 
-			WriteToSQL(Table, data, TagList, Limit);
+			WriteToSQL(Table, data);
 
 		}
 
@@ -321,7 +303,7 @@ public class Prospectus_XML_to_Excel {
 		}
 	}
 
-	public static void ParseFromXML(String Location, String Table, String[] TagList) throws Exception {
+	public static void ParseFromXML(String Location, String Table, String[] TagList, String source) throws Exception {
 		try {
 			File inputFile = new File(Location);
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -353,7 +335,7 @@ public class Prospectus_XML_to_Excel {
 					// do not enable this, you will increase your runtime greatly
 				}
 			}
-			WriteToSQL(Table, data, TagList, Limit);
+			WriteToSQL(Table, data);
 		}
 
 		catch (Exception e) {
@@ -361,7 +343,52 @@ public class Prospectus_XML_to_Excel {
 		}
 	}
 
-	public static void WriteToSQL(String TableName, String[][] data, String[] TagName, int Limit) throws Exception {
+	public static String[][] AddTagAndData(String[][] input, String Tag, String Data) throws Exception {
+
+		int InpLength = input.length;
+		int InpDepth = input[0].length;
+
+		//System.out.println("pre-Adding input is " + InpLength + " : " + InpDepth + ". Adding " + Data);
+		String[][] newList = new String[InpLength][InpDepth+1];
+
+		newList[0][InpDepth] = Tag;
+		//System.out.println("Tag is " + newList[0][InpDepth]);
+
+		for(int i = 1; i < InpLength; i++) {
+			newList[i][InpDepth] = Data;
+		}
+
+		for (int i = 0; i<InpLength; i++) {
+			for (int j = 0; j<InpDepth; j++) {
+				newList[i][j] = input[i][j];
+			}
+		}
+		System.out.println(newList[1][InpDepth]);
+		return newList;
+	}
+
+	public static void PrintList(String[][] input) {
+
+		int InpLength = input.length;
+		int InpDepth = input[0].length;
+
+		for (int i = 0; i<InpLength; i++) {
+			System.out.print(i + ": ");
+			for (int j = 0; j<InpDepth; j++) {
+				System.out.print(input[i][j]+", ");
+			}
+			System.out.println();
+		}
+	}
+
+	public static void PrintList(String[] input) {
+		int InpLength = input.length;
+		for (int j = 0; j< InpLength; j++) {
+			System.out.print(input[j]+", ");
+		}
+	}
+	
+	public static void WriteToSQL(String TableName, String[][] data) throws Exception {
 		try (
 				Connection conn = DriverManager
 						.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" + "?user=testuser"
@@ -372,7 +399,15 @@ public class Prospectus_XML_to_Excel {
 			String DropTable, CreateTable, Statement;
 
 			DropTable = "DROP TABLE IF EXISTS " + TableName + ";";
-			//System.out.println(DropTable);
+			
+			int Limit = data[0].length;
+
+			String[] TagName = new String[Limit];
+			for(int i = 0;i<Limit;i++){
+				TagName[i] = data[0][i];
+			}
+			//System.out.println(Limit);
+
 			CreateTable = "CREATE TABLE " + TableName + " (" + TagName[0] + " VARCHAR(255) PRIMARY KEY, ";
 
 			for (int j = 0; j < TagName.length - 1; j++) // creates the SWL table based on the number of strings in
@@ -384,6 +419,7 @@ public class Prospectus_XML_to_Excel {
 			}
 			CreateTable = CreateTable + ")";
 			//System.out.println(CreateTable);
+			//System.out.println(DropTable);
 
 			stmt.execute(DropTable);
 			stmt.execute(CreateTable);
@@ -397,19 +433,21 @@ public class Prospectus_XML_to_Excel {
 			Statement = Statement + "?)";
 
 			PreparedStatement preparedStatement = conn.prepareStatement(Statement);
+			//System.out.println(data[0].length);
 
-			for (int i = 0; i < Limit; i++) {
-				for (int j = 0; j < TagName.length; j++) {
-					preparedStatement.setString(j + 1, data[i][j]); // sets the Prepared String a number of times equal
+			for (int i = 0; i < data.length; i++) {
+				for (int j = 0; j < Limit; j++) {
+					preparedStatement.setString(j+1, data[i][j]); // sets the Prepared String a number of times equal
 																	// to the amount of strings in TagName
 				}
+				//System.out.println(preparedStatement);
 				preparedStatement.execute();
 			}
 			conn.close();
 		}
 	}
 
-	public static void WriteToExcel(String DataWanted, String Table, XSSFWorkbook workbook, String location)
+	public static void WriteToExcel(String DataWanted, String[] Table, XSSFWorkbook workbook)
 			throws Exception {
 		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" +
 				"?user=testuser" + "&password=password" + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true"
@@ -418,46 +456,56 @@ public class Prospectus_XML_to_Excel {
 
 			// XSSFSheet spreadsheet = workbook.createSheet("Research Data; " + location);
 			// // spreadsheet object
-			int sheetNum = 0;
+			/*int sheetNum = 0;
 			for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
 				if (workbook.getSheetAt(i).getSheetName().equals(location)) {
 					workbook.removeSheetAt(i);
 					sheetNum = i;
 					i--;
 				}
-			}
-			XSSFSheet spreadsheet = workbook.createSheet(location);
+			} */
+
+			XSSFSheet spreadsheet = workbook.createSheet("Data");
 			XSSFRow row; // creating a row object
 
 			System.out.println("Starting writing to Excel.");
-			String strSelect = "SELECT " + DataWanted + " FROM " + Table;
-			ResultSet rset = stmt.executeQuery(strSelect);
 
-			ResultSetMetaData rsmd = rset.getMetaData();
-			int columnsNumber = rsmd.getColumnCount();
-			String columnValue = "";
 			int rowNumber = 0;
-			String ColumnName = rsmd.getColumnName(1);
-			row = spreadsheet.createRow(rowNumber++);
-			rset.last();
+			row = spreadsheet.createRow(0);
+			for(int q = 0; q < Table.length;q++) {
+				
+				//System.out.println(Table[q]);
+				String strSelect = "SELECT " + DataWanted + " FROM " + Table[q];
+				ResultSet rset = stmt.executeQuery(strSelect);
 
-			do {
-				for (int i = 1; i <= columnsNumber; i++) // this loop populates a cell with data
-				{
-					if (rsmd.getColumnName(i) == rsmd.getColumnName(1)) // this detects if the column at the current is
-																		// equal to the first entry. If so, that means
-																		// we need a new row
-					{
-						row = spreadsheet.createRow(rowNumber++); // This line create a new row
-					}
-					columnValue = rset.getString(i);
-					// console.WriteLine(columnValue);
-					row.createCell(i).setCellValue(columnValue);
+				ResultSetMetaData rsmd = rset.getMetaData();
+				int columnsNumber = rsmd.getColumnCount();
+				String columnValue = "";
+				
+				String ColumnName = rsmd.getColumnName(1);
+
+				if(rowNumber > 0) {
+				row = spreadsheet.createRow(rowNumber++);
 				}
-				FileOutputStream out = new FileOutputStream(new File("GFGsheet.xlsx")); // C:\Users\sleep\Desktop\Excel
-				workbook.write(out);
-			} while (rset.previous());
+				rset.last();
 
+				do {
+					for (int i = 1; i <= columnsNumber; i++) // this loop populates a cell with data
+					{
+						if (rsmd.getColumnName(i) == rsmd.getColumnName(1)) // this detects if the column at the current is
+																			// equal to the first entry. If so, that means
+																			// we need a new row
+						{
+							row = spreadsheet.createRow(rowNumber++); // This line create a new row
+						}
+						columnValue = rset.getString(i);
+						//System.out.println(columnValue);
+						row.createCell(i).setCellValue(columnValue);
+					}
+					FileOutputStream out = new FileOutputStream(new File("GFGsheet.xlsx")); // C:\Users\sleep\Desktop\Excel
+					workbook.write(out);
+				} while (rset.previous());
+			}
 			conn.close();
 		}
 	}
