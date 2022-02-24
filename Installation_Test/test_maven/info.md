@@ -29,3 +29,6 @@ mvn  exec:java -Dexec.mainClass="com.mycompany.app.App
 
 
 From there, _a lot_ remains to be done: reading <https://maven.apache.org/guides/getting-started/> and <https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html> should help in getting started. Obviously, better company, package, url, etc, will need to be declared, but that's a start.
+
+NOTE TO/FROM NOAH:
+Everything was compiled and run without difficulty. Now, put Maven on the Installation Test and Dependencies Test, after configuring Excel to one sheet.
