@@ -18,7 +18,8 @@ mvn -B archetype:generate -DgroupId=com.mycompany.app -DartifactId=my-app -Darch
 
 Following <https://stackoverflow.com/a/8202181>, the pom.xml was edited to add the dependencies to Apache's Poi.
 
-I then edited `src/main/java/com/mycompany/app/App.java` to copy-and-paste your code from `Write_to_Excel_from_java/Prospectus_Write_to_Excel`, simply changing the class name and leaving the package declaration on the very first line.
+I then edited `src/main/java/com/mycompany/app/App.java` to copy-and-paste your code from `Write_to_Excel_from_java/Prospectus_Write_to_Excel`, 
+simply changing the class name and leaving the package declaration on the very first line.
 
 Then,
 
@@ -28,7 +29,8 @@ mvn  exec:java -Dexec.mainClass="com.mycompany.app.App
 ```
 
 
-From there, _a lot_ remains to be done: reading <https://maven.apache.org/guides/getting-started/> and <https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html> should help in getting started. Obviously, better company, package, url, etc, will need to be declared, but that's a start.
+From there, _a lot_ remains to be done: reading <https://maven.apache.org/guides/getting-started/> and <https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html> 
+should help in getting started. Obviously, better company, package, url, etc, will need to be declared, but that's a start.
 
 NOTE TO/FROM NOAH:
 Everything was compiled and run without difficulty. Now, put Maven on the Installation Test and Dependencies Test, after configuring Excel to one sheet.

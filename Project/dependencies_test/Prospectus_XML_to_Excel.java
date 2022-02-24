@@ -31,28 +31,8 @@ public class Prospectus_XML_to_Excel {
 		Scanner myObj = new Scanner(System.in);
 		XSSFWorkbook workbook = new XSSFWorkbook(); // workbook object
 
-		File s = new File("f.txt");
-		//System.out.println(s.getAbsolutePath());
-		String FilePath = "";
-		char[] tempChar = s.getAbsolutePath().toCharArray();
-		char[] newChar = new char[tempChar.length - 6];
-		for (int i = 0; i < newChar.length; i++) {
-			newChar[i] = tempChar[i];
-		}
-		
-		FilePath = String.valueOf(newChar) + "\\Downloads\\";
-		//System.out.println(FilePath);
-		File f = new File(FilePath);
-		
-		File[] fileN = f.listFiles();
-		File[] fileNames = new File[fileN.length-1];
-		int txtCatch = 0;
-		for (int i = 0; i < fileN.length; i++) {
-			if (!fileN[i].getName().equals("ReadMeDownloads.txt")) {
-				fileNames[txtCatch] = fileN[i];
-				txtCatch++;
-			}
-		}
+		String FilePath = EstablishFilePath() + "\\Downloads\\";
+		File[] fileNames = EstablishFileList(FilePath);
 
 		if(fileNames.length==0) {
 			System.out.println("There are no databases in the downloads folder.\nPlease download at least one database and try again.");
@@ -350,6 +330,35 @@ public class Prospectus_XML_to_Excel {
 		}
 	}
 
+	public static String EstablishFilePath(){
+		File s = new File("f.txt");
+		//System.out.println(s.getAbsolutePath());
+		String FilePath = "";
+		char[] tempChar = s.getAbsolutePath().toCharArray();
+		char[] newChar = new char[tempChar.length - 6];
+		for (int i = 0; i < newChar.length; i++) {
+			newChar[i] = tempChar[i];
+		}
+		
+		FilePath = String.valueOf(newChar);
+		return FilePath;
+	}
+
+	public static File[] EstablishFileList(String FilePath) {
+		File f = new File(FilePath);
+		
+		File[] fileN = f.listFiles();
+		File[] fileNames = new File[fileN.length-1];
+		int txtCatch = 0;
+		for (int i = 0; i < fileN.length; i++) {
+			if (!fileN[i].getName().equals("ReadMeDownloads.txt")) {
+				fileNames[txtCatch] = fileN[i];
+				txtCatch++;
+			}
+		}
+		return fileNames;
+	}
+	
 	public static String[][] AddTagAndData(String[][] input, String Tag, String Data) throws Exception {
 
 		int InpLength = input.length;
