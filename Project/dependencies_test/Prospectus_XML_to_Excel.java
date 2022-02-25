@@ -31,8 +31,8 @@ public class Prospectus_XML_to_Excel {
 		Scanner myObj = new Scanner(System.in);
 		XSSFWorkbook workbook = new XSSFWorkbook(); // workbook object
 
-		String FilePath = EstablishFilePath() + "\\Downloads\\";
-		File[] fileNames = EstablishFileList(FilePath);
+		String FilePath = EstablishFilePath() + "\\Downloads\\"; //this sets the program to be aimed at the downloads folder
+		File[] fileNames = EstablishFileList(FilePath); //This creates and populates a list of all the files in the ^^^ downloads folder
 
 		if(fileNames.length==0) {
 			System.out.println("There are no databases in the downloads folder.\nPlease download at least one database and try again.");
@@ -42,10 +42,17 @@ public class Prospectus_XML_to_Excel {
 			String source = ""; 
 			String[] Table = new String[fileNames.length];
 			Class.forName("com.mysql.jdbc.Driver");
-			String[] TagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAMEs" };
+			String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAMEs" };
 			String[] tsvTagList = { "Title", "Status", "Locations" };
 			String[] Search = {"Medical University of South Carolina", "ORG_NAME"}; // plug this into all parsing methods
 			System.out.println();
+
+			//I'm starting to see a problem: we need deeper download folders -- better ways to classify the downloads. Currently, there isn't a way to track the 
+			//source of a downloaded file -- like Reporter, NIH, etc... -- a folder within the Downloads folder would be better to classify and tag the data with 
+			// where it came from. That way, we could track it and pass it to Excel, so it can create a new page when a new source appears or switch pages based 
+			// on what source is currently being used.
+
+
 
 			for (int i = 0; i < fileNames.length; i++) {
 				//System.out.println("File path Is:"+fileNames[i].getPath()+".");
@@ -54,16 +61,13 @@ public class Prospectus_XML_to_Excel {
 					source = fileNames[i].getName();
 				fType = FilenameUtils.getExtension(fileNames[i].getName());
 				if (fType.equals("xml"))
-					ParseFromXML(fileNames[i].getPath(), Table[i], TagList, source);
+					ParseFromXML(fileNames[i].getPath(), Table[i], ReporterTagList, Search, source);
 				else if (fType.equals("csv"))
-					ParseFromtxt(fileNames[i].getPath(), Table[i], "\",\"", TagList, Search, source);
+					ParseFromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, Search, source);
 				else if (fType.equals("tsv"))
 					ParseFromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source);
 			}
 
-			for(int i = 0; i < fileNames.length; i++) {
-				//if (!fileNames[i].getName().equals("ReadMeDownloads.txt")) 
-			}
 			//PrintList(Table);
 			WriteToExcel("*", Table, workbook);
 		}
@@ -182,44 +186,12 @@ public class Prospectus_XML_to_Excel {
 		// so, Noah, problem here is that some fields only have ", ;" in them. If that field happens to be looked at and edited
 		// then that'sgoing to trip an alarm, becausethe field
 
-		if (Search != null) 
-		{
-			int searchIndex = 0;
-			for (int i = 0; i<TagIndex.length; i++) {
-				if (Search[1].equalsIgnoreCase(data[0][i])) {
-					searchIndex = i; 
-				} 
-			}
-
-			int searchHits = 0;
-			for (int i = 1; i<Limit; i++) {
-				if (Search[0].equalsIgnoreCase(data[i][searchIndex])) {
-					searchHits++; 
-				} //Search = {"Medical University of South Carolina", 3};
-			}
-			//System.out.println("Number of hits is "+searchHits);
-
-			String[][] SearchData = new String[searchHits+1][TagIndex.length];
-
-			for (int i = 0; i < TagIndex.length; i++) {
-				SearchData[0][i] = data[0][i];
-			}
-			int max = searchHits;
-			searchHits = 0;
-			for (int i = 0; i<Limit; i++) {
-				if (data[i][searchIndex].equalsIgnoreCase(Search[0])) {
-					for(int j = 0; j<TagIndex.length; j++) {
-						SearchData[searchHits+1][j] = data[i][j];
-					}
-					searchHits++;
-					//System.out.println("Hit found at "+ i);
-					if (searchHits == max) break;
-				} //Search = {"Medical University of South Carolina", 3};
-			}
-			
+		
+		if(Search != null) {
+			String[][] SearchData = SearchforAttributeData(data, Search, Limit);
+			//PrintList(SearchData);
 			SearchData = AddTagAndData(SearchData, "Source", source);
 			SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime());
-			//PrintList(SearchData);
 			WriteToSQL(Table, SearchData);
 		} 
 		else 
@@ -290,7 +262,7 @@ public class Prospectus_XML_to_Excel {
 		}
 	}
 
-	public static void ParseFromXML(String Location, String Table, String[] TagList, String source) throws Exception {
+	public static void ParseFromXML(String Location, String Table, String[] TagList, String Search[], String source) throws Exception {
 		try {
 			File inputFile = new File(Location);
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -309,10 +281,9 @@ public class Prospectus_XML_to_Excel {
 			NodeList nList = doc.getElementsByTagName("row");
 			System.out.println("Start Parsing from XML");
 			for (int TagName = 0; TagName < TagList.length; TagName++) {
-				System.out.println(TagList[TagName]);
+				//System.out.println(TagList[TagName]);
 				for (int temp = 1; temp < Limit; temp++) // temp < nList.getLength()
 				{
-
 					Node nNode = nList.item(temp);
 					if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 						Element eElement = (Element) nNode;
@@ -322,7 +293,23 @@ public class Prospectus_XML_to_Excel {
 					// do not enable this, you will increase your runtime greatly
 				}
 			}
-			WriteToSQL(Table, data);
+
+			if(Search != null) {
+				String[][] SearchData = SearchforAttributeData(data, Search, Limit);
+				//PrintList(SearchData);
+				SearchData = AddTagAndData(SearchData, "Source", source);
+				SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime());
+				WriteToSQL(Table, SearchData);
+			} 
+			else 
+			{
+				data = AddTagAndData(data, "Source", source);
+				data = AddTagAndData(data, "Time_Retrieved", GetTime());
+				//PrintList(data);
+				WriteToSQL(Table, data);
+			}
+
+			WriteToSQL(Table, data); //WARNING: ParsefromXML has NOT been tested with a search parameter.  
 		}
 
 		catch (Exception e) {
@@ -357,6 +344,45 @@ public class Prospectus_XML_to_Excel {
 			}
 		}
 		return fileNames;
+	}
+	
+	public static String[][] SearchforAttributeData(String[][] data, String[] SearchParamaters, int dataLimit){
+
+		int Length = data[0].length;
+		//System.out.println(Length);
+		int searchIndex = 0;
+		for (int i = 0; i < Length; i++) {
+			if (SearchParamaters[1].equalsIgnoreCase(data[0][i])) {
+				searchIndex = i; 
+			} 
+		}
+
+		int searchHits = 0;
+		for (int i = 1; i<dataLimit; i++) {
+			if (SearchParamaters[0].equalsIgnoreCase(data[i][searchIndex])) {
+				searchHits++; 
+			} //Search = {"Medical University of South Carolina", 3};
+		}
+		//System.out.println("Number of hits is "+searchHits);
+
+		String[][] SearchData = new String[searchHits+1][Length];
+
+		for (int i = 0; i < Length; i++) {
+			SearchData[0][i] = data[0][i];
+		}
+		int max = searchHits;
+		searchHits = 0;
+		for (int i = 0; i<dataLimit; i++) {
+			if (data[i][searchIndex].equalsIgnoreCase(SearchParamaters[0])) {
+				for(int j = 0; j<Length; j++) {
+					SearchData[searchHits+1][j] = data[i][j];
+				}
+				searchHits++;
+				//System.out.println("Hit found at "+ i);
+				if (searchHits == max) break;
+			} 
+		}
+		return SearchData;
 	}
 	
 	public static String[][] AddTagAndData(String[][] input, String Tag, String Data) throws Exception {
@@ -486,6 +512,7 @@ public class Prospectus_XML_to_Excel {
 
 			XSSFSheet spreadsheet = workbook.createSheet("Data");
 			XSSFRow row; // creating a row object
+			String source;
 
 			System.out.println("Starting writing to Excel.");
 
@@ -503,7 +530,7 @@ public class Prospectus_XML_to_Excel {
 				
 				String ColumnName = rsmd.getColumnName(1);
 
-				if(rowNumber > 0) {
+				if(rowNumber > 0 && true) { //this create a line between entries
 				row = spreadsheet.createRow(rowNumber++);
 				}
 				rset.last();
@@ -511,11 +538,11 @@ public class Prospectus_XML_to_Excel {
 				do {
 					for (int i = 1; i <= columnsNumber; i++) // this loop populates a cell with data
 					{
-						if (rsmd.getColumnName(i) == rsmd.getColumnName(1)) 
+						columnValue = rset.getString(i);
+						if (rsmd.getColumnName(i) == rsmd.getColumnName(1))
 						{ // this detects if the column at the current is equal to the first entry. If so, that means we need a new row.
 							row = spreadsheet.createRow(rowNumber++); // This line create a new row
 						}
-						columnValue = rset.getString(i);
 						//System.out.println(columnValue);
 						row.createCell(i).setCellValue(columnValue);
 					}
