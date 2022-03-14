@@ -287,7 +287,7 @@ public class Prospectus_XML_to_Excel {
 					Node nNode = nList.item(temp);
 					if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 						Element eElement = (Element) nNode;
-						data[temp][TagName] = eElement.getElementsByTagName(TagList[TagName]).item(0).getTextContent();
+						data[temp][TagName] = eElement.getElementsByTagName(TagList[TagName]).item(0).getTextContent(); //maybe encapsul this in a try catch?
 						// System.out.println(data);
 					}
 					// do not enable this, you will increase your runtime greatly
