@@ -9,10 +9,35 @@ Default locale: fr_FR, platform encoding: UTF-8
 OS name: "linux", version: "4.19.0-18-amd64", arch: "amd64", family: "unix"
 ```
 
+If I have an error message 
+
+```
+[ERROR] Error executing Maven.
+[ERROR] java.lang.IllegalStateException: Unable to load cache item
+[ERROR] Caused by: Unable to load cache item
+[ERROR] Caused by: Could not initialize class com.google.inject.internal.cglib.core.$ReflectUtils
+```
+
+when trying to use maven, it is because I am using a version of java that is too recent:
+
+```
+Apache Maven 3.6.0
+Maven home: /usr/share/maven
+Java version: 17.0.2, vendor: Oracle Corporation, runtime: /opt/jdk17.0.2 <===== HERE
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.19.0-19-amd64", arch: "amd64", family: "unix"
+```
+
+Adjust with
+
+```
+sudo update-alternatives --config java
+```
+
 Following <https://maven.apache.org/guides/getting-started/#how-do-i-make-my-first-maven-project>, 
 
 ```
-mvn -B archetype:generate -DgroupId=com.mycompany.app -DartifactId=my-app -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4
+mvn -B archetype:generate -DgroupId=com.mycompany.app -DartifactId=my-app-2 -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4
 ```
 
 
