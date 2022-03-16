@@ -17,7 +17,7 @@ public class App
 {
   public static void main(String[] args) throws Exception
   {
-    
+    EstablishFilePath();
     XSSFWorkbook Wbook = new XSSFWorkbook(); // workbook object
     XSSFSheet spreadsheet = Wbook.createSheet("Research Data"); // spreadsheet object
     XSSFRow row; // creating a row object
@@ -33,17 +33,21 @@ public class App
   
     Set<String> keyid = ReschData.keySet();
     int rowid = 0;
+    int cellid = 0;
   
     for (String key : keyid) // writing the data into the sheets
     {
       row = spreadsheet.createRow(rowid);
       Object[] objectArr = ReschData.get(key);
-      int cellid = 0;
+      cellid = 0;
       for (Object obj : objectArr) 
       {
         Cell cell = row.createCell(cellid);
         cell.setCellValue((String)obj);
+        //System.out.println((String)obj);
+        cellid++;
       }
+      rowid++;
     } 
     
     // writing the workbook into the file
@@ -54,15 +58,14 @@ public class App
 
   public static String EstablishFilePath(){
 		File s = new File("f.txt");
-		System.out.println(s.getAbsolutePath());
 		String FilePath = "";
 		char[] tempChar = s.getAbsolutePath().toCharArray();
 		char[] newChar = new char[tempChar.length - 6];
 		for (int i = 0; i < newChar.length; i++) {
 			newChar[i] = tempChar[i];
 		}
-		
 		FilePath = String.valueOf(newChar);
+    System.out.println(FilePath);
 		return FilePath;
 	}
   
