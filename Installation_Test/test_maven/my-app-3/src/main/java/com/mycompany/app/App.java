@@ -21,6 +21,9 @@ import java.util.Scanner;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
+
 public class App
 {
   public static void main(String[] args) throws Exception
@@ -35,12 +38,15 @@ public class App
     String FilePath = EstablishFilePath() + "\\Downloads\\";
     File[] fileNames = EstablishFileList(FilePath);
 
+    String source = "";
     String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAMEs" };
+    String[] Search = {"Medical University of South Carolina", "ORG_NAME"};
 
     for (int i = 0; i < fileNames.length; i++) {
-      System.out.println("\n"+fileNames[i].getName());
-      System.out.println(fileNames[i].getPath()+"\n");
-      Parsefromtxt(fileNames[i].getPath(), "\",\"", ReporterTagList);
+      //System.out.println("\n"+fileNames[i].getName());
+      source = fileNames[i].getName();
+      
+      Parsefromtxt(fileNames[i].getPath(), "\",\"", ReporterTagList, Search, source);
     }
 
     System.out.println("\n");
@@ -76,7 +82,7 @@ public class App
 		return fileNames;
 	}
 
-  public static void Parsefromtxt(String txtlocation, String Delim, String[] TagList) throws Exception{
+  public static void Parsefromtxt(String txtlocation, String Delim, String[] TagList, String Search[], String source) throws Exception{
     Scanner txtFile = new Scanner(new File(txtlocation));
 
 		String txtFields = txtFile.nextLine();
@@ -190,7 +196,24 @@ public class App
 
 		} while (txtFile.hasNextLine() && indexTracker < Limit);
 
-    PrintList(data);
+    //PrintList(data);
+
+    if(Search != null) {
+			String[][] SearchData = SearchforAttributeData(data, Search, Limit);
+			//PrintList(SearchData);
+			SearchData = AddTagAndData(SearchData, "Source", source);
+			SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime());
+			PrintList(SearchData);
+			//WriteToSQL(Table, SearchData);
+		} 
+		else 
+		{
+			data = AddTagAndData(data, "Source", source);
+			data = AddTagAndData(data, "Time_Retrieved", GetTime());
+			PrintList(data);
+			//WriteToSQL(Table, data);
+		}
+
   }
 
   public static void PrintList(String[][] input) {
@@ -205,6 +228,75 @@ public class App
 			}
 			System.out.println();
 		}
+	}
+
+  public static String[][] SearchforAttributeData(String[][] data, String[] SearchParamaters, int dataLimit){
+
+		int Length = data[0].length;
+		//System.out.println(Length);
+		int searchIndex = 0;
+		for (int i = 0; i < Length; i++) {
+			if (SearchParamaters[1].equalsIgnoreCase(data[0][i])) {
+				searchIndex = i; 
+			} 
+		}
+
+		int searchHits = 0;
+		for (int i = 1; i<dataLimit; i++) {
+			if (SearchParamaters[0].equalsIgnoreCase(data[i][searchIndex])) {
+				searchHits++; 
+			} //Search = {"Medical University of South Carolina", 3};
+		}
+		//System.out.println("Number of hits is "+searchHits);
+
+		String[][] SearchData = new String[searchHits+1][Length];
+
+		for (int i = 0; i < Length; i++) {
+			SearchData[0][i] = data[0][i];
+		}
+		int max = searchHits;
+		searchHits = 0;
+		for (int i = 0; i<dataLimit; i++) {
+			if (data[i][searchIndex].equalsIgnoreCase(SearchParamaters[0])) {
+				for(int j = 0; j<Length; j++) {
+					SearchData[searchHits+1][j] = data[i][j];
+				}
+				searchHits++;
+				//System.out.println("Hit found at "+ i);
+				if (searchHits == max) break;
+			} 
+		}
+		return SearchData;
+	}
+	
+	public static String[][] AddTagAndData(String[][] input, String Tag, String Data) throws Exception {
+
+		int InpLength = input.length;
+		int InpDepth = input[0].length;
+
+		//System.out.println("pre-Adding input is " + InpLength + " : " + InpDepth + ". Adding " + Data);
+		String[][] newList = new String[InpLength][InpDepth+1];
+
+		newList[0][InpDepth] = Tag;
+		//System.out.println("Tag is " + newList[0][InpDepth]);
+
+		for(int i = 1; i < InpLength; i++) {
+			newList[i][InpDepth] = Data;
+		}
+
+		for (int i = 0; i<InpLength; i++) {
+			for (int j = 0; j<InpDepth; j++) {
+				newList[i][j] = input[i][j];
+			}
+		}
+		return newList;
+	}
+
+  public static String GetTime() {
+		DateTimeFormatter Format = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
+		LocalDateTime current = LocalDateTime.now();
+		//System.out.println(Format.format(current));
+		return (Format.format(current));
 	}
   
   public static void oldTest() {
