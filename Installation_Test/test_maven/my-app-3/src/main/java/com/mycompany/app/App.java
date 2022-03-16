@@ -1,12 +1,14 @@
 package com.mycompany.app;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import java.io.FileOutputStream;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -16,8 +18,8 @@ public class App
   public static void main(String[] args) throws Exception
   {
     
-    XSSFWorkbook workbook = new XSSFWorkbook(); // workbook object
-    XSSFSheet spreadsheet = workbook.createSheet("Research Data"); // spreadsheet object
+    XSSFWorkbook Wbook = new XSSFWorkbook(); // workbook object
+    XSSFSheet spreadsheet = Wbook.createSheet("Research Data"); // spreadsheet object
     XSSFRow row; // creating a row object
   
     Map<String, Object[]> ReschData = new TreeMap<String, Object[]>(); // This data is what needs to be written (Object[]) v
@@ -42,11 +44,26 @@ public class App
         Cell cell = row.createCell(cellid);
         cell.setCellValue((String)obj);
       }
-    }
-  
+    } 
+    
     // writing the workbook into the file
     FileOutputStream out = new FileOutputStream( new File("./GFGsheet.xlsx")); //C:\Users\sleep\Desktop\Excel
-    workbook.write(out);
+    Wbook.write(out);
     out.close();
   }
+
+  public static String EstablishFilePath(){
+		File s = new File("f.txt");
+		System.out.println(s.getAbsolutePath());
+		String FilePath = "";
+		char[] tempChar = s.getAbsolutePath().toCharArray();
+		char[] newChar = new char[tempChar.length - 6];
+		for (int i = 0; i < newChar.length; i++) {
+			newChar[i] = tempChar[i];
+		}
+		
+		FilePath = String.valueOf(newChar);
+		return FilePath;
+	}
+  
 }

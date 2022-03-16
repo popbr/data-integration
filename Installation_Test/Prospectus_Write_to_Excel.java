@@ -1,8 +1,5 @@
-package com.mycompany.app;
-
 import java.io.File;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -11,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class App
+public class Prospectus_Write_to_Excel 
 {
   public static void main(String[] args) throws Exception
   {
@@ -28,18 +25,19 @@ public class App
     ReschData.put("3", new Object[] { "Dr. Aubert", "AU Compuster and Cyber Science", "Teacher & Researcher" });
     ReschData.put("4", new Object[] { "Dr. Balas", "AU Allied Health", "Teacher & Researcher" });
     ReschData.put("5", new Object[] { "Sleeper", "Best Redhead in AU", "Student" });
+    ReschData.put("5", new Object[] { "Elton", "yes", "Student" });
   
     Set<String> keyid = ReschData.keySet();
     int rowid = 0;
   
     for (String key : keyid) // writing the data into the sheets
     {
-      row = spreadsheet.createRow(rowid);
+      row = spreadsheet.createRow(rowid++);
       Object[] objectArr = ReschData.get(key);
       int cellid = 0;
       for (Object obj : objectArr) 
       {
-        Cell cell = row.createCell(cellid);
+        Cell cell = row.createCell(cellid++);
         cell.setCellValue((String)obj);
       }
     }
