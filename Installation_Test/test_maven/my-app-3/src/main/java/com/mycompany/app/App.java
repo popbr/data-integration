@@ -51,7 +51,7 @@ public class App
 
     System.out.println("\n");
 
-  }
+  } // ADD NEXT: SQL interaction and test putting a datalist into Excel for output.
 
   public static String EstablishFilePath(){
 		File s = new File("f.txt");
