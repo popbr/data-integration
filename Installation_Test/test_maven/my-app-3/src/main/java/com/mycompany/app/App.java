@@ -25,21 +25,24 @@ public class App
 {
   public static void main(String[] args) throws Exception
   {
+    newTest(); // This is what I've been building, piece by piece, to eventually replicate the old dependency Test
+    //oldTest(); //This is what the program used to do when it was orginally created and modified by Dr. Aubert
+
+  }
+
+  public static void newTest() throws Exception {
     System.out.println("\n");
     String FilePath = EstablishFilePath() + "\\Downloads\\";
     File[] fileNames = EstablishFileList(FilePath);
 
+    String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAMEs" };
+
     for (int i = 0; i < fileNames.length; i++) {
       System.out.println("\n"+fileNames[i].getName());
       System.out.println(fileNames[i].getPath()+"\n");
-      Parsefromtxt(fileNames[i].getPath(), "\",\"");
+      Parsefromtxt(fileNames[i].getPath(), "\",\"", ReporterTagList);
     }
 
-    
-    // writing the workbook into the file
-    //FileOutputStream out = new FileOutputStream( new File("./GFGsheet.xlsx")); //C:\Users\sleep\Desktop\Excel
-    //Wbook.write(out);
-    //out.close();
     System.out.println("\n");
 
   }
@@ -73,7 +76,7 @@ public class App
 		return fileNames;
 	}
 
-  public static void Parsefromtxt(String txtlocation, String Delim) throws Exception{
+  public static void Parsefromtxt(String txtlocation, String Delim, String[] TagList) throws Exception{
     Scanner txtFile = new Scanner(new File(txtlocation));
 
 		String txtFields = txtFile.nextLine();
@@ -88,7 +91,7 @@ public class App
       entries in the CSV file total, so this cuts out 23 entries, for some reason. Research it further. 
       Something's weird*/
 			index++;
-			System.out.println(txtFile.nextLine()+"\n");
+			txtFile.nextLine();
 		}
 		if (index < Limit)
 			Limit = (index + 1);
@@ -102,10 +105,109 @@ public class App
     int indexTracker = 0;
 		String currentWord = "";
 		String currentLine = "";
-    
+
+    int[] TagIndex = new int[TagList.length];
+		String[][] data = new String[Limit][TagList.length];
+
+		for (int i = 0; i < TagList.length; i++) {
+			data[0][i] = TagList[i];
+		}
+    //PrintList(data);
+
+    while (txtFieldsLine.hasNext()) {
+
+			currentWord = txtFieldsLine.next();
+
+			if (index == 0) { // Makes sure the first tag will not has a " at the front
+				char[] tempChar = currentWord.toCharArray();
+				char[] newChar = new char[tempChar.length - 1];
+				for (int i = 1; i < newChar.length + 1; i++) {
+					newChar[i - 1] = tempChar[i];
+				}
+				currentWord = String.valueOf(newChar);
+			}
+			if (!(txtFieldsLine.hasNext())) { // makes sure the last tag will no have a " at the end
+				char[] tempChar = currentWord.toCharArray();
+				char[] newChar = new char[tempChar.length - 1];
+				for (int i = 0; i < newChar.length; i++) {
+					newChar[i] = tempChar[i];
+				}
+				currentWord = String.valueOf(newChar);
+			}
+			for (int p = 0; p < TagList.length; p++) {
+				if (currentWord.equalsIgnoreCase(TagList[p])) {
+					TagIndex[indexTracker] = index;
+					indexTracker++;
+				}
+			}
+			index++;
+		}
+		indexTracker = 0;
+		indexTracker = 1;
+			
+		do {
+			index = 0;
+			currentLine = txtFile.nextLine();
+			txtFieldsLine = new Scanner(currentLine);
+			txtFieldsLine.useDelimiter(Delim);
+			char quote = '"';
+			while (txtFieldsLine.hasNext()) {
+				currentWord = txtFieldsLine.next();
+				if (index == 0) {
+
+					char[] tempChar = currentWord.toCharArray();
+					if (tempChar[0] == quote) {
+						char[] newChar = new char[tempChar.length - 1];
+
+						for (int i = 1; i < newChar.length + 1; i++) {
+							newChar[i - 1] = tempChar[i];
+						}
+						currentWord = String.valueOf(newChar);
+					}
+				}
+				if (index == (TagList.length - 1)) {
+					char[] tempChar = currentWord.toCharArray();
+					if (tempChar == null || tempChar.length == 0) { //this deals with entries such as " , ;"
+						currentWord = "null";
+					} 
+					else {
+					char[] newChar = new char[tempChar.length - 1];
+					for (int i = 0; i < newChar.length; i++) {
+						newChar[i] = tempChar[i];
+					}
+					currentWord = String.valueOf(newChar);
+				} }
+
+				for (int ind = 0; ind < TagIndex.length; ind++) {
+					if (index == TagIndex[ind]) {
+						data[indexTracker][ind] = currentWord;
+					}
+				}
+				index++;
+			}
+
+			indexTracker++;
+
+		} while (txtFile.hasNextLine() && indexTracker < Limit);
+
+    PrintList(data);
   }
+
+  public static void PrintList(String[][] input) {
+
+		int InpLength = input.length;
+		int InpDepth = input[0].length;
+
+		for (int i = 0; i<InpLength; i++) {
+			System.out.print(i + ": ");
+			for (int j = 0; j<InpDepth; j++) {
+				System.out.print(input[i][j]+", ");
+			}
+			System.out.println();
+		}
+	}
   
-  public static void OldTest() {
+  public static void oldTest() {
     XSSFWorkbook Wbook = new XSSFWorkbook(); // workbook object
     XSSFSheet spreadsheet = Wbook.createSheet("Research Data"); // spreadsheet object
     XSSFRow row; // creating a row object
