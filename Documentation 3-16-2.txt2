@@ -1,0 +1,11 @@
+Documentation as of 3/16/2022
+
+
+Using:
+MySQL Server 8.0
+MySQL Workbench 8.0
+Microsoft Visual Studio Code
+mysql-connector-java-8.0.23
+junit version 4.11
+apache poi  5.0.0
+apache poi-ooxml  5.0.0
