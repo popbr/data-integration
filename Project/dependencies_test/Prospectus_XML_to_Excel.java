@@ -20,7 +20,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
-import java.io.File;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 
@@ -74,6 +73,7 @@ public class Prospectus_XML_to_Excel {
 	}
 
 	public static void ParseFromtxt(String txtlocation, String Table, String Delim, String[] TagList, String Search[], String source) throws Exception {
+		System.out.println(txtlocation);
 		Scanner txtFile = new Scanner(new File(txtlocation));
 
 		String txtFields = txtFile.nextLine();
@@ -192,6 +192,7 @@ public class Prospectus_XML_to_Excel {
 			//PrintList(SearchData);
 			SearchData = AddTagAndData(SearchData, "Source", source);
 			SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime());
+			//PrintList(SearchData);
 			WriteToSQL(Table, SearchData);
 		} 
 		else 
@@ -201,8 +202,10 @@ public class Prospectus_XML_to_Excel {
 			//PrintList(data);
 			WriteToSQL(Table, data);
 		}
-		txtFile.close();
 		txtFieldsLine.close();
+		txtFile.close();
+		//txtFields.out(); //newly added, may be a problem. Future note: It is a problem.
+		
 
 	}
 
@@ -437,12 +440,11 @@ public class Prospectus_XML_to_Excel {
 	}
 	
 	public static void WriteToSQL(String TableName, String[][] data) throws Exception {
-		try (
-				Connection conn = DriverManager
-						.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" + "?user=testuser"
-								+ "&password=password" + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true"
-								+ "&useSSL=true");
-				Statement stmt = conn.createStatement();) {
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" 
+				+ "?user=testuser" + "&password=password" + "&allowMultiQueries=true" 
+				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
+		Statement stmt = conn.createStatement();) 
+		{
 
 			String DropTable, CreateTable, Statement;
 
