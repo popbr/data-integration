@@ -16,7 +16,11 @@ public class App
     }
  
     public static void main(String[] args) throws Exception {
-        downloadFile(new URL("https://www.nsf.gov/awardsearch/download?DownloadFileName=1968&All=true"), "1968.zip");
+        File file = new File("target/download/"); 
+        FileUtils.forceMkdir(file);
+        downloadFile(new URL("https://www.nsf.gov/awardsearch/download?DownloadFileName=1968&All=true"), "target/download/1968.zip");
+        
+        
     }
 }
 
