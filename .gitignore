@@ -7,7 +7,19 @@
 **/.settings/*
 **/bin/*
 
+# We ignore all xml files *but*
+# the pom.xml ones.
+
 !*/pom.xml
 !*/*/pom.xml
 !*/*/*/pom.xml
 !*/*/*/*/pom.xml
+
+# Ignoring Maven's targets.
+
+target/**
+*/target/**
+*/*/target/**
+*/*/*/target/**
+*/*/*/*/target/**
+*/*/*/*/*/target/**
