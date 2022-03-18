@@ -51,14 +51,12 @@ public class Prospectus_XML_to_Excel {
 			// where it came from. That way, we could track it and pass it to Excel, so it can create a new page when a new source appears or switch pages based 
 			// on what source is currently being used.
 
-
-
 			for (int i = 0; i < fileNames.length; i++) {
 				//System.out.println("File path Is:"+fileNames[i].getPath()+".");
 				fType = FilenameUtils.getExtension(fileNames[i].getName());
-					Table[i] = fType + (i + 1); // this stores the tables names in a retrievable list. 
-					source = fileNames[i].getName();
-				fType = FilenameUtils.getExtension(fileNames[i].getName());
+				Table[i] = fType + (i + 1); // this stores the tables names in a retrievable list. 
+				source = fileNames[i].getName();
+				//fType = FilenameUtils.getExtension(fileNames[i].getName());
 				if (fType.equals("xml"))
 					ParseFromXML(fileNames[i].getPath(), Table[i], ReporterTagList, Search, source);
 				else if (fType.equals("csv"))
