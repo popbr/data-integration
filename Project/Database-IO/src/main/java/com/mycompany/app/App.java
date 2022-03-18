@@ -46,15 +46,20 @@ public class App
             String source = "";
             String[] Table = new String[fileNames.length];
             String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAMEs" };
+			String[] tsvTagList = { "Title", "Status", "Locations" };
             String[] Search = {"Medical University of South Carolina", "ORG_NAME"};
 
             for (int i = 0; i < fileNames.length; i++) {
-                //System.out.println("\n"+fileNames[i].getName());
                 fType = FilenameUtils.getExtension(fileNames[i].getName());
                 Table[i] = fType + (i + 1); // this stores the tables names in a retrievable list.
                 source = fileNames[i].getName();
-                
-                Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, Search, source);
+				if (fType.equals("xml"))
+					source = "Delete this when you implement ParsefromXML";
+					//ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, Search, source);
+                else if (fType.equals("csv"))
+                	Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, Search, source);
+				else if (fType.equals("tsv"))
+					Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source);
             }
         
         WriteToExcel("*", Table, workbook);

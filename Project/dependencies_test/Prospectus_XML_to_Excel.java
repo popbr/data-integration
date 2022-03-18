@@ -56,7 +56,6 @@ public class Prospectus_XML_to_Excel {
 				fType = FilenameUtils.getExtension(fileNames[i].getName());
 				Table[i] = fType + (i + 1); // this stores the tables names in a retrievable list. 
 				source = fileNames[i].getName();
-				//fType = FilenameUtils.getExtension(fileNames[i].getName());
 				if (fType.equals("xml"))
 					ParseFromXML(fileNames[i].getPath(), Table[i], ReporterTagList, Search, source);
 				else if (fType.equals("csv"))
