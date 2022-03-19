@@ -39,7 +39,12 @@ public class App
 
         System.out.println("\n");
         XSSFWorkbook workbook = new XSSFWorkbook(); // workbook object
-        String FilePath = EstablishFilePath() + "\\Downloads\\";
+        String BasePath = EstablishFilePath();
+
+		String LoginPath = BasePath + "\\target\\LoginInfo.xml";
+		String[] SQLLogin = GetLoginInfo("SQL", LoginPath);
+
+		String FilePath = BasePath + "\\Downloads\\";
         File[] fileNames = EstablishFileList(FilePath);
 
 
@@ -59,12 +64,11 @@ public class App
                 Table[i] = fType + (i + 1); // this stores the tables names in a retrievable list.
                 source = fileNames[i].getName();
 				if (fType.equals("xml"))
-					source = "Delete this when you implement ParsefromXML";
-					//ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, Search, source);
+					ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, Search, source, SQLLogin);
                 else if (fType.equals("csv"))
-                	Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, Search, source);
+                	Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, Search, source, SQLLogin);
 				else if (fType.equals("tsv"))
-					Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source);
+					Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source, SQLLogin);
             }
         
         WriteToExcel("*", Table, workbook);
@@ -103,7 +107,7 @@ public class App
 		return fileNames;
 	}
 
-	public static void Parsefromtxt(String txtlocation, String Table, String Delim, String[] TagList, String Search[], String source) throws Exception{
+	public static void Parsefromtxt(String txtlocation, String Table, String Delim, String[] TagList, String Search[], String source, String[] SQLLogin) throws Exception{
     	Scanner txtFile = new Scanner(new File(txtlocation));
 
 		String txtFields = txtFile.nextLine();
@@ -228,15 +232,15 @@ public class App
 			//PrintList(SearchData);
 			SearchData = AddTagAndData(SearchData, "Source", source);
 			SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime());
-			PrintList(SearchData);
-			WriteToSQL(Table, SearchData);
+			//PrintList(SearchData);
+			WriteToSQL(Table, SearchData, SQLLogin);
 		} 
 		else 
 		{
 			data = AddTagAndData(data, "Source", source);
 			data = AddTagAndData(data, "Time_Retrieved", GetTime());
-			PrintList(data);
-			WriteToSQL(Table, data);
+			//PrintList(data);
+			WriteToSQL(Table, data, SQLLogin);
 		}
 
 		txtFieldsLine.close();
@@ -244,7 +248,7 @@ public class App
 		//txtFields.close();
 	}
 
-	public static void ParseFromExcel(String ExcelLocation, String Table, String[] TagList) throws Exception {
+	public static void ParsefromExcel(String ExcelLocation, String Table, String[] TagList, String[] SQLLogin) throws Exception {
 		try {
 
 			// FileInputStream inputStream = new FileInputStream(new File(ExcelLocation));
@@ -291,7 +295,7 @@ public class App
 				}
 			}
 
-			WriteToSQL(Table, data);
+			WriteToSQL(Table, data, SQLLogin);
 
 		}
 
@@ -300,7 +304,7 @@ public class App
 		}
 	}
 
-	public static void ParseFromXML(String Location, String Table, String[] TagList, String Search[], String source) throws Exception {
+	public static void ParsefromXML(String Location, String Table, String[] TagList, String Search[], String source, String[] SQLLogin) throws Exception {
 		try {
 			File inputFile = new File(Location);
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -311,8 +315,7 @@ public class App
 
 			String[][] data = new String[Limit][TagList.length];
 
-			for (int i = 0; i < TagList.length; i++) // sets the first elements of data to be the Tags
-			{
+			for (int i = 0; i < TagList.length; i++) { // sets the first elements of data to be the Tags 
 				data[0][i] = TagList[i];
 			}
 
@@ -337,17 +340,17 @@ public class App
 				//PrintList(SearchData);
 				SearchData = AddTagAndData(SearchData, "Source", source);
 				SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime());
-				WriteToSQL(Table, SearchData);
+				WriteToSQL(Table, SearchData, SQLLogin);
 			} 
 			else 
 			{
 				data = AddTagAndData(data, "Source", source);
 				data = AddTagAndData(data, "Time_Retrieved", GetTime());
 				//PrintList(data);
-				WriteToSQL(Table, data);
+				WriteToSQL(Table, data, SQLLogin);
 			}
 
-			WriteToSQL(Table, data); //WARNING: ParsefromXML has NOT been tested with a search parameter.  
+			//WriteToSQL(Table, data, SQLLogin); //WARNING: ParsefromXML has NOT been tested with a search parameter.  
 		}
 
 		catch (Exception e) {
@@ -355,10 +358,39 @@ public class App
 		}
 	}
 
+	public static String[] GetLoginInfo(String LoginType, String Location) throws Exception{
+		
+		File inputFile = new File(Location);
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+		Document doc = dBuilder.parse(inputFile);
+		doc.getDocumentElement().normalize();
+		
+		NodeList nList = doc.getElementsByTagName("Login");
+
+		String[] LoginInfo = new String[2];
+
+		for (int temp = 0; temp < nList.getLength(); temp++) {
+			Node nNode = nList.item(temp);
+			if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+				Element eElement = (Element) nNode;
+
+				Node username = eElement.getElementsByTagName("Username").item(0);
+				LoginInfo[0] = username.getTextContent();
+
+				Node password = eElement.getElementsByTagName("Password").item(0);
+				LoginInfo[1] = password.getTextContent();
+			}
+		}
+		//PrintList(LoginInfo);
+
+		return LoginInfo;
+	}  
+	
 	public static void PrintList(String[] input) throws Exception {
 		int InpLength = input.length;
 		for (int j = 0; j< InpLength; j++) {
-			System.out.print(input[j]+", ");
+			System.out.println(input[j]+", ");
 		}
 	}
 
@@ -445,50 +477,45 @@ public class App
 		return (Format.format(current));
 	}
   
-	public static void WriteToSQL(String TableName, String[][] data) throws Exception {
+	public static void WriteToSQL(String TableName, String[][] data, String[] SQLLogin) throws Exception {
 		try ( Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" 
-				+ "?user=testuser" + "&password=password" + "&allowMultiQueries=true" 
+				+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true" 
 				+ "&createDatabaseIfNotExist=true" + "&useSSL=true"
 				);
 		Statement stmt = conn.createStatement();) 
 		{
 
 			String DropTable, CreateTable, Statement;
-
 			DropTable = "DROP TABLE IF EXISTS " + TableName + ";";
 			
 			int Limit = data[0].length;
 
 			String[] TagName = new String[Limit];
-			for(int i = 0;i<Limit;i++){
+			for(int i = 0;i<Limit;i++) {
 				TagName[i] = data[0][i];
 			}
 
 			CreateTable = "CREATE TABLE " + TableName + " (" + TagName[0] + " VARCHAR(255) PRIMARY KEY, ";
 
-			for (int j = 0; j < TagName.length - 1; j++) // creates the SWL table based on the number of strings in
-															// TagName
-			{
+			for (int j = 0; j < TagName.length - 1; j++) {// creates the SWL table based on the number of strings in TagName
 				CreateTable = CreateTable + TagName[j + 1] + " VARCHAR(255)";
 				if (j != TagName.length - 2)
 					CreateTable = CreateTable + ", ";
 			}
 			CreateTable = CreateTable + ")";
-			System.out.println(CreateTable + "\n" + DropTable);
+			//System.out.println(CreateTable + "\n" + DropTable);
 
 			stmt.execute(DropTable);
 			stmt.execute(CreateTable);
 
-			System.out.println("Finished dropping and creating tables.");
+			//System.out.println("Finished dropping and creating tables.");
 
 			Statement = "INSERT INTO " + TableName + " VALUES (";
-			for (int j = 1; j < TagName.length; j++) // creates the Prepared Statement based on the number of strings in
-														// TagName
-			{
+			for (int j = 1; j < TagName.length; j++) {// creates the Prepared Statement based on the number of strings in TagName
 				Statement = Statement + "?, ";
 			}
-			Statement = Statement + "?)";
 
+			Statement = Statement + "?)";
 			PreparedStatement preparedStatement = conn.prepareStatement(Statement);
 
 			for (int i = 0; i < data.length; i++) {
@@ -496,7 +523,7 @@ public class App
 					preparedStatement.setString(j+1, data[i][j]); // sets the Prepared String a number of times equal
 																	// to the amount of strings in TagName
 				}
-				System.out.println(preparedStatement);
+				//System.out.println(preparedStatement);
 				preparedStatement.execute();
 			}
 			conn.close();
