@@ -44,7 +44,7 @@ public class App
 		String LoginPath = BasePath + "\\target\\LoginInfo.xml";
 		String[] SQLLogin = GetLoginInfo("SQL", LoginPath);
 
-		String FilePath = BasePath + "\\Downloads\\";
+		String FilePath = BasePath + "\\target\\Downloads\\";
         File[] fileNames = EstablishFileList(FilePath);
 
 
