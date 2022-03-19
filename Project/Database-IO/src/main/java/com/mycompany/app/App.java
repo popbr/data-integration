@@ -23,6 +23,11 @@ import java.util.Scanner;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
+import org.w3c.dom.Element;
+
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 
@@ -237,6 +242,117 @@ public class App
 		txtFieldsLine.close();
 		txtFile.close();
 		//txtFields.close();
+	}
+
+	public static void ParseFromExcel(String ExcelLocation, String Table, String[] TagList) throws Exception {
+		try {
+
+			// FileInputStream inputStream = new FileInputStream(new File(ExcelLocation));
+			File inputFile = new File(ExcelLocation);
+			XSSFWorkbook ParsingWorkbook = new XSSFWorkbook(); // po0ssible bug sol: change "ParsingWorkbook" with
+																// "workbook"
+			XSSFSheet ParsingSheet = ParsingWorkbook.getSheetAt(0);
+
+			int Limit = 50 + 1;
+
+			int[] TagIndex = new int[TagList.length];
+			String[][] data = new String[Limit][TagList.length];
+
+			for (int i = 0; i < TagList.length; i++) {
+				data[0][i] = TagList[i];
+			}
+
+			int columnNum = ParsingSheet.getRow(0).getLastCellNum(); // gets the number of columnsin the header
+
+			XSSFRow rowHeader = ParsingSheet.getRow(0);
+			XSSFCell Headercell;
+			for (int j = 0; j < columnNum; j++) {
+				Headercell = rowHeader.getCell(j);
+				String KellValue = Headercell.getStringCellValue();
+				for (int i = 0; i < Limit; i++) {
+					if (TagList[i].equalsIgnoreCase(KellValue)) { // This determines at what index the tags are located
+																	// at for more precise searching
+						TagIndex[i] = j;
+					}
+				}
+			} // As a fun note, I've been bug testing this for so long that the word "cell"
+				// looks madeup now.
+
+			// data[i+1][TagName] = cell.toString(row.getCell(TagIndex[TagName]));
+			// data[i+1][TagName] = cellToString(row.getCell(TagIndex[TagName]));
+			// data[i+1][TagName] = row.getStringCellValue(row.getCell(TagIndex[TagName]);
+			XSSFCell DataCell;
+			for (int TagName = 0; TagName < TagList.length; TagName++) {
+				for (int i = 1; i < Limit; i++) {
+					XSSFRow row = ParsingSheet.getRow(i);
+
+					DataCell = row.getCell(TagIndex[TagName]);
+					data[i + 1][TagName] = DataCell.getStringCellValue();
+				}
+			}
+
+			WriteToSQL(Table, data);
+
+		}
+
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void ParseFromXML(String Location, String Table, String[] TagList, String Search[], String source) throws Exception {
+		try {
+			File inputFile = new File(Location);
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(inputFile);
+			doc.getDocumentElement().normalize();
+			int Limit = 50 + 1;
+
+			String[][] data = new String[Limit][TagList.length];
+
+			for (int i = 0; i < TagList.length; i++) // sets the first elements of data to be the Tags
+			{
+				data[0][i] = TagList[i];
+			}
+
+			NodeList nList = doc.getElementsByTagName("row");
+			System.out.println("Start Parsing from XML");
+			for (int TagName = 0; TagName < TagList.length; TagName++) {
+				//System.out.println(TagList[TagName]);
+				for (int temp = 1; temp < Limit; temp++) // temp < nList.getLength()
+				{
+					Node nNode = nList.item(temp);
+					if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+						Element eElement = (Element) nNode;
+						data[temp][TagName] = eElement.getElementsByTagName(TagList[TagName]).item(0).getTextContent(); //maybe encapsul this in a try catch?
+						// System.out.println(data);
+					}
+					// do not enable this, you will increase your runtime greatly
+				}
+			}
+
+			if(Search != null) {
+				String[][] SearchData = SearchforAttributeData(data, Search, Limit);
+				//PrintList(SearchData);
+				SearchData = AddTagAndData(SearchData, "Source", source);
+				SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime());
+				WriteToSQL(Table, SearchData);
+			} 
+			else 
+			{
+				data = AddTagAndData(data, "Source", source);
+				data = AddTagAndData(data, "Time_Retrieved", GetTime());
+				//PrintList(data);
+				WriteToSQL(Table, data);
+			}
+
+			WriteToSQL(Table, data); //WARNING: ParsefromXML has NOT been tested with a search parameter.  
+		}
+
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static void PrintList(String[] input) throws Exception {
