@@ -7,6 +7,8 @@
 **/.settings/*
 **/bin/*
 
+# We still want to track pom.xml files.
+
 !*/pom.xml
 !*/*/pom.xml
 !*/*/*/pom.xml
