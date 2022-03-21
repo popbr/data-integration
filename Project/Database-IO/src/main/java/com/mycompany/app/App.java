@@ -56,8 +56,10 @@ public class App
             String source = "";
             String[] Table = new String[fileNames.length];
             String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAMEs" };
-			String[] tsvTagList = { "Title", "Status", "Locations" };
+			String[] tsvTagList = { "School_Name", "Location", "MD_or_DO", "Type", "Average_GPA",
+				"Average_MCAT", "Total_Applicants", "Class_size" };
             String[] Search = {"Medical University of South Carolina", "ORG_NAME"};
+			tsvTagList = null;
 
             for (int i = 0; i < fileNames.length; i++) {
                 fType = FilenameUtils.getExtension(fileNames[i].getName());
@@ -136,14 +138,28 @@ public class App
     	int indexTracker = 0;
 		String currentWord = "";
 		String currentLine = "";
+		int length;
+		if(TagList != null)
+		length = TagList.length;
+		else length = 10;
 
-    	int[] TagIndex = new int[TagList.length];
-		String[][] data = new String[Limit][TagList.length];
-
-		for (int i = 0; i < TagList.length; i++) {
-			data[0][i] = TagList[i];
+		int[] TagIndex = new int[length];
+		for (int i = 0; i < length; i++) {
+			TagIndex[i] = i;
 		}
-    	//PrintList(data);
+		String[][] data = new String[Limit][length];
+
+		if(TagList != null) {
+			for (int i = 0; i < length; i++) {
+				data[0][i] = TagList[i];
+			}
+			//PrintList(data);
+		} else {
+
+			for (int i = 0; i < length; i++) {
+				data[0][i] = "Attribute"+i;
+			}
+		}
 
     	while (txtFieldsLine.hasNext()) {
 
@@ -167,16 +183,17 @@ public class App
 				currentWord = String.valueOf(newChar);
 			}
 
-			for (int p = 0; p < TagList.length; p++) {
-				if (currentWord.equalsIgnoreCase(TagList[p])) {
-					TagIndex[indexTracker] = index;
-					indexTracker++;
+			if (TagList != null) {
+				for (int p = 0; p < length; p++) {
+					if (currentWord.equalsIgnoreCase(TagList[p])) {
+						TagIndex[indexTracker] = index;
+						indexTracker++;
+					}
 				}
 			}
 			index++;
 		}
 
-		indexTracker = 0;
 		indexTracker = 1;
 		
 		do {
@@ -188,6 +205,7 @@ public class App
 
 			while (txtFieldsLine.hasNext()) {
 				currentWord = txtFieldsLine.next();
+				//System.out.println(currentWord);
 				if (index == 0) {
 
 					char[] tempChar = currentWord.toCharArray();
@@ -200,7 +218,8 @@ public class App
 						currentWord = String.valueOf(newChar);
 					}
 				}
-				if (index == (TagList.length - 1)) {
+
+				if (index == (length - 1)) {
 					char[] tempChar = currentWord.toCharArray();
 					if (tempChar == null || tempChar.length == 0) { //this deals with entries such as " , ;"
 						currentWord = "null";
@@ -214,6 +233,7 @@ public class App
 				} }
 
 				for (int ind = 0; ind < TagIndex.length; ind++) {
+					//System.out.println(TagIndex[ind]);
 					if (index == TagIndex[ind]) {
 						data[indexTracker][ind] = currentWord;
 					}
@@ -237,8 +257,8 @@ public class App
 		} 
 		else 
 		{
-			data = AddTagAndData(data, "Source", source);
-			data = AddTagAndData(data, "Time_Retrieved", GetTime());
+			//data = AddTagAndData(data, "Source", source);
+			//data = AddTagAndData(data, "Time_Retrieved", GetTime());
 			//PrintList(data);
 			WriteToSQL(Table, data, SQLLogin);
 		}
