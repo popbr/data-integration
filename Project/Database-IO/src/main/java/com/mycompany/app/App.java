@@ -44,7 +44,7 @@ public class App
 		String LoginPath = BasePath + File.separator + "target" + File.separator + "LoginInfo.xml";
 		String[] SQLLogin = GetLoginInfo("SQL", LoginPath);
 
-		String FilePath = BasePath + File.separator+ "target" + File.separator + "Downloads" + File.separator;
+		String FilePath = BasePath + File.separator + "target" + File.separator + "Downloads" + File.separator;
         File[] fileNames = EstablishFileList(FilePath);
 
 
@@ -76,6 +76,7 @@ public class App
         WriteToExcel("*", Table, workbook);
         }
         System.out.println("Finished");
+		System.exit(0);
         System.out.println("\n");
 
     } // ADD NEXT: SQL interaction and test putting a datalist into Excel for output.
@@ -120,9 +121,9 @@ public class App
 		int Limit = 9050 + 1;
 
 		while (txtFile.hasNextLine()) { 
-      	/*ISSUE: for some reason, the .nextLine() quits at line 333, and cuts off that line before ends. There's 356 
-      	entries in the CSV file total, so this cuts out 23 entries, for some reason. Research it further. 
-      	Something's weird*/
+			/*ISSUE: for some reason, the .nextLine() quits at line 333, and cuts off that line before ends. There's 356 
+			entries in the CSV file total, so this cuts out 23 entries, for some reason. Research it further. 
+			Something's weird*/
 			index++;
 			txtFile.nextLine();
 		}
@@ -249,14 +250,13 @@ public class App
 
     	if(Search != null) {
 			String[][] SearchData = SearchforAttributeData(data, Search, Limit);
-			//PrintList(SearchData);
+			PrintList(SearchData);
 			SearchData = AddTagAndData(SearchData, "Source", source);
 			SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime());
 			//PrintList(SearchData);
 			WriteToSQL(Table, SearchData, SQLLogin);
 		} 
-		else 
-		{
+		else {
 			//data = AddTagAndData(data, "Source", source);
 			//data = AddTagAndData(data, "Time_Retrieved", GetTime());
 			//PrintList(data);
@@ -357,7 +357,7 @@ public class App
 
 			if(Search != null) {
 				String[][] SearchData = SearchforAttributeData(data, Search, Limit);
-				//PrintList(SearchData);
+				PrintList(SearchData);
 				SearchData = AddTagAndData(SearchData, "Source", source);
 				SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime());
 				WriteToSQL(Table, SearchData, SQLLogin);
@@ -500,8 +500,7 @@ public class App
 	public static void WriteToSQL(String TableName, String[][] data, String[] SQLLogin) throws Exception {
 		try ( Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" 
 				+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true" 
-				+ "&createDatabaseIfNotExist=true" + "&useSSL=true"
-				);
+				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
 		Statement stmt = conn.createStatement();) 
 		{
 
@@ -540,8 +539,8 @@ public class App
 
 			for (int i = 0; i < data.length; i++) {
 				for (int j = 0; j < Limit; j++) {
-					preparedStatement.setString(j+1, data[i][j]); // sets the Prepared String a number of times equal
-																	// to the amount of strings in TagName
+					preparedStatement.setString(j+1, data[i][j]); 
+					// sets the Prepared String a number of times equal to the amount of strings in TagName
 				}
 				//System.out.println(preparedStatement);
 				preparedStatement.execute();
@@ -555,17 +554,6 @@ public class App
 			"?user=testuser" + "&password=password" + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true"
 			+ "&useSSL=true");
 			Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
-
-			// XSSFSheet spreadsheet = workbook.createSheet("Research Data; " + location);
-			// // spreadsheet object
-			/*int sheetNum = 0;
-			for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-				if (workbook.getSheetAt(i).getSheetName().equals(location)) {
-					workbook.removeSheetAt(i);
-					sheetNum = i;
-					i--;
-				}
-			} */
 
 			XSSFSheet spreadsheet = workbook.createSheet("Data");
 			XSSFRow row; // creating a row object
