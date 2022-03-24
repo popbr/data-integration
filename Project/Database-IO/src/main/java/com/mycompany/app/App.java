@@ -35,16 +35,16 @@ public class App
 {
     public static void main(String[] args) throws Exception 
     {
-        Class.forName("com.mysql.jdbc.Driver");
+        Class.forName("com.mysql.cj.jdbc.Driver");
 
         System.out.println("\n");
         XSSFWorkbook workbook = new XSSFWorkbook(); // workbook object
         String BasePath = EstablishFilePath();
 
-		String LoginPath = BasePath + "\\target\\LoginInfo.xml";
+		String LoginPath = BasePath + File.separator + "target" + File.separator + "LoginInfo.xml";
 		String[] SQLLogin = GetLoginInfo("SQL", LoginPath);
 
-		String FilePath = BasePath + "\\target\\Downloads\\";
+		String FilePath = BasePath + File.separator+ "target" + File.separator + "Downloads" + File.separator;
         File[] fileNames = EstablishFileList(FilePath);
 
 
