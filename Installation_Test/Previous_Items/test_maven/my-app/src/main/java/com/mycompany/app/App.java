@@ -2,128 +2,90 @@ package com.mycompany.app;
 
 import java.io.Console;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-
-import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.poi.xssf.usermodel.XSSFCell; //Newest addition
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
 import java.sql.*;
-
 import java.text.CharacterIterator;
 import java.util.Scanner;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
-
+import java.io.File;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 
-public class App
-{
-    public static void main(String[] args) throws Exception 
-    {
-        Class.forName("com.mysql.cj.jdbc.Driver");
+public class App {
+	public static void main(String[] args) throws Exception {
 
-        System.out.println("\n");
-        XSSFWorkbook workbook = new XSSFWorkbook(); // workbook object
-        String BasePath = EstablishFilePath();
+		System.out.println("");
+		Scanner myObj = new Scanner(System.in);
+		XSSFWorkbook workbook = new XSSFWorkbook(); // workbook object
 
-		String LoginPath = BasePath + File.separator + "target" + File.separator + "LoginInfo.xml";
-		String[] SQLLogin = GetLoginInfo("SQL", LoginPath);
+		String FilePath = EstablishFilePath() + "\\Downloads\\"; //this sets the program to be aimed at the downloads folder
+		File[] fileNames = EstablishFileList(FilePath); //This creates and populates a list of all the files in the ^^^ downloads folder
 
-		String FilePath = BasePath + File.separator + "target" + File.separator + "Downloads" + File.separator;
-        File[] fileNames = EstablishFileList(FilePath);
+		if(fileNames.length==0) {
+			System.out.println("There are no databases in the downloads folder.\nPlease download at least one database and try again.");
+		} 
+		else {
+			String fType;
+			String source = ""; 
+			String[] Table = new String[fileNames.length];
+			Class.forName("com.mysql.jdbc.Driver");
+			String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAMEs" };
+			String[] tsvTagList = { "Title", "Status", "Locations" };
+			String[] Search = {"Medical University of South Carolina", "ORG_NAME"}; // plug this into all parsing methods
+			System.out.println();
+
+			//I'm starting to see a problem: we need deeper download folders -- better ways to classify the downloads. Currently, there isn't a way to track the 
+			//source of a downloaded file -- like Reporter, NIH, etc... -- a folder within the Downloads folder would be better to classify and tag the data with 
+			// where it came from. That way, we could track it and pass it to Excel, so it can create a new page when a new source appears or switch pages based 
+			// on what source is currently being used.
 
 
-        if(fileNames.length==0) {
-            System.out.println("There are no databases in the downloads folder.\nPlease download at least one database and try again.");
-        } 
-        else {
-            String fType;
-            String source = "";
-            String[] Table = new String[fileNames.length];
-            String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAMEs" };
-			String[] tsvTagList = { "School_Name", "Location", "MD_or_DO", "Type", "Average_GPA",
-				"Average_MCAT", "Total_Applicants", "Class_size" };
-            String[] Search = {"Medical University of South Carolina", "ORG_NAME"};
-			tsvTagList = null;
 
-            for (int i = 0; i < fileNames.length; i++) {
-                fType = FilenameUtils.getExtension(fileNames[i].getName());
-                Table[i] = fType + (i + 1); // this stores the tables names in a retrievable list.
-                source = fileNames[i].getName();
+			for (int i = 0; i < fileNames.length; i++) {
+				//System.out.println("File path Is:"+fileNames[i].getPath()+".");
+				fType = FilenameUtils.getExtension(fileNames[i].getName());
+					Table[i] = fType + (i + 1); // this stores the tables names in a retrievable list. 
+					source = fileNames[i].getName();
+				fType = FilenameUtils.getExtension(fileNames[i].getName());
 				if (fType.equals("xml"))
-					ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, Search, source, SQLLogin);
-                else if (fType.equals("csv"))
-                	Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, Search, source, SQLLogin);
+					ParseFromXML(fileNames[i].getPath(), Table[i], ReporterTagList, Search, source);
+				else if (fType.equals("csv"))
+					ParseFromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, Search, source);
 				else if (fType.equals("tsv"))
-					Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source, SQLLogin);
-            }
-        
-        	WriteToExcel("*", Table, workbook, SQLLogin);
-        }
-        System.out.println("Finished");
-		System.exit(0);
-        System.out.println("\n");
-
-    } // ADD NEXT: SQL interaction and test putting a datalist into Excel for output.
-
-	public static String EstablishFilePath() throws Exception {
-		File s = new File("f.txt");
-		String FilePath = "";
-		char[] tempChar = s.getAbsolutePath().toCharArray();
-		char[] newChar = new char[tempChar.length - 6];
-		for (int i = 0; i < newChar.length; i++) {
-			newChar[i] = tempChar[i];
-		}
-		FilePath = String.valueOf(newChar);
-        //System.out.println(FilePath);
-		return FilePath;
-	}
-
-	public static File[] EstablishFileList(String FilePath) throws Exception {
-	  File f = new File(FilePath);
-		
-		File[] fileN = f.listFiles();
-		File[] fileNames = new File[fileN.length];
-		int txtCatch = 0;
-		for (int i = 0; i < fileN.length; i++) {
-			if (!fileN[i].getName().equals("ReadMeDownloads.txt")) {
-				fileNames[txtCatch] = fileN[i];
-        System.out.println(fileNames[txtCatch].getName());
-				txtCatch++;
+					ParseFromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source);
 			}
+
+			//PrintList(Table);
+			WriteToExcel("*", Table, workbook);
 		}
-		return fileNames;
 	}
 
-	public static void Parsefromtxt(String txtlocation, String Table, String Delim, String[] TagList, String Search[], String source, String[] SQLLogin) throws Exception{
-    	Scanner txtFile = new Scanner(new File(txtlocation));
+	public static void ParseFromtxt(String txtlocation, String Table, String Delim, String[] TagList, String Search[], String source) throws Exception {
+		Scanner txtFile = new Scanner(new File(txtlocation));
 
 		String txtFields = txtFile.nextLine();
 		Scanner txtFieldsLine = new Scanner(txtFields);
 		txtFieldsLine.useDelimiter(Delim);
 
-    	int index = 0;
+		int index = 0;
 		int Limit = 9050 + 1;
 
-		while (txtFile.hasNextLine()) { 
-			/*ISSUE: for some reason, the .nextLine() quits at line 333, and cuts off that line before ends. There's 356 
-			entries in the CSV file total, so this cuts out 23 entries, for some reason. Research it further. 
-			Something's weird*/
+		while (txtFile.hasNextLine()) {
 			index++;
 			txtFile.nextLine();
 		}
@@ -131,38 +93,24 @@ public class App
 			Limit = (index + 1);
 		index = 0;
 		txtFile.reset();
-    	txtFile = new Scanner(new File(txtlocation));
+		txtFile = new Scanner(new File(txtlocation));
 
 		txtFields = txtFile.nextLine();
 		txtFieldsLine = new Scanner(txtFields);
 		txtFieldsLine.useDelimiter(Delim);
-    	int indexTracker = 0;
+
+		int indexTracker = 0;
 		String currentWord = "";
 		String currentLine = "";
-		int length;
-		if(TagList != null)
-		length = TagList.length;
-		else length = 10;
 
-		int[] TagIndex = new int[length];
-		for (int i = 0; i < length; i++) {
-			TagIndex[i] = i;
-		}
-		String[][] data = new String[Limit][length];
+		int[] TagIndex = new int[TagList.length];
+		String[][] data = new String[Limit][TagList.length];
 
-		if(TagList != null) {
-			for (int i = 0; i < length; i++) {
-				data[0][i] = TagList[i];
-			}
-			//PrintList(data);
-		} else {
-
-			for (int i = 0; i < length; i++) {
-				data[0][i] = "Attribute"+i;
-			}
+		for (int i = 0; i < TagList.length; i++) {
+			data[0][i] = TagList[i];
 		}
 
-    	while (txtFieldsLine.hasNext()) {
+		while (txtFieldsLine.hasNext()) {
 
 			currentWord = txtFieldsLine.next();
 
@@ -174,7 +122,6 @@ public class App
 				}
 				currentWord = String.valueOf(newChar);
 			}
-
 			if (!(txtFieldsLine.hasNext())) { // makes sure the last tag will no have a " at the end
 				char[] tempChar = currentWord.toCharArray();
 				char[] newChar = new char[tempChar.length - 1];
@@ -183,30 +130,25 @@ public class App
 				}
 				currentWord = String.valueOf(newChar);
 			}
-
-			if (TagList != null) {
-				for (int p = 0; p < length; p++) {
-					if (currentWord.equalsIgnoreCase(TagList[p])) {
-						TagIndex[indexTracker] = index;
-						indexTracker++;
-					}
+			for (int p = 0; p < TagList.length; p++) {
+				if (currentWord.equalsIgnoreCase(TagList[p])) {
+					TagIndex[indexTracker] = index;
+					indexTracker++;
 				}
 			}
 			index++;
 		}
-
+		indexTracker = 0;
 		indexTracker = 1;
-		
+			
 		do {
 			index = 0;
 			currentLine = txtFile.nextLine();
 			txtFieldsLine = new Scanner(currentLine);
 			txtFieldsLine.useDelimiter(Delim);
 			char quote = '"';
-
 			while (txtFieldsLine.hasNext()) {
 				currentWord = txtFieldsLine.next();
-				//System.out.println(currentWord);
 				if (index == 0) {
 
 					char[] tempChar = currentWord.toCharArray();
@@ -219,8 +161,7 @@ public class App
 						currentWord = String.valueOf(newChar);
 					}
 				}
-
-				if (index == (length - 1)) {
+				if (index == (TagList.length - 1)) {
 					char[] tempChar = currentWord.toCharArray();
 					if (tempChar == null || tempChar.length == 0) { //this deals with entries such as " , ;"
 						currentWord = "null";
@@ -234,7 +175,6 @@ public class App
 				} }
 
 				for (int ind = 0; ind < TagIndex.length; ind++) {
-					//System.out.println(TagIndex[ind]);
 					if (index == TagIndex[ind]) {
 						data[indexTracker][ind] = currentWord;
 					}
@@ -245,30 +185,30 @@ public class App
 			indexTracker++;
 
 		} while (txtFile.hasNextLine() && indexTracker < Limit);
+		// so, Noah, problem here is that some fields only have ", ;" in them. If that field happens to be looked at and edited
+		// then that'sgoing to trip an alarm, becausethe field
 
-   	 	//PrintList(data);
-
-    	if(Search != null) {
+		
+		if(Search != null) {
 			String[][] SearchData = SearchforAttributeData(data, Search, Limit);
-			PrintList(SearchData);
+			//PrintList(SearchData);
 			SearchData = AddTagAndData(SearchData, "Source", source);
 			SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime());
-			//PrintList(SearchData);
-			WriteToSQL(Table, SearchData, SQLLogin);
+			WriteToSQL(Table, SearchData);
 		} 
-		else {
-			//data = AddTagAndData(data, "Source", source);
-			//data = AddTagAndData(data, "Time_Retrieved", GetTime());
+		else 
+		{
+			data = AddTagAndData(data, "Source", source);
+			data = AddTagAndData(data, "Time_Retrieved", GetTime());
 			//PrintList(data);
-			WriteToSQL(Table, data, SQLLogin);
+			WriteToSQL(Table, data);
 		}
-
-		txtFieldsLine.close();
 		txtFile.close();
-		//txtFields.close();
+		txtFieldsLine.close();
+
 	}
 
-	public static void ParsefromExcel(String ExcelLocation, String Table, String[] TagList, String[] SQLLogin) throws Exception {
+	public static void ParseFromExcel(String ExcelLocation, String Table, String[] TagList) throws Exception {
 		try {
 
 			// FileInputStream inputStream = new FileInputStream(new File(ExcelLocation));
@@ -315,7 +255,7 @@ public class App
 				}
 			}
 
-			WriteToSQL(Table, data, SQLLogin);
+			WriteToSQL(Table, data);
 
 		}
 
@@ -324,7 +264,7 @@ public class App
 		}
 	}
 
-	public static void ParsefromXML(String Location, String Table, String[] TagList, String Search[], String source, String[] SQLLogin) throws Exception {
+	public static void ParseFromXML(String Location, String Table, String[] TagList, String Search[], String source) throws Exception {
 		try {
 			File inputFile = new File(Location);
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -335,7 +275,8 @@ public class App
 
 			String[][] data = new String[Limit][TagList.length];
 
-			for (int i = 0; i < TagList.length; i++) { // sets the first elements of data to be the Tags 
+			for (int i = 0; i < TagList.length; i++) // sets the first elements of data to be the Tags
+			{
 				data[0][i] = TagList[i];
 			}
 
@@ -357,20 +298,20 @@ public class App
 
 			if(Search != null) {
 				String[][] SearchData = SearchforAttributeData(data, Search, Limit);
-				PrintList(SearchData);
+				//PrintList(SearchData);
 				SearchData = AddTagAndData(SearchData, "Source", source);
 				SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime());
-				WriteToSQL(Table, SearchData, SQLLogin);
+				WriteToSQL(Table, SearchData);
 			} 
 			else 
 			{
 				data = AddTagAndData(data, "Source", source);
 				data = AddTagAndData(data, "Time_Retrieved", GetTime());
 				//PrintList(data);
-				WriteToSQL(Table, data, SQLLogin);
+				WriteToSQL(Table, data);
 			}
 
-			//WriteToSQL(Table, data, SQLLogin); //WARNING: ParsefromXML has NOT been tested with a search parameter.  
+			WriteToSQL(Table, data); //WARNING: ParsefromXML has NOT been tested with a search parameter.  
 		}
 
 		catch (Exception e) {
@@ -378,57 +319,36 @@ public class App
 		}
 	}
 
-	public static String[] GetLoginInfo(String LoginType, String Location) throws Exception{
+	public static String EstablishFilePath(){
+		File s = new File("f.txt");
+		//System.out.println(s.getAbsolutePath());
+		String FilePath = "";
+		char[] tempChar = s.getAbsolutePath().toCharArray();
+		char[] newChar = new char[tempChar.length - 6];
+		for (int i = 0; i < newChar.length; i++) {
+			newChar[i] = tempChar[i];
+		}
 		
-		File inputFile = new File(Location);
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		Document doc = dBuilder.parse(inputFile);
-		doc.getDocumentElement().normalize();
+		FilePath = String.valueOf(newChar);
+		return FilePath;
+	}
+
+	public static File[] EstablishFileList(String FilePath) {
+		File f = new File(FilePath);
 		
-		NodeList nList = doc.getElementsByTagName("Login");
-
-		String[] LoginInfo = new String[2];
-
-		for (int temp = 0; temp < nList.getLength(); temp++) {
-			Node nNode = nList.item(temp);
-			if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-				Element eElement = (Element) nNode;
-
-				Node username = eElement.getElementsByTagName("Username").item(0);
-				LoginInfo[0] = username.getTextContent();
-
-				Node password = eElement.getElementsByTagName("Password").item(0);
-				LoginInfo[1] = password.getTextContent();
+		File[] fileN = f.listFiles();
+		File[] fileNames = new File[fileN.length-1];
+		int txtCatch = 0;
+		for (int i = 0; i < fileN.length; i++) {
+			if (!fileN[i].getName().equals("ReadMeDownloads.txt")) {
+				fileNames[txtCatch] = fileN[i];
+				txtCatch++;
 			}
 		}
-		//PrintList(LoginInfo);
-
-		return LoginInfo;
-	}  
+		return fileNames;
+	}
 	
-	public static void PrintList(String[] input) throws Exception {
-		int InpLength = input.length;
-		for (int j = 0; j< InpLength; j++) {
-			System.out.println(input[j]+", ");
-		}
-	}
-
-	public static void PrintList(String[][] input) throws Exception {
-
-		int InpLength = input.length;
-		int InpDepth = input[0].length;
-
-		for (int i = 0; i<InpLength; i++) {
-			System.out.print(i + ": ");
-			for (int j = 0; j<InpDepth; j++) {
-				System.out.print(input[i][j]+", ");
-			}
-			System.out.println();
-		}
-	}
-
-	public static String[][] SearchforAttributeData(String[][] data, String[] SearchParamaters, int dataLimit) throws Exception {
+	public static String[][] SearchforAttributeData(String[][] data, String[] SearchParamaters, int dataLimit){
 
 		int Length = data[0].length;
 		//System.out.println(Length);
@@ -490,57 +410,80 @@ public class App
 		return newList;
 	}
 
-	public static String GetTime() throws Exception {
+	public static void PrintList(String[][] input) {
+
+		int InpLength = input.length;
+		int InpDepth = input[0].length;
+
+		for (int i = 0; i<InpLength; i++) {
+			System.out.print(i + ": ");
+			for (int j = 0; j<InpDepth; j++) {
+				System.out.print(input[i][j]+", ");
+			}
+			System.out.println();
+		}
+	}
+
+	public static void PrintList(String[] input) {
+		int InpLength = input.length;
+		for (int j = 0; j< InpLength; j++) {
+			System.out.print(input[j]+", ");
+		}
+	}
+
+	public static String GetTime() {
 		DateTimeFormatter Format = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
 		LocalDateTime current = LocalDateTime.now();
 		//System.out.println(Format.format(current));
 		return (Format.format(current));
 	}
-  
-	public static void WriteToSQL(String TableName, String[][] data, String[] SQLLogin) throws Exception {
-		try ( Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" 
-				+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true" 
-				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
-		Statement stmt = conn.createStatement();) 
-		{
+	
+	public static void WriteToSQL(String TableName, String[][] data) throws Exception {
+		try (
+				Connection conn = DriverManager
+						.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" + "?user=testuser"
+								+ "&password=password" + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true"
+								+ "&useSSL=true");
+				Statement stmt = conn.createStatement();) {
 
 			String DropTable, CreateTable, Statement;
+
 			DropTable = "DROP TABLE IF EXISTS " + TableName + ";";
 			
 			int Limit = data[0].length;
 
 			String[] TagName = new String[Limit];
-			for(int i = 0;i<Limit;i++) {
+			for(int i = 0;i<Limit;i++){
 				TagName[i] = data[0][i];
 			}
 
 			CreateTable = "CREATE TABLE " + TableName + " (" + TagName[0] + " VARCHAR(255) PRIMARY KEY, ";
 
-			for (int j = 0; j < TagName.length - 1; j++) {// creates the SWL table based on the number of strings in TagName
+			for (int j = 0; j < TagName.length - 1; j++) // creates the SQL table based on the number of strings in TagName
+			{
 				CreateTable = CreateTable + TagName[j + 1] + " VARCHAR(255)";
 				if (j != TagName.length - 2)
 					CreateTable = CreateTable + ", ";
 			}
 			CreateTable = CreateTable + ")";
-			//System.out.println(CreateTable + "\n" + DropTable);
+			System.out.println(CreateTable + "\n" + DropTable);
 
 			stmt.execute(DropTable);
 			stmt.execute(CreateTable);
 
-			//System.out.println("Finished dropping and creating tables.");
-
 			Statement = "INSERT INTO " + TableName + " VALUES (";
-			for (int j = 1; j < TagName.length; j++) {// creates the Prepared Statement based on the number of strings in TagName
+			for (int j = 1; j < TagName.length; j++) // creates the Prepared Statement based on the number of strings in TagName
+			{
 				Statement = Statement + "?, ";
 			}
-
 			Statement = Statement + "?)";
+
 			PreparedStatement preparedStatement = conn.prepareStatement(Statement);
 
 			for (int i = 0; i < data.length; i++) {
 				for (int j = 0; j < Limit; j++) {
-					preparedStatement.setString(j+1, data[i][j]); 
-					// sets the Prepared String a number of times equal to the amount of strings in TagName
+					preparedStatement.setString(j+1, data[i][j]); // sets the Prepared String a number of times equal
+																	// to the amount of strings in TagName
 				}
 				//System.out.println(preparedStatement);
 				preparedStatement.execute();
@@ -549,11 +492,23 @@ public class App
 		}
 	}
 
-    public static void WriteToExcel(String DataWanted, String[] Table, XSSFWorkbook workbook, String[] SQLLogin) throws Exception {
-		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" 
-			+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true" 
-			+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
-			Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
+	public static void WriteToExcel(String DataWanted, String[] Table, XSSFWorkbook workbook)
+			throws Exception {
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" +
+				"?user=testuser" + "&password=password" + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true"
+				+ "&useSSL=true");
+				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
+
+			// XSSFSheet spreadsheet = workbook.createSheet("Research Data; " + location);
+			// // spreadsheet object
+			/*int sheetNum = 0;
+			for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+				if (workbook.getSheetAt(i).getSheetName().equals(location)) {
+					workbook.removeSheetAt(i);
+					sheetNum = i;
+					i--;
+				}
+			} */
 
 			XSSFSheet spreadsheet = workbook.createSheet("Data");
 			XSSFRow row; // creating a row object
