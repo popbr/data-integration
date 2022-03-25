@@ -24,4 +24,8 @@ target/**
 */*/*/*/target/**
 */*/*/*/*/target/**
 
+!*/test.xml
+!*/test.xml
+!*/*/test.xml
+!*/*/*/test.xml
 !*/*/*/*/test.xml
