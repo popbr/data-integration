@@ -1,0 +1,6 @@
+<Inputs>
+	<Input id= "English">
+		<Opener>Hello</Opener>
+		<Closer>World</Closer>
+	</Input>
+</Inputs>
