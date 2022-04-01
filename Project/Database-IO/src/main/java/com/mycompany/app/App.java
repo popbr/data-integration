@@ -11,6 +11,7 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.openxml4j.opc.OPCPackage;
 
 import java.util.Map;
 import java.util.Set;
@@ -58,6 +59,7 @@ public class App
             String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAMEs" };
 			String[] tsvTagList = { "School_Name", "Location", "MD_or_DO", "Type", "Average_GPA",
 				"Average_MCAT", "Total_Applicants", "Class_size" };
+			String[] xlsTagList = {"School_Name","Type","State"};
             String[] Search = {"Medical University of South Carolina", "ORG_NAME"};
 			tsvTagList = null;
 
@@ -67,10 +69,12 @@ public class App
                 source = fileNames[i].getName();
 				if (fType.equals("xml"))
 					ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, Search, source, SQLLogin);
-                else if (fType.equals("csv"))
-                	Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, Search, source, SQLLogin);
-				else if (fType.equals("tsv"))
-					Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source, SQLLogin);
+                else if (fType.equals("csv")) 
+                	Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, Search, source, SQLLogin); 
+				else if (fType.equals("tsv")) 
+					Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source, SQLLogin); 
+				else if (fType.equals("xlsx"))
+					ParsefromExcel(fileNames[i].getPath(), Table[i], xlsTagList, null, source, SQLLogin);
             }
         
         	WriteToExcel("*", Table, workbook, SQLLogin);
@@ -254,13 +258,13 @@ public class App
 			SearchData = AddTagAndData(SearchData, "Source", source);
 			SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime());
 			//PrintList(SearchData);
-			WriteToSQL(Table, SearchData, SQLLogin);
+			WriteToSQL(Table, SearchData, SQLLogin, null);
 		} 
 		else {
 			//data = AddTagAndData(data, "Source", source);
 			//data = AddTagAndData(data, "Time_Retrieved", GetTime());
 			//PrintList(data);
-			WriteToSQL(Table, data, SQLLogin);
+			WriteToSQL(Table, data, SQLLogin, null);
 		}
 
 		txtFieldsLine.close();
@@ -268,16 +272,18 @@ public class App
 		//txtFields.close();
 	}
 
-	public static void ParsefromExcel(String ExcelLocation, String Table, String[] TagList, String[] SQLLogin) throws Exception {
+	public static void ParsefromExcel(String ExcelLocation, String Table, String[] TagList, String Search[], String source, String[] SQLLogin) throws Exception {
 		try {
-
-			// FileInputStream inputStream = new FileInputStream(new File(ExcelLocation));
-			File inputFile = new File(ExcelLocation);
-			XSSFWorkbook ParsingWorkbook = new XSSFWorkbook(); // po0ssible bug sol: change "ParsingWorkbook" with
-																// "workbook"
+			//String WorkbookName = ExcelLocation.getName();
+			OPCPackage pkg = OPCPackage.open(new File(ExcelLocation));
+			XSSFWorkbook ParsingWorkbook = new XSSFWorkbook(pkg);
 			XSSFSheet ParsingSheet = ParsingWorkbook.getSheetAt(0);
 
 			int Limit = 50 + 1;
+			int foundLimit = ParsingSheet.getLastRowNum()+1; //Since Excel starts at 1, and this program starts at 0, this will make sure the last row isn't skipped over
+			if (foundLimit > Limit) // This checks if the given limit is greater than the max amount of rows in the sheet.
+				Limit = foundLimit; // If so, then the limit given is changed to the max amount of rows in a sheet
+			//System.out.println(Limit);
 
 			int[] TagIndex = new int[TagList.length];
 			String[][] data = new String[Limit][TagList.length];
@@ -286,36 +292,45 @@ public class App
 				data[0][i] = TagList[i];
 			}
 
-			int columnNum = ParsingSheet.getRow(0).getLastCellNum(); // gets the number of columnsin the header
+			//PrintList(data);
 
+			int columnNum = ParsingSheet.getRow(0).getLastCellNum(); // gets the number of columns in the header
+			
 			XSSFRow rowHeader = ParsingSheet.getRow(0);
 			XSSFCell Headercell;
+			String cellValue = "";
+
 			for (int j = 0; j < columnNum; j++) {
 				Headercell = rowHeader.getCell(j);
-				String KellValue = Headercell.getStringCellValue();
-				for (int i = 0; i < Limit; i++) {
-					if (TagList[i].equalsIgnoreCase(KellValue)) { // This determines at what index the tags are located
-																	// at for more precise searching
+				cellValue = Headercell.getStringCellValue();
+				for (int i = 0; i < TagList.length; i++) {
+					if (TagList[i].equalsIgnoreCase(cellValue)) { // This determines at what index the tags are located at for more precise searching
 						TagIndex[i] = j;
 					}
 				}
-			} // As a fun note, I've been bug testing this for so long that the word "cell"
-				// looks madeup now.
+			} // As a fun note, I've been bug testing this for so long that the word "cell" looks madeup now.
 
 			// data[i+1][TagName] = cell.toString(row.getCell(TagIndex[TagName]));
 			// data[i+1][TagName] = cellToString(row.getCell(TagIndex[TagName]));
 			// data[i+1][TagName] = row.getStringCellValue(row.getCell(TagIndex[TagName]);
 			XSSFCell DataCell;
+			XSSFRow row;
+			cellValue = "";
 			for (int TagName = 0; TagName < TagList.length; TagName++) {
 				for (int i = 1; i < Limit; i++) {
-					XSSFRow row = ParsingSheet.getRow(i);
-
+					row = ParsingSheet.getRow(i);
 					DataCell = row.getCell(TagIndex[TagName]);
-					data[i + 1][TagName] = DataCell.getStringCellValue();
+					cellValue = DataCell.getStringCellValue();
+
+					data[i][TagName] = cellValue;
+					
 				}
 			}
 
-			WriteToSQL(Table, data, SQLLogin);
+			//PrintList(data);
+
+			int[] PKAddition = {1, 2};
+			WriteToSQL(Table, data, SQLLogin, PKAddition);
 
 		}
 
@@ -360,14 +375,14 @@ public class App
 				PrintList(SearchData);
 				SearchData = AddTagAndData(SearchData, "Source", source);
 				SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime());
-				WriteToSQL(Table, SearchData, SQLLogin);
+				WriteToSQL(Table, SearchData, SQLLogin, null);
 			} 
 			else 
 			{
 				data = AddTagAndData(data, "Source", source);
 				data = AddTagAndData(data, "Time_Retrieved", GetTime());
 				//PrintList(data);
-				WriteToSQL(Table, data, SQLLogin);
+				WriteToSQL(Table, data, SQLLogin, null);
 			}
 
 			//WriteToSQL(Table, data, SQLLogin); //WARNING: ParsefromXML has NOT been tested with a search parameter.  
@@ -406,6 +421,13 @@ public class App
 
 		return LoginInfo;
 	}  
+	
+	public static void PrintList(int[] input) throws Exception {
+		int InpLength = input.length;
+		for (int j = 0; j< InpLength; j++) {
+			System.out.println(input[j]+", ");
+		}
+	}
 	
 	public static void PrintList(String[] input) throws Exception {
 		int InpLength = input.length;
@@ -497,7 +519,7 @@ public class App
 		return (Format.format(current));
 	}
   
-	public static void WriteToSQL(String TableName, String[][] data, String[] SQLLogin) throws Exception {
+	public static void WriteToSQL(String TableName, String[][] data, String[] SQLLogin, int[] PKAdditions) throws Exception {
 		try ( Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" 
 				+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true" 
 				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
@@ -514,18 +536,26 @@ public class App
 				TagName[i] = data[0][i];
 			}
 
-			CreateTable = "CREATE TABLE " + TableName + " (" + TagName[0] + " VARCHAR(255) PRIMARY KEY, ";
+			CreateTable = "CREATE TABLE " + TableName + " (" + TagName[0] + " VARCHAR(255), ";
 
 			for (int j = 0; j < TagName.length - 1; j++) {// creates the SWL table based on the number of strings in TagName
 				CreateTable = CreateTable + TagName[j + 1] + " VARCHAR(255)";
 				if (j != TagName.length - 2)
 					CreateTable = CreateTable + ", ";
 			}
-			CreateTable = CreateTable + ")";
+			if (PKAdditions != null) {
+				String AddPK = TagName[0];
+				for (int num : PKAdditions) { // This can't handle adding more than 1 PK right now
+					AddPK += ", " + TagName[num];
+					//System.out.println(AddPK);
+				}
+			CreateTable = CreateTable + ", PRIMARY KEY (" + AddPK + "))";
 			//System.out.println(CreateTable + "\n" + DropTable);
 
 			stmt.execute(DropTable);
 			stmt.execute(CreateTable);
+			
+			}
 
 			//System.out.println("Finished dropping and creating tables.");
 
@@ -537,6 +567,7 @@ public class App
 			Statement = Statement + "?)";
 			PreparedStatement preparedStatement = conn.prepareStatement(Statement);
 
+
 			for (int i = 0; i < data.length; i++) {
 				for (int j = 0; j < Limit; j++) {
 					preparedStatement.setString(j+1, data[i][j]); 
@@ -545,6 +576,7 @@ public class App
 				//System.out.println(preparedStatement);
 				preparedStatement.execute();
 			}
+
 			conn.close();
 		}
 	}
