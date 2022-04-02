@@ -57,8 +57,7 @@ public class App
             String source = "";
             String[] Table = new String[fileNames.length];
             String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAMEs" };
-			String[] tsvTagList = { "School_Name", "Location", "MD_or_DO", "Type", "Average_GPA",
-				"Average_MCAT", "Total_Applicants", "Class_size" };
+			String[] tsvTagList = { "School_Name", "Location", "MD_or_DO" };
 			String[] xlsTagList = {"School_Name","Type","State"};
             String[] Search = {"Medical University of South Carolina", "ORG_NAME"};
 			tsvTagList = null;
@@ -76,8 +75,8 @@ public class App
 				else if (fType.equals("xlsx"))
 					ParsefromExcel(fileNames[i].getPath(), Table[i], xlsTagList, null, source, SQLLogin);
             }
-        
-        	WriteToExcel("*", Table, workbook, SQLLogin);
+			FindSimilarRelation("xlsx1", "tsv1", "School_Name", SQLLogin, workbook);
+        	//WriteToExcel("*", Table, workbook, SQLLogin);
         }
         System.out.println("Finished");
 		System.exit(0);
@@ -254,7 +253,7 @@ public class App
 
     	if(Search != null) {
 			String[][] SearchData = SearchforAttributeData(data, Search, Limit);
-			PrintList(SearchData);
+			//PrintList(SearchData);
 			SearchData = AddTagAndData(SearchData, "Source", source);
 			SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime());
 			//PrintList(SearchData);
@@ -543,8 +542,10 @@ public class App
 				if (j != TagName.length - 2)
 					CreateTable = CreateTable + ", ";
 			}
+
+			String AddPK = TagName[0];
+
 			if (PKAdditions != null) {
-				String AddPK = TagName[0];
 				for (int num : PKAdditions) { // This can't handle adding more than 1 PK right now
 					AddPK += ", " + TagName[num];
 					//System.out.println(AddPK);
@@ -553,11 +554,8 @@ public class App
 			//System.out.println(CreateTable + "\n" + DropTable);
 
 			stmt.execute(DropTable);
-			stmt.execute(CreateTable);
-			
+			stmt.execute(CreateTable);			
 			}
-
-			//System.out.println("Finished dropping and creating tables.");
 
 			Statement = "INSERT INTO " + TableName + " VALUES (";
 			for (int j = 1; j < TagName.length; j++) {// creates the Prepared Statement based on the number of strings in TagName
@@ -565,6 +563,8 @@ public class App
 			}
 
 			Statement = Statement + "?)";
+			System.out.println(Statement + "\n");
+			PrintList(TagName);
 			PreparedStatement preparedStatement = conn.prepareStatement(Statement);
 
 
@@ -573,7 +573,7 @@ public class App
 					preparedStatement.setString(j+1, data[i][j]); 
 					// sets the Prepared String a number of times equal to the amount of strings in TagName
 				}
-				//System.out.println(preparedStatement);
+				System.out.println(preparedStatement);
 				preparedStatement.execute();
 			}
 
@@ -581,7 +581,55 @@ public class App
 		}
 	}
 
-    public static void WriteToExcel(String DataWanted, String[] Table, XSSFWorkbook workbook, String[] SQLLogin) throws Exception {
+    public static void FindSimilarRelation(String Table1, String Table2, String Attribute, String[] SQLLogin, XSSFWorkbook workbook) throws Exception {
+		try ( Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" 
+				+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true" 
+				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
+		Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) 
+		{
+		
+			XSSFSheet spreadsheet = workbook.createSheet("SimilarData");
+			XSSFRow row; // creating a row object
+
+			System.out.println("Writing Similar Relations to Excel.");
+
+			int rowNumber = 0;
+			row = spreadsheet.createRow(0);
+
+			String Statement = "SELECT " + Attribute + " FROM " + Table1 + " INTERSECT SELECT " + Attribute + " FROM " + Table2;
+			ResultSet rset = stmt.executeQuery(Statement);
+
+			ResultSetMetaData rsmd = rset.getMetaData();
+				int columnsNumber = rsmd.getColumnCount();
+				String columnValue = "";
+				
+				String ColumnName = rsmd.getColumnName(1);
+
+				if(rowNumber > 0 && true) { //this create a line between entries
+				row = spreadsheet.createRow(rowNumber++);
+				}
+				rset.last();
+
+				do {
+					for (int i = 1; i <= columnsNumber; i++) // this loop populates a cell with data
+					{
+						columnValue = rset.getString(i);
+						if (rsmd.getColumnName(i) == rsmd.getColumnName(1))
+						{ // this detects if the column at the current is equal to the first entry. If so, that means we need a new row.
+							row = spreadsheet.createRow(rowNumber++); // This line create a new row
+						}
+						//System.out.println(columnValue);
+						row.createCell(i).setCellValue(columnValue);
+					}
+					FileOutputStream out = new FileOutputStream(new File("GFGsheet.xlsx")); // C:\Users\sleep\Desktop\Excel
+					workbook.write(out);
+				} while (rset.previous());
+		
+			conn.close();
+		}
+	}
+	
+	public static void WriteToExcel(String DataWanted, String[] Table, XSSFWorkbook workbook, String[] SQLLogin) throws Exception {
 		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" 
 			+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true" 
 			+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
