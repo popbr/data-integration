@@ -7,3 +7,9 @@ This project is authored by Dr. Clément Aubert and Noah Sleeper for the use in 
 This project may be downloaded for the purposes of academic research or inquery, but please note that this project is only a tool for the collection and examination of databases and the data within said databases. This project and its authors do not claim ownership over any files downloaded or any data handled by the project, nor do they claim 100% accuracy in conclusions drawn from any results user may recieve.
 
 This project relies on the use of Microsoft Excel, mySQL, Maven, and Apache IO in order to function. All use of these programs/entities falls under fair use.
+
+## Data Integration for the Study of Outstanding Productivity in Biomedical Research
+
+The purpose, motivation and challenges behind this project are presented in
+
+C. Aubert, A. Balas, T. Townsend, N. Sleeper, C. Tran, _Data integration for the study of outstanding productivity in biomedical research_, in: Proceedings of the 15th International Conference on [Current Research Information Systems (Cris2022)](https://cris2022.srce.hr/), 2022. <http://hdl.handle.net/11366/1987>.
