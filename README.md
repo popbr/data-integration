@@ -1,4 +1,4 @@
-# *MNS_Markdown*
+# *Data Integration for the Study of Outstanding Productivity in Biomedical Research Version 1.0*
 ## A repo for the Honors Thesis/Prospectus Project
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
