@@ -1,3 +1,7 @@
+# Testing Your Installation
+
+This programs serves to test if your set-up match our requirements.
+
 Test User: DBTestUser
      Password: wali0e^23
 
