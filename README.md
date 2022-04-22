@@ -1,5 +1,10 @@
 # *Data Integration for the Study of Outstanding Productivity in Biomedical Research*
 
+This repository serves to share two programs:
+
+- [Installation_Test](Installation_Test) helps in assessing whenever your set-up is correctly configured to run our main program,
+- [Project/Database-IO](Project/Database-IO) is our main program, whose purpose is to process a variety of data sources (`xml`, `cvs`, `json`, …), insert relevant attributes into an SQL database, and then output the resulting data into an `xml` file.
+
 ## A repo for the Honors Thesis/Prospectus Project
 
 This project is authored by Dr. [Clément Aubert](https://spots.augusta.edu/caubert/) and Noah Sleeper for the use in Mr. Sleeper's Honors Thesis at *[Augusta University](https://www.augusta.edu/)*. It is intended to work with Dr. [Andrew Balas](https://www.augusta.edu/faculty/directory/view.php?id=ebalas)'s research at Augusta University in looking at ways to generate qualitative measures of academic researchers/instutions/entities.
