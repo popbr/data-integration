@@ -13,3 +13,14 @@ This project relies on the use of Microsoft Excel, mySQL, Maven, and Apache IO i
 The purpose, motivation and challenges behind this project are presented in
 
 C. Aubert, A. Balas, T. Townsend, N. Sleeper, C. Tran, _Data integration for the study of outstanding productivity in biomedical research_, in: Proceedings of the 15th International Conference on [Current Research Information Systems (Cris2022)](https://cris2022.srce.hr/), 2022. <http://hdl.handle.net/11366/1987>.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+## Using:
+
+- MySQL Server 8.0
+
+- mySQL Workbench 8.0
+
+- For a full list of dependencies, please look at the POM.xml file of the downloaded program
+
