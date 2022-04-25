@@ -27,5 +27,5 @@ C. Aubert, A. Balas, T. Townsend, N. Sleeper, C. Tran, _Data integration for the
 - MySQL Server 8.0
 - mySQL Workbench 8.0
 
-For a full list of dependencies, please look at the [POM.xml](Project/Database-IO/pom.xml) file.
+For a full list of dependencies, please have a look at the [POM.xml](Project/Database-IO/pom.xml) file.
 
