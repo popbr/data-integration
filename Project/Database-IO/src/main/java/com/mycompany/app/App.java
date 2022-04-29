@@ -56,30 +56,31 @@ public class App
             String fType;
             String source = "";
             String[] Table = new String[fileNames.length]; //This will store the Table names for SQL information retrieval 
-            String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAMEs" };
+            String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAME" };
 			String[] tsvTagList = { "School_Name", "Location", "MD_or_DO" };
 			String[] xlsTagList = {"School_Name","Type","State"};
             String[] Search = {"Medical University of South Carolina", "ORG_NAME"};
-			tsvTagList = null;
+			int[] PKAddition = {1, 2}; // This denotes what additional Primary Keys there are for a file, given by the position in the input statements (index of 1, 2, etc...)
+			//tsvTagList = null;
 
             for (int i = 0; i < fileNames.length; i++) { //Goes through the list of files and parses from each of them, delegating to the appropriate method based on the file extension
                 fType = FilenameUtils.getExtension(fileNames[i].getName()); // Getter for file extension of the current file
                 Table[i] = fType + (i + 1); // this stores the tables names in a retrievable list.
                 source = fileNames[i].getName(); //Getter for the source of the data file
 				if (fType.equals("xml"))
-					ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, Search, source, SQLLogin);
+					ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, null, source, SQLLogin, null);
                 else if (fType.equals("csv")) 
-                	Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, Search, source, SQLLogin); 
+                	Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, Search, source, SQLLogin, null); 
 				else if (fType.equals("tsv")) 
-					Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source, SQLLogin); 
+					Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source, SQLLogin, PKAddition); 
 				else if (fType.equals("xlsx"))
-					ParsefromExcel(fileNames[i].getPath(), Table[i], xlsTagList, null, source, SQLLogin);
+					ParsefromExcel(fileNames[i].getPath(), Table[i], xlsTagList, null, source, SQLLogin, PKAddition);
             }
-			FindSimilarRelation("xlsx1", "tsv1", "School_Name", SQLLogin, workbook);
+			FindSimilarRelation("xlsx1", "tsv2", "School_Name", SQLLogin, workbook);
         	//WriteToExcel("*", Table, workbook, SQLLogin);
         }
         System.out.println("Finished");
-		System.exit(0); //Exits the program entirely, without it the program will stallfor ~15 seconds once "finished"
+		System.exit(0); //Exits the program entirely, without it the program will stall for ~15 seconds once "finished"
         System.out.println("\n");
 
     } // ADD NEXT: SQL interaction and test putting a datalist into Excel for output.
@@ -114,7 +115,7 @@ public class App
 		return fileNames;
 	}
 
-	public static void Parsefromtxt(String txtlocation, String Table, String Delim, String[] TagList, String Search[], String source, String[] SQLLogin) throws Exception{
+	public static void Parsefromtxt(String txtlocation, String Table, String Delim, String[] TagList, String Search[], String source, String[] SQLLogin, int[] PKAddition) throws Exception{
     	//This parses information from a txt file, typically a TSV or CSV
 		Scanner txtFile = new Scanner(new File(txtlocation)); //Opens a text scanner on the file in question
 
@@ -261,13 +262,13 @@ public class App
 			SearchData = AddTagAndData(SearchData, "Source", source); //Adds a source attribute
 			SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime());//Adds a Time retrieved attribute
 			//PrintList(SearchData);
-			WriteToSQL(Table, SearchData, SQLLogin, null); //Inputs the searched list into SQL
+			WriteToSQL(Table, SearchData, SQLLogin, PKAddition); //Inputs the searched list into SQL
 		} 
 		else {
 			//data = AddTagAndData(data, "Source", source);
 			//data = AddTagAndData(data, "Time_Retrieved", GetTime());
 			//PrintList(data);
-			WriteToSQL(Table, data, SQLLogin, null); //Inputs the whole data list into SQL
+			WriteToSQL(Table, data, SQLLogin, PKAddition); //Inputs the whole data list into SQL
 		}
 
 		txtFieldsLine.close();
@@ -275,7 +276,7 @@ public class App
 		//txtFields.close();
 	}
 
-	public static void ParsefromExcel(String ExcelLocation, String Table, String[] TagList, String Search[], String source, String[] SQLLogin) throws Exception {
+	public static void ParsefromExcel(String ExcelLocation, String Table, String[] TagList, String Search[], String source, String[] SQLLogin, int[] PKAddition) throws Exception {
 		try {
 			//String WorkbookName = ExcelLocation.getName();
 			OPCPackage pkg = OPCPackage.open(new File(ExcelLocation)); // These lines find the Excel file, workbook, and work sheet
@@ -328,7 +329,7 @@ public class App
 			}
 
 			//PrintList(data);
-			int[] PKAddition = {1, 2}; //Ignore, this is for testing 
+			
 			WriteToSQL(Table, data, SQLLogin, PKAddition); //Writes the data gathered to SQL
 
 		}
@@ -338,7 +339,7 @@ public class App
 		}
 	}
 
-	public static void ParsefromXML(String Location, String Table, String[] TagList, String Search[], String source, String[] SQLLogin) throws Exception {
+	public static void ParsefromXML(String Location, String Table, String[] TagList, String Search[], String source, String[] SQLLogin, int[] PKAddition) throws Exception {
 		try {
 			File inputFile = new File(Location); //This gets the file's location, starts up the XML reader, and normalizes the file
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -353,13 +354,11 @@ public class App
 				data[0][i] = TagList[i];
 			}
 
-			/*
-				NOTE: XML IS STILL A BIT IFFY ON DATA RETRIEVAL, SO I AM NOT DOCUMENTING THIS METHOD BECAUSE IT IS GOING TO CHANGE IN THE FUTURE
-				FOR AN EXAMPLE OF XML PARSING DONE RIGHT, SKIP TO THE GETLOGININFO METHOD BELOW
-			*/
-
 			NodeList nList = doc.getElementsByTagName("row");
 			System.out.println("Start Parsing from XML");
+
+			Node dataElement;
+
 			for (int TagName = 0; TagName < TagList.length; TagName++) {
 				//System.out.println(TagList[TagName]);
 				for (int temp = 1; temp < Limit; temp++) // temp < nList.getLength()
@@ -367,13 +366,16 @@ public class App
 					Node nNode = nList.item(temp);
 					if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 						Element eElement = (Element) nNode;
-						data[temp][TagName] = eElement.getElementsByTagName(TagList[TagName]).item(0).getTextContent(); //maybe encapsul this in a try catch?
-						// System.out.println(data);
+
+						dataElement = eElement.getElementsByTagName(TagList[TagName]).item(0);
+						if (dataElement != null) {
+							data[temp][TagName] = dataElement.getTextContent(); //maybe encapsul this in a try catch?
+						} else data[temp][TagName] = null;					
 					}
-					// do not enable this, you will increase your runtime greatly
 				}
 			}
-
+			PrintList(data);
+			
 			if(Search != null) { //If no search item was passed (like a specific school), then the program puts the entire datalist into SQL. Else, the program combs through the data for that search item, and passed only that data to SQL
 				String[][] SearchData = SearchforAttributeData(data, Search, Limit);
 				PrintList(SearchData);
@@ -381,15 +383,14 @@ public class App
 				SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime()); //Adds a Time retrieved attribute
 				WriteToSQL(Table, SearchData, SQLLogin, null); //Inputs the searched list into SQL
 			} 
+
 			else 
 			{
 				data = AddTagAndData(data, "Source", source); //Adds a source attribute
 				data = AddTagAndData(data, "Time_Retrieved", GetTime()); //Adds a Time retrieved attribute
 				//PrintList(data);
 				WriteToSQL(Table, data, SQLLogin, null); //Inputs the whole data list into SQL
-			}
-
-			//WriteToSQL(Table, data, SQLLogin); //WARNING: ParsefromXML has NOT been tested with a search parameter.  
+			} 
 		}
 
 		catch (Exception e) {
@@ -454,6 +455,16 @@ public class App
 		}
 	}
 
+	public static String[][] FillEmpty(String[][] input) throws Exception {
+		for (int i = 0; i<input.length; i++) {
+			for (int j = 0; j< input[0].length; j++) {
+				//if(input[i][j].equals("") || input[i][j].equals("\t")) input[i][j].equals("No_Data_Found");
+				if(input[i][j].isEmpty()) input[i][j].equals("No_Data_Found");
+			}
+		}
+		return input;
+	}
+	
 	public static String[][] SearchforAttributeData(String[][] data, String[] SearchParamaters, int dataLimit) throws Exception {
 		// Searches a passed array for the specific data in the array, and returns a new array of only that data
 
@@ -558,12 +569,12 @@ public class App
 					AddPK += ", " + TagName[num];
 					//System.out.println(AddPK);
 				}
+			}
 			CreateTable = CreateTable + ", PRIMARY KEY (" + AddPK + "))"; // This adds thoe PK attributes to the create Table command
 			//System.out.println(CreateTable + "\n" + DropTable);
 
 			stmt.execute(DropTable); //Drops the current table, if it exists
 			stmt.execute(CreateTable); // Creates the current table
-			}
 
 			Statement = "INSERT INTO " + TableName + " VALUES (";
 			for (int j = 1; j < TagName.length; j++) {// creates the Prepared Statement based on the number of strings in TagName
@@ -571,8 +582,8 @@ public class App
 			}
 
 			Statement = Statement + "?)"; // finishes the PS, and readies it for data to be added to it.
-			System.out.println(Statement + "\n");
-			PrintList(TagName);
+			//System.out.println(Statement + "\n");
+			//PrintList(TagName);
 			PreparedStatement preparedStatement = conn.prepareStatement(Statement);
 
 
@@ -581,7 +592,7 @@ public class App
 					preparedStatement.setString(j+1, data[i][j]); 
 					// sets the Prepared String a number of times equal to the amount of strings in TagName
 				}
-				System.out.println(preparedStatement);
+				//System.out.println(preparedStatement);
 				preparedStatement.execute();
 			}
 
@@ -602,35 +613,44 @@ public class App
 
 			int rowNumber = 0;
 			row = spreadsheet.createRow(0); // Creates a new row in the final Excel Sheet
+			String Table1Att = Table1 + "." + Attribute;
+			String Table2Att = Table2 + "." + Attribute;
+			String Table2Id = "data2";
+			String Table2DataId = Table2Id + "." + Attribute;
 
-			String Statement = "SELECT " + Attribute + " FROM " + Table1 + " INTERSECT SELECT " + Attribute + " FROM " + Table2;
+			//String Statement "SELECT " + Table1Att + " FROM " + Table1 + " INTERSECT SELECT " + Table2 + " " + Table2Att + " ON " + Table2 + ";";
+			String Statement = "SELECT " + Table1Att + " FROM " + Table1 + " INNER JOIN " + Table2 + " " + Table2Id + " ON " + Table2DataId + ";";
+			//String Statement = "SELECT " + Table1Att + " FROM " + Table1 + " IN ( SELECT " + Attribute + " FROM " + Table2 + ");";
+			// "SELECT TABLE1.ATTRIBUTE FROM TABLE1 INNER JOIN Table2 Table2DataID ON Table2.Attribute"
+			// "SELECT TABLE1.ATTRIBUTE FROM TABLE IN (SELECT ATTRIBUTE FROM TABLE2);"
+			//Does not work, need to do INNER JOIN instead of intersect. Look at the SO page left from Dr Aubert
 			ResultSet rset = stmt.executeQuery(Statement); // Requests the attribute/Attribute Data in Table 1 that also appears in Table 2
 
 			ResultSetMetaData rsmd = rset.getMetaData(); // This parses through the data and outputs in to the Excel sheet, row by row
-				int columnsNumber = rsmd.getColumnCount();
-				String columnValue = "";
-				
-				String ColumnName = rsmd.getColumnName(1);
+			int columnsNumber = rsmd.getColumnCount();
+			String columnValue = "";
+			
+			String ColumnName = rsmd.getColumnName(1);
 
-				if(rowNumber > 0 && true) { //this create a line between entries
-				row = spreadsheet.createRow(rowNumber++);
-				}
-				rset.last();
+			if(rowNumber > 0 && true) { //this create a line between entries
+			row = spreadsheet.createRow(rowNumber++);
+			}
+			rset.last();
 
-				do {
-					for (int i = 1; i <= columnsNumber; i++) // this loop populates a cell with data
-					{
-						columnValue = rset.getString(i);
-						if (rsmd.getColumnName(i) == rsmd.getColumnName(1))
-						{ // this detects if the column at the current is equal to the first entry. If so, that means we need a new row.
-							row = spreadsheet.createRow(rowNumber++); // This line create a new row
-						}
-						//System.out.println(columnValue);
-						row.createCell(i).setCellValue(columnValue);
+			do {
+				for (int i = 1; i <= columnsNumber; i++) // this loop populates a cell with data
+				{
+					columnValue = rset.getString(i);
+					if (rsmd.getColumnName(i) == rsmd.getColumnName(1))
+					{ // this detects if the column at the current is equal to the first entry. If so, that means we need a new row.
+						row = spreadsheet.createRow(rowNumber++); // This line create a new row
 					}
-					FileOutputStream out = new FileOutputStream(new File("GFGsheet.xlsx")); // C:\Users\sleep\Desktop\Excel
-					workbook.write(out);
-				} while (rset.previous());
+					//System.out.println(columnValue);
+					row.createCell(i).setCellValue(columnValue);
+				}
+				FileOutputStream out = new FileOutputStream(new File("GFGsheet.xlsx")); // C:\Users\sleep\Desktop\Excel
+				workbook.write(out);
+			} while (rset.previous());
 		
 			conn.close();
 		}
