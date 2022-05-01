@@ -617,12 +617,20 @@ public class App
 			String Table2Att = Table2 + "." + Attribute;
 			String Table2Id = "data2";
 			String Table2DataId = Table2Id + "." + Attribute;
+			String Statement;
 
-			//String Statement "SELECT " + Table1Att + " FROM " + Table1 + " INTERSECT SELECT " + Table2 + " " + Table2Att + " ON " + Table2 + ";";
-			String Statement = "SELECT " + Table1Att + " FROM " + Table1 + " INNER JOIN " + Table2 + " " + Table2Id + " ON " + Table2DataId + ";";
-			//String Statement = "SELECT " + Table1Att + " FROM " + Table1 + " IN ( SELECT " + Attribute + " FROM " + Table2 + ");";
-			// "SELECT TABLE1.ATTRIBUTE FROM TABLE1 INNER JOIN Table2 Table2DataID ON Table2.Attribute"
-			// "SELECT TABLE1.ATTRIBUTE FROM TABLE IN (SELECT ATTRIBUTE FROM TABLE2);"
+			//SStatement = "SELECT " + Table1Att + " FROM " + Table1 + " INTERSECT SELECT " + Table2 + " " + Table2Att + " ON " + Table2 + ";";
+				// "SELECT TABLE1.ATTRIBUTE FROM TABLE1 INTERSECT SELECT Table2 Table2DataID ON Table2.Attribute;"
+			//Statement = "SELECT " + Table1Att + " FROM " + Table1 + " INNER JOIN " + Table2 + " " + Table2Id + " ON " + Table2DataId + ";";
+				// "SELECT TABLE1.ATTRIBUTE FROM TABLE1 INNER JOIN Table2 Table2DataID ON Table2.Attribute;"
+			//Statement = "SELECT " + Table1Att + " FROM " + Table1 + " WHERE " + Table1Att + " IN ( SELECT " + Attribute + " FROM " + Table2 + ");";
+			Statement = "SELECT " + Table1Att + " FROM " + Table1 + " WHERE " + Table1Att + " IN ( SELECT " + Table2Att + " FROM " + Table2 + " WHERE " + Table2Att + " IS NOT NULL);";
+				// "SELECT TABLE1.ATTRIBUTE FROM TABLE WHERE TABLE1.ATTRIBUTE IN (SELECT TABLE2.ATTRIBUTE FROM TABLE2 WHERE TABLE2.ATTRIBUTE IS NOT NULL);"
+			//Statement = "SELECT " + Table1Att + " FROM " + Table1 + " IN ( SELECT " + Table2Att + " FROM " + Table2 + ");";
+				// "SELECT TABLE1.ATTRIBUTE FROM TABLE IN (SELECT ATTRIBUTE FROM TABLE2);"
+
+			//String Statement = "SELECT " + Table2Att + " FROM " + Table2 + ";";
+
 			//Does not work, need to do INNER JOIN instead of intersect. Look at the SO page left from Dr Aubert
 			ResultSet rset = stmt.executeQuery(Statement); // Requests the attribute/Attribute Data in Table 1 that also appears in Table 2
 
