@@ -60,24 +60,37 @@ public class App
 			String[] tsvTagList = { "School_Name", "Location", "MD_or_DO" };
 			String[] xlsTagList = {"School_Name","Type","State"};
             String[] Search = {"Medical University of South Carolina", "ORG_NAME"};
+			String[][] ParsingData;
 			int[] PKAddition = {1, 2}; // This denotes what additional Primary Keys there are for a file, given by the position in the input statements (index of 1, 2, etc...)
 			//tsvTagList = null;
+
+			CreateLinkageTable(SQLLogin);
 
             for (int i = 0; i < fileNames.length; i++) { //Goes through the list of files and parses from each of them, delegating to the appropriate method based on the file extension
                 fType = FilenameUtils.getExtension(fileNames[i].getName()); // Getter for file extension of the current file
                 Table[i] = fType + (i + 1); // this stores the tables names in a retrievable list.
                 source = fileNames[i].getName(); //Getter for the source of the data file
-				if (fType.equals("xml"))
-					ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, null, source, SQLLogin, null);
-                else if (fType.equals("csv")) 
-                	Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, Search, source, SQLLogin, null); 
-				else if (fType.equals("tsv")) 
-					Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source, SQLLogin, PKAddition); 
-				else if (fType.equals("xlsx"))
-					ParsefromExcel(fileNames[i].getPath(), Table[i], xlsTagList, null, source, SQLLogin, PKAddition);
+				if (fType.equals("xml")) {
+					ParsingData = ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, null, source, SQLLogin, null);
+					LinkTable(ParsingData);
+				}
+                else if (fType.equals("csv")) {
+                	ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, Search, source, SQLLogin, null); 
+					LinkTable(ParsingData);
+				}
+				else if (fType.equals("tsv")) {
+					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source, SQLLogin, PKAddition); 
+					LinkTable(ParsingData);
+				}
+				else if (fType.equals("xlsx")) {
+					ParsingData = ParsefromExcel(fileNames[i].getPath(), Table[i], xlsTagList, null, source, SQLLogin, PKAddition);
+					LinkTable(ParsingData);
+				}
             }
-			FindSimilarRelation("xlsx1", "tsv2", "School_Name", SQLLogin, workbook);
+			//FindSimilarRelation("xlsx1", "tsv2", "School_Name", SQLLogin, workbook);
         	//WriteToExcel("*", Table, workbook, SQLLogin);
+			
+			
         }
         System.out.println("Finished");
 		System.exit(0); //Exits the program entirely, without it the program will stall for ~15 seconds once "finished"
@@ -115,7 +128,7 @@ public class App
 		return fileNames;
 	}
 
-	public static void Parsefromtxt(String txtlocation, String Table, String Delim, String[] TagList, String Search[], String source, String[] SQLLogin, int[] PKAddition) throws Exception{
+	public static String[][] Parsefromtxt(String txtlocation, String Table, String Delim, String[] TagList, String Search[], String source, String[] SQLLogin, int[] PKAddition) throws Exception{
     	//This parses information from a txt file, typically a TSV or CSV
 		Scanner txtFile = new Scanner(new File(txtlocation)); //Opens a text scanner on the file in question
 
@@ -254,6 +267,8 @@ public class App
 
 		} while (txtFile.hasNextLine() && indexTracker < Limit);
 
+		txtFieldsLine.close();
+		txtFile.close();
    	 	//PrintList(data);
 
     	if(Search != null) { //If no search item was passed (like a specific school), then the program puts the entire datalist into SQL. Else, the program combs through the data for that search item, and passed only that data to SQL
@@ -263,20 +278,18 @@ public class App
 			SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime());//Adds a Time retrieved attribute
 			//PrintList(SearchData);
 			WriteToSQL(Table, SearchData, SQLLogin, PKAddition); //Inputs the searched list into SQL
+			return SearchData;
 		} 
 		else {
 			//data = AddTagAndData(data, "Source", source);
 			//data = AddTagAndData(data, "Time_Retrieved", GetTime());
 			//PrintList(data);
 			WriteToSQL(Table, data, SQLLogin, PKAddition); //Inputs the whole data list into SQL
+			return data;
 		}
-
-		txtFieldsLine.close();
-		txtFile.close();
-		//txtFields.close();
 	}
 
-	public static void ParsefromExcel(String ExcelLocation, String Table, String[] TagList, String Search[], String source, String[] SQLLogin, int[] PKAddition) throws Exception {
+	public static String[][] ParsefromExcel(String ExcelLocation, String Table, String[] TagList, String Search[], String source, String[] SQLLogin, int[] PKAddition) throws Exception {
 		try {
 			//String WorkbookName = ExcelLocation.getName();
 			OPCPackage pkg = OPCPackage.open(new File(ExcelLocation)); // These lines find the Excel file, workbook, and work sheet
@@ -331,7 +344,7 @@ public class App
 			//PrintList(data);
 			
 			WriteToSQL(Table, data, SQLLogin, PKAddition); //Writes the data gathered to SQL
-
+			return data;
 		}
 
 		catch (Exception e) {
@@ -339,7 +352,7 @@ public class App
 		}
 	}
 
-	public static void ParsefromXML(String Location, String Table, String[] TagList, String Search[], String source, String[] SQLLogin, int[] PKAddition) throws Exception {
+	public static String[][] ParsefromXML(String Location, String Table, String[] TagList, String Search[], String source, String[] SQLLogin, int[] PKAddition) throws Exception {
 		try {
 			File inputFile = new File(Location); //This gets the file's location, starts up the XML reader, and normalizes the file
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -359,7 +372,8 @@ public class App
 
 			Node dataElement;
 
-			for (int TagName = 0; TagName < TagList.length; TagName++) {
+			for (int TagName = 0; TagName < TagList.length; TagName++) 
+			{
 				//System.out.println(TagList[TagName]);
 				for (int temp = 1; temp < Limit; temp++) // temp < nList.getLength()
 				{
@@ -374,25 +388,27 @@ public class App
 					}
 				}
 			}
-			PrintList(data);
+			//PrintList(data);
 			
 			if(Search != null) { //If no search item was passed (like a specific school), then the program puts the entire datalist into SQL. Else, the program combs through the data for that search item, and passed only that data to SQL
-				String[][] SearchData = SearchforAttributeData(data, Search, Limit);
-				PrintList(SearchData);
-				SearchData = AddTagAndData(SearchData, "Source", source); //Adds a source attribute
-				SearchData = AddTagAndData(SearchData, "Time_Retrieved", GetTime()); //Adds a Time retrieved attribute
-				WriteToSQL(Table, SearchData, SQLLogin, null); //Inputs the searched list into SQL
+				data = SearchforAttributeData(data, Search, Limit);
+				//PrintList(data);
+				data = AddTagAndData(data, "Source", source); //Adds a source attribute
+				data = AddTagAndData(data, "Time_Retrieved", GetTime()); //Adds a Time retrieved attribute
+				WriteToSQL(Table, data, SQLLogin, null); //Inputs the searched list into SQL
+				return data;
 			} 
-
 			else 
 			{
 				data = AddTagAndData(data, "Source", source); //Adds a source attribute
 				data = AddTagAndData(data, "Time_Retrieved", GetTime()); //Adds a Time retrieved attribute
 				//PrintList(data);
 				WriteToSQL(Table, data, SQLLogin, null); //Inputs the whole data list into SQL
+				return data;
 			} 
+			
 		}
-
+		
 		catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -619,7 +635,7 @@ public class App
 			String Table2DataId = Table2Id + "." + Attribute;
 			String Statement;
 
-			//SStatement = "SELECT " + Table1Att + " FROM " + Table1 + " INTERSECT SELECT " + Table2 + " " + Table2Att + " ON " + Table2 + ";";
+			//Statement = "SELECT " + Table1Att + " FROM " + Table1 + " INTERSECT SELECT " + Table2 + " " + Table2Att + " ON " + Table2 + ";";
 				// "SELECT TABLE1.ATTRIBUTE FROM TABLE1 INTERSECT SELECT Table2 Table2DataID ON Table2.Attribute;"
 			//Statement = "SELECT " + Table1Att + " FROM " + Table1 + " INNER JOIN " + Table2 + " " + Table2Id + " ON " + Table2DataId + ";";
 				// "SELECT TABLE1.ATTRIBUTE FROM TABLE1 INNER JOIN Table2 Table2DataID ON Table2.Attribute;"
@@ -662,6 +678,29 @@ public class App
 		
 			conn.close();
 		}
+	}
+	
+	public static void CreateLinkageTable(String[] SQLLogin) throws Exception {
+		try ( Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" 
+		+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true" 
+		+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
+		Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) 
+		{
+			
+			String DropTable, CreateTable;
+			DropTable = "DROP TABLE IF EXISTS LinkTable;";
+
+			CreateTable = "CREATE TABLE LinkTable (UID INT PRIMARY KEY, FNAME VARCHAR(255), LNAME VARCHAR(255), EMAIL VARCHAR(255));"; // Creates the Create Table command.
+
+			//System.out.println(CreateTable + "\n" + DropTable);
+
+			stmt.execute(DropTable); //Drops the current table, if it exists
+			stmt.execute(CreateTable); // Creates the current table
+		}
+	}
+
+	public static void LinkTable() throws Exception {
+
 	}
 	
 	public static void WriteToExcel(String DataWanted, String[] Table, XSSFWorkbook workbook, String[] SQLLogin) throws Exception {
