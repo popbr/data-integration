@@ -64,7 +64,7 @@ public class App
 			int[] PKAddition = {1, 2}; // This denotes what additional Primary Keys there are for a file, given by the position in the input statements (index of 1, 2, etc...)
 			//tsvTagList = null;
 
-			CreateLinkageTable(SQLLogin);
+			CreateLinkageTable(SQLLogin); // this starts up the linkage table in SQL that we use to link people to their data across the databases
 
             for (int i = 0; i < fileNames.length; i++) { //Goes through the list of files and parses from each of them, delegating to the appropriate method based on the file extension
                 fType = FilenameUtils.getExtension(fileNames[i].getName()); // Getter for file extension of the current file
@@ -72,20 +72,21 @@ public class App
                 source = fileNames[i].getName(); //Getter for the source of the data file
 				if (fType.equals("xml")) {
 					ParsingData = ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, null, source, SQLLogin, null);
-					LinkTable(ParsingData);
-				}
+					LinkTable(ParsingData, Table[i], SQLLogin);
+					}
                 else if (fType.equals("csv")) {
-                	ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, Search, source, SQLLogin, null); 
-					LinkTable(ParsingData);
-				}
+                	ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, Search, source, SQLLogin, null);
+					LinkTable(ParsingData, Table[i], SQLLogin); 
+					}
 				else if (fType.equals("tsv")) {
-					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source, SQLLogin, PKAddition); 
-					LinkTable(ParsingData);
+					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source, SQLLogin, PKAddition);
+					LinkTable(ParsingData, Table[i], SQLLogin);
 				}
 				else if (fType.equals("xlsx")) {
 					ParsingData = ParsefromExcel(fileNames[i].getPath(), Table[i], xlsTagList, null, source, SQLLogin, PKAddition);
-					LinkTable(ParsingData);
+					LinkTable(ParsingData, Table[i], SQLLogin);
 				}
+				
             }
 			//FindSimilarRelation("xlsx1", "tsv2", "School_Name", SQLLogin, workbook);
         	//WriteToExcel("*", Table, workbook, SQLLogin);
@@ -121,7 +122,7 @@ public class App
 			if (!fileN[i].getName().equals("ReadMeDownloads.txt")) 
 			{
 				fileNames[txtCatch] = fileN[i];
-        		System.out.println(fileNames[txtCatch].getName());
+        		//System.out.println(fileNames[txtCatch].getName());
 				txtCatch++;
 			}
 		}
@@ -349,6 +350,7 @@ public class App
 
 		catch (Exception e) {
 			e.printStackTrace(); //Stacktrace for if a crash occurs.
+			return null;
 		}
 	}
 
@@ -411,6 +413,7 @@ public class App
 		
 		catch (Exception e) {
 			e.printStackTrace();
+			return null;
 		}
 	}
 
@@ -697,9 +700,24 @@ public class App
 			stmt.execute(DropTable); //Drops the current table, if it exists
 			stmt.execute(CreateTable); // Creates the current table
 		}
+
+		catch (Exception e) {
+			e.printStackTrace(); //Stacktrace for if a crash occurs.
+		}
 	}
 
-	public static void LinkTable() throws Exception {
+	public static void LinkTable(String[][] ParsingData, String Table, String[] SQLLogin) throws Exception {
+		try ( Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" 
+		+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true" 
+		+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
+		Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) 
+		{
+			System.out.println("Hello");
+		}
+
+		catch (Exception e) {
+			e.printStackTrace(); //Stacktrace for if a crash occurs.
+		}
 
 	}
 	
