@@ -66,31 +66,31 @@ public class App
 
 			CreateLinkageTable(SQLLogin); // this starts up the linkage table in SQL that we use to link people to their data across the databases
 
+			
             for (int i = 0; i < fileNames.length; i++) { //Goes through the list of files and parses from each of them, delegating to the appropriate method based on the file extension
                 fType = FilenameUtils.getExtension(fileNames[i].getName()); // Getter for file extension of the current file
                 Table[i] = fType + (i + 1); // this stores the tables names in a retrievable list.
                 source = fileNames[i].getName(); //Getter for the source of the data file
 				if (fType.equals("xml")) {
 					ParsingData = ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, null, source, SQLLogin, null);
-					LinkTable(ParsingData, Table[i], SQLLogin);
+					LinkTable(ParsingData, Table[i], SQLLogin, ReporterTagList);
 					}
                 else if (fType.equals("csv")) {
-                	ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, Search, source, SQLLogin, null);
-					LinkTable(ParsingData, Table[i], SQLLogin); 
+                	ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, null, source, SQLLogin, null);
+					LinkTable(ParsingData, Table[i], SQLLogin, ReporterTagList); 
 					}
 				else if (fType.equals("tsv")) {
 					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source, SQLLogin, PKAddition);
-					LinkTable(ParsingData, Table[i], SQLLogin);
+					LinkTable(ParsingData, Table[i], SQLLogin, tsvTagList);
 				}
 				else if (fType.equals("xlsx")) {
 					ParsingData = ParsefromExcel(fileNames[i].getPath(), Table[i], xlsTagList, null, source, SQLLogin, PKAddition);
-					LinkTable(ParsingData, Table[i], SQLLogin);
-				}
+					LinkTable(ParsingData, Table[i], SQLLogin, xlsTagList);
+				} 
 				
-            }
+            } 
 			//FindSimilarRelation("xlsx1", "tsv2", "School_Name", SQLLogin, workbook);
         	//WriteToExcel("*", Table, workbook, SQLLogin);
-			
 			
         }
         System.out.println("Finished");
@@ -573,15 +573,15 @@ public class App
 				TagName[i] = data[0][i];
 			}
 
-			CreateTable = "CREATE TABLE " + TableName + " (" + TagName[0] + " VARCHAR(255), "; // Creates the Create Table command.
+			CreateTable = "CREATE TABLE " + TableName + " (EntryID INT AUTO_INCREMENT, "; // Creates the Create Table command.
 				// Implicitely,the commandhas a Table name and 1 attribute to be added. More are added as necessary, as seen below
-			for (int j = 0; j < TagName.length - 1; j++) {// creates the SQL table based on the number of strings in TagName
-				CreateTable = CreateTable + TagName[j + 1] + " VARCHAR(255)";
-				if (j != TagName.length - 2)
+			for (int j = 0; j < TagName.length ; j++) {// creates the SQL table based on the number of strings in TagName
+				CreateTable = CreateTable + TagName[j] + " VARCHAR(255)";
+				if (j != TagName.length - 1)
 					CreateTable = CreateTable + ", ";
 			}
 
-			String AddPK = TagName[0]; //This begins to set to Primary Keys. Automatically, the first attribute is made a PK
+			String AddPK = "EntryID"; //This begins to set to Primary Keys. Automatically, the first attribute is made a PK
 
 			if (PKAdditions != null) { // This sets primary Keys too, based on the PK Additions list passed 
 				for (int num : PKAdditions) { // This can't handle adding more than 1 PK right now
@@ -638,19 +638,8 @@ public class App
 			String Table2DataId = Table2Id + "." + Attribute;
 			String Statement;
 
-			//Statement = "SELECT " + Table1Att + " FROM " + Table1 + " INTERSECT SELECT " + Table2 + " " + Table2Att + " ON " + Table2 + ";";
-				// "SELECT TABLE1.ATTRIBUTE FROM TABLE1 INTERSECT SELECT Table2 Table2DataID ON Table2.Attribute;"
-			//Statement = "SELECT " + Table1Att + " FROM " + Table1 + " INNER JOIN " + Table2 + " " + Table2Id + " ON " + Table2DataId + ";";
-				// "SELECT TABLE1.ATTRIBUTE FROM TABLE1 INNER JOIN Table2 Table2DataID ON Table2.Attribute;"
-			//Statement = "SELECT " + Table1Att + " FROM " + Table1 + " WHERE " + Table1Att + " IN ( SELECT " + Attribute + " FROM " + Table2 + ");";
 			Statement = "SELECT " + Table1Att + " FROM " + Table1 + " WHERE " + Table1Att + " IN ( SELECT " + Table2Att + " FROM " + Table2 + " WHERE " + Table2Att + " IS NOT NULL);";
-				// "SELECT TABLE1.ATTRIBUTE FROM TABLE WHERE TABLE1.ATTRIBUTE IN (SELECT TABLE2.ATTRIBUTE FROM TABLE2 WHERE TABLE2.ATTRIBUTE IS NOT NULL);"
-			//Statement = "SELECT " + Table1Att + " FROM " + Table1 + " IN ( SELECT " + Table2Att + " FROM " + Table2 + ");";
-				// "SELECT TABLE1.ATTRIBUTE FROM TABLE IN (SELECT ATTRIBUTE FROM TABLE2);"
 
-			//String Statement = "SELECT " + Table2Att + " FROM " + Table2 + ";";
-
-			//Does not work, need to do INNER JOIN instead of intersect. Look at the SO page left from Dr Aubert
 			ResultSet rset = stmt.executeQuery(Statement); // Requests the attribute/Attribute Data in Table 1 that also appears in Table 2
 
 			ResultSetMetaData rsmd = rset.getMetaData(); // This parses through the data and outputs in to the Excel sheet, row by row
@@ -689,31 +678,79 @@ public class App
 		+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
 		Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) 
 		{
-			
-			String DropTable, CreateTable;
+			String DropTable, CreateTable, FirstInsert;
 			DropTable = "DROP TABLE IF EXISTS LinkTable;";
+			CreateTable = "CREATE TABLE LinkTable (UID INT AUTO_INCREMENT PRIMARY KEY, NAME VARCHAR(255), EMAIL VARCHAR(255));"; // Creates the Create Table command.
+			FirstInsert = "INSERT INTO LinkTable VALUES(?,?)";
 
-			CreateTable = "CREATE TABLE LinkTable (UID INT PRIMARY KEY, FNAME VARCHAR(255), LNAME VARCHAR(255), EMAIL VARCHAR(255));"; // Creates the Create Table command.
-
-			//System.out.println(CreateTable + "\n" + DropTable);
+			PreparedStatement preparedStatement = conn.prepareStatement(FirstInsert);
+ 
+			preparedStatement.setString(1, "Noah Sleeper"); 
+			preparedStatement.setString(2, "Yes"); 
 
 			stmt.execute(DropTable); //Drops the current table, if it exists
 			stmt.execute(CreateTable); // Creates the current table
+			preparedStatement.execute();
 		}
-
 		catch (Exception e) {
 			e.printStackTrace(); //Stacktrace for if a crash occurs.
 		}
 	}
 
-	public static void LinkTable(String[][] ParsingData, String Table, String[] SQLLogin) throws Exception {
+	public static void LinkTable(String[][] ParsingData, String CurrentTable, String[] SQLLogin, String[] TagList) throws Exception {
 		try ( Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" 
 		+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true" 
 		+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
 		Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) 
 		{
-			System.out.println("Hello");
-		}
+			String Test = "Columbia University";
+			String TagName = "";
+			String ColumnValue = "";
+			String AddFK = "";
+			int TagIndex = -1;
+			int InpLength = ParsingData.length;
+			int InpDepth = ParsingData[0].length;
+
+			for(int tag = 0; tag < TagList.length; tag++) 
+			{
+				if (TagList[tag].equals("School_Name")) 
+				{
+					TagName = "School_Name";
+					TagIndex = tag;
+				}
+				else if (TagList[tag].equals("ORG_NAME")) 
+				{
+					TagName = "ORG_NAME";
+					TagIndex = tag;
+				}
+			}
+				
+			String strSelect = "SELECT Name FROM LinkTable"; // This selects the data from SQL
+
+			ResultSet rset = stmt.executeQuery(strSelect);
+			//ResultSetMetaData rsmd = rset.getMetaData(); // This gets the retrieved data ready to be read
+			//int columnsNumber = rsmd.getColumnCount();
+
+			//String ColumnName = rsmd.getColumnName(1);
+
+			int track = 0;
+			do {			
+					ColumnValue = rset.getString(track);
+				
+					for (int k = 0; k<InpLength; k++) 
+					{
+						if((ParsingData[k][TagIndex]).equals(ColumnValue))
+						{
+							AddFK = "ALTER TABLE LinkTable ADD FOREIGN KEY (UID) REFERENCES " + CurrentTable + "(EntryID) WHERE " + TagName + " EQUALS " + ColumnValue + ");";
+						}	//"ALTER TABLE LinkTable ADD FOREIGN KEY (UID) REFERENCES tsv1(EntryID) WHERE ORG_NAME EQUALS ExampleValue1);"
+					}
+					track++;
+				//System.out.println(columnValue);
+			} while (rset.next());
+			
+
+			//System.out.println("Hello");
+		} //UID INT PRIMARY KEY, NAME VARCHAR(255), EMAIL VARCHAR(255))
 
 		catch (Exception e) {
 			e.printStackTrace(); //Stacktrace for if a crash occurs.
