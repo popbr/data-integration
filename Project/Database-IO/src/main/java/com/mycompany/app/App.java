@@ -89,8 +89,9 @@ public class App
 				} 
 				
             } 
+			Table[0] = "LinkTable";
 			//FindSimilarRelation("xlsx1", "tsv2", "School_Name", SQLLogin, workbook);
-        	//WriteToExcel("*", Table, workbook, SQLLogin);
+        	WriteToExcel("*", Table, workbook, SQLLogin);
 			
         }
         System.out.println("Finished");
@@ -576,9 +577,9 @@ public class App
 			CreateTable = "CREATE TABLE " + TableName + " (EntryID INT AUTO_INCREMENT, "; // Creates the Create Table command.
 				// Implicitely,the commandhas a Table name and 1 attribute to be added. More are added as necessary, as seen below
 			for (int j = 0; j < TagName.length ; j++) {// creates the SQL table based on the number of strings in TagName
-				CreateTable = CreateTable + TagName[j] + " VARCHAR(255)";
+				CreateTable += TagName[j] + " VARCHAR(255)";
 				if (j != TagName.length - 1)
-					CreateTable = CreateTable + ", ";
+					CreateTable += ", ";
 			}
 
 			String AddPK = "EntryID"; //This begins to set to Primary Keys. Automatically, the first attribute is made a PK
@@ -595,9 +596,15 @@ public class App
 			stmt.execute(DropTable); //Drops the current table, if it exists
 			stmt.execute(CreateTable); // Creates the current table
 
-			Statement = "INSERT INTO " + TableName + " VALUES (";
-			for (int j = 1; j < TagName.length; j++) {// creates the Prepared Statement based on the number of strings in TagName
-				Statement = Statement + "?, ";
+			Statement = "INSERT INTO " + TableName + "(";
+			for (int j = 0; j < TagName.length; j++) {// creates the Prepared Statement based on the number of strings in TagName
+				Statement += TagName[j];
+				if (j != TagName.length - 1)
+					Statement += ", ";
+			} 
+			Statement += ") VALUES(";
+			for (int j = 0; j < TagName.length-1; j++) {// creates the Prepared Statement based on the number of strings in TagName
+				Statement += "?, ";
 			}
 
 			Statement = Statement + "?)"; // finishes the PS, and readies it for data to be added to it.
@@ -681,7 +688,7 @@ public class App
 			String DropTable, CreateTable, FirstInsert;
 			DropTable = "DROP TABLE IF EXISTS LinkTable;";
 			CreateTable = "CREATE TABLE LinkTable (UID INT AUTO_INCREMENT PRIMARY KEY, NAME VARCHAR(255), EMAIL VARCHAR(255));"; // Creates the Create Table command.
-			FirstInsert = "INSERT INTO LinkTable VALUES(?,?)";
+			FirstInsert = "INSERT INTO LinkTable(NAME, EMAIL) VALUES(?,?)";
 
 			PreparedStatement preparedStatement = conn.prepareStatement(FirstInsert);
  
@@ -701,15 +708,19 @@ public class App
 		try ( Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" 
 		+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true" 
 		+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
-		Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) 
+		Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) 
 		{
 			String Test = "Columbia University";
-			String TagName = "";
-			String ColumnValue = "";
-			String AddFK = "";
+			String TagName = "", ColumnValue, strSelect, AddFK = "";
+			String FKInsert = "INSERT INTO LinkTable(NAME, EMAIL) VALUES(?,null)";
+			PreparedStatement preparedStatement = conn.prepareStatement(FKInsert);
 			int TagIndex = -1;
 			int InpLength = ParsingData.length;
-			int InpDepth = ParsingData[0].length;
+			int track = 1;
+			int ColumnsNumber, columnMax;
+			int FKIndex = 0;
+			int[] AddToLinkTable = new int[InpLength];
+			boolean LinkTableMatch = false;
 
 			for(int tag = 0; tag < TagList.length; tag++) 
 			{
@@ -724,32 +735,51 @@ public class App
 					TagIndex = tag;
 				}
 			}
+
+			System.out.println("Starting Linkage: " + InpLength);
+
+			for (int k = 1; k<InpLength; k++) 
+			{
+				LinkTableMatch = true;
+
+				ResultSet rsetCount = stmt.executeQuery("SELECT COUNT(NAME) FROM LinkTable;");
+				rsetCount.next();
+				columnMax = rsetCount.getInt(1);
+				ColumnsNumber = 1;
 				
-			String strSelect = "SELECT Name FROM LinkTable"; // This selects the data from SQL
-
-			ResultSet rset = stmt.executeQuery(strSelect);
-			//ResultSetMetaData rsmd = rset.getMetaData(); // This gets the retrieved data ready to be read
-			//int columnsNumber = rsmd.getColumnCount();
-
-			//String ColumnName = rsmd.getColumnName(1);
-
-			int track = 0;
-			do {			
-					ColumnValue = rset.getString(track);
 				
-					for (int k = 0; k<InpLength; k++) 
+				ResultSet rset = stmt.executeQuery("SELECT NAME FROM LinkTable ;");// This selects the Name attribute from the Linktable Database to compare to the names recently found in files.		
+				rset.next();
+				 
+				do {				
+					ColumnValue = rset.getString(1);
+					//System.out.println(ColumnsNumber + " of " + columnMax + ": " + ColumnValue);
+					
+					if((ParsingData[k][TagIndex]).equals(ColumnValue))
 					{
-						if((ParsingData[k][TagIndex]).equals(ColumnValue))
-						{
-							AddFK = "ALTER TABLE LinkTable ADD FOREIGN KEY (UID) REFERENCES " + CurrentTable + "(EntryID) WHERE " + TagName + " EQUALS " + ColumnValue + ");";
-						}	//"ALTER TABLE LinkTable ADD FOREIGN KEY (UID) REFERENCES tsv1(EntryID) WHERE ORG_NAME EQUALS ExampleValue1);"
+						AddFK = "ALTER TABLE LinkTable ADD FOREIGN KEY (UID) REFERENCES " + CurrentTable + "(EntryID) WHERE \"" + TagName + "\" EQUALS \"" + ColumnValue + "\");";
+						stmt.executeUpdate(AddFK);
+						//"ALTER TABLE LinkTable ADD FOREIGN KEY (UID) REFERENCES tsv1(EntryID) WHERE ORG_NAME EQUALS ExampleValue1);"	
+						//for(int l: AddToLinkTable) 
+						//{
+							//if (track == l) { // this indicates that the column value from SQL not one that's already been examined so far
+								LinkTableMatch = false;
+							//}
+						//}
 					}
 					track++;
-				//System.out.println(columnValue);
-			} while (rset.next());
-			
+					//ColumnsNumber++;
+				} while (rset.next() && ColumnsNumber <= columnMax);
 
-			//System.out.println("Hello");
+				if (LinkTableMatch) {
+					AddToLinkTable[FKIndex] = track;
+					//System.out.println("Inputting: " + ParsingData[k][TagIndex]);
+					FKIndex++;
+					preparedStatement.setString(1, ParsingData[k][TagIndex]); 
+					preparedStatement.execute();
+					LinkTableMatch = false;
+				}
+			}
 		} //UID INT PRIMARY KEY, NAME VARCHAR(255), EMAIL VARCHAR(255))
 
 		catch (Exception e) {
@@ -772,7 +802,8 @@ public class App
 
 			int rowNumber = 0;
 			row = spreadsheet.createRow(0); // This creates a new sheet
-			for(int q = 0; q < Table.length;q++) {
+			for(int q = 0; q < Table.length;q++) 
+			{
 		
 				//System.out.println(Table[q]);
 				String strSelect = "SELECT " + DataWanted + " FROM " + Table[q]; // This selects the data from SQL
@@ -800,6 +831,7 @@ public class App
 						//System.out.println(columnValue);
 						row.createCell(i).setCellValue(columnValue);
 					}
+
 					FileOutputStream out = new FileOutputStream(new File("GFGsheet.xlsx")); // C:\Users\sleep\Desktop\Excel
 					workbook.write(out);
 				} while (rset.previous());
