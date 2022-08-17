@@ -4,6 +4,8 @@ import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -32,6 +34,16 @@ import org.w3c.dom.Element;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomNode;
+import com.gargoylesoftware.htmlunit.html.DomNodeList;
+
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+
 public class App
 {
     public static void main(String[] args) throws Exception 
@@ -41,14 +53,18 @@ public class App
         System.out.println("\n");
         XSSFWorkbook workbook = new XSSFWorkbook(); // workbook object
         String BasePath = EstablishFilePath(); // Getter for user's filepath to program
-
+		String[] SQLElementList= {"Login", "Username", "Password"};
 		String LoginPath = BasePath + File.separator + "target" + File.separator + "LoginInfo.xml"; //Getter for the Login information file
-		String[] SQLLogin = GetLoginInfo("SQL", LoginPath); //Retrieves and Stores User SQL Login information
+		String[] SQLLogin = GetLoginInfo(LoginPath, SQLElementList); //Retrieves and Stores User SQL Login information
 
 		String FilePath = BasePath + File.separator + "target" + File.separator + "Downloads" + File.separator; //Gets Downloads folder filepath for downloads
         File[] fileNames = EstablishFileList(FilePath); //Creates a list of file names in the downloads folder
 
-
+		String URLPath = BasePath + File.separator + "target" + File.separator + "DBInfo.xml";
+		//String[] URLList = CreateURLList(URLPath);
+		//for(int q = 0; q<URLList.length; q++) {
+			//ScrapeWebsite(URLList[q]);
+		//}
         if(fileNames.length==0) { //This deals with the Fillearray, checking if it populated
             System.out.println("There are no databases in the downloads folder.\nPlease download at least one database and try again.");
         } 
@@ -74,11 +90,11 @@ public class App
 				if (fType.equals("xml")) {
 					ParsingData = ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, null, source, SQLLogin, null);
 					LinkTable(ParsingData, Table[i], SQLLogin, ReporterTagList);
-					}
+				}
                 else if (fType.equals("csv")) {
                 	ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, null, source, SQLLogin, null);
 					LinkTable(ParsingData, Table[i], SQLLogin, ReporterTagList); 
-					}
+				}
 				else if (fType.equals("tsv")) {
 					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source, SQLLogin, PKAddition);
 					LinkTable(ParsingData, Table[i], SQLLogin, tsvTagList);
@@ -91,9 +107,10 @@ public class App
             } 
 			Table[0] = "LinkTable";
 			//FindSimilarRelation("xlsx1", "tsv2", "School_Name", SQLLogin, workbook);
-        	WriteToExcel("*", Table, workbook, SQLLogin);
+        	//WriteToExcel("*", Table, workbook, SQLLogin);
 			
         }
+
         System.out.println("Finished");
 		System.exit(0); //Exits the program entirely, without it the program will stall for ~15 seconds once "finished"
         System.out.println("\n");
@@ -130,6 +147,42 @@ public class App
 		return fileNames;
 	}
 
+	public static String[] CreateURLList(String URL) throws Exception{
+
+		String[] URLElements = {"DB", "Name", "URL"};
+		String[] URLList = GetURLList( URL, URLElements);
+		return URLList;
+	}
+	
+	public static void ScrapeWebsite(String URL) throws Exception {
+        
+		//initialize a headless browser
+		WebClient webClient = new WebClient();
+	
+		//configuring options    
+		//webClient.getOptions().setUseInsecureSSL(true);
+		webClient.getOptions().setCssEnabled(false);
+		webClient.getOptions().setJavaScriptEnabled(false);        
+		//webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
+		//webClient.getOptions().setThrowExceptionOnScriptError(false);
+	    
+		HtmlPage page = webClient.getPage(URL); // This fetches the web page
+	
+		//selecting all headings
+		DomNodeList<DomNode> headings = page.querySelectorAll("h3._eYtD2XCVieq6emjKBH3m");
+	
+		//iterating and extracting
+		for (DomNode content: headings) {
+		  System.out.println(content.asText());
+		}    
+	  
+	}
+
+	public static void ApacheScrapeWebsite(URL url, String Filename) throws Exception { 
+		FileUtils.copyURLToFile(url, new File(Filename));;
+	}
+
+	
 	public static String[][] Parsefromtxt(String txtlocation, String Table, String Delim, String[] TagList, String Search[], String source, String[] SQLLogin, int[] PKAddition) throws Exception{
     	//This parses information from a txt file, typically a TSV or CSV
 		Scanner txtFile = new Scanner(new File(txtlocation)); //Opens a text scanner on the file in question
@@ -418,7 +471,7 @@ public class App
 		}
 	}
 
-	public static String[] GetLoginInfo(String LoginType, String Location) throws Exception { //returns the login info of the specified type
+	public static String[] GetLoginInfo(String Location, String[] Elements) throws Exception { //returns the login info of the specified type
 		
 		File inputFile = new File(Location); //This gets the file's location, starts up the XML reader, and normalizes the file
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -426,25 +479,58 @@ public class App
 		Document doc = dBuilder.parse(inputFile);
 		doc.getDocumentElement().normalize();
 		
-		NodeList nList = doc.getElementsByTagName("Login"); //Looks at the login element (which is the whole document, really)
+		NodeList nList = doc.getElementsByTagName(Elements[0]); //Looks at the first element
+		Node Info;
 
-		String[] LoginInfo = new String[2]; // readys the login string to be filled and passed
-
+		String[] LoginInfo = new String[(Elements.length-1)]; // readys the login string to be filled and passed
 		for (int temp = 0; temp < nList.getLength(); temp++) {
+			
 			Node nNode = nList.item(temp);
 			if (nNode.getNodeType() == Node.ELEMENT_NODE) { // Goes to the element of the type wanted, like SQL
 				Element eElement = (Element) nNode;
+				for (int k = 1; k<(Elements.length); k++) {
+					Info = eElement.getElementsByTagName(Elements[k]).item(0); // Gets and Sets all the specified tags, like Username and Password
+					LoginInfo[(k-1)] = Info.getTextContent();
+				}
 
-				Node username = eElement.getElementsByTagName("Username").item(0); // Gets and Sets the username
-				LoginInfo[0] = username.getTextContent();
-
-				Node password = eElement.getElementsByTagName("Password").item(0); // Gets and Sets the [password]
-				LoginInfo[1] = password.getTextContent();
+				//<a href="download?DownloadFileName=2021&amp;All=true">
 			}
 		}
 		//PrintList(LoginInfo);
 
 		return LoginInfo; // returns the login information
+	}  
+
+	public static String[] GetURLList(String Location, String[] Elements) throws Exception { //returns the login info of the specified type
+		
+		File inputFile = new File(Location); //This gets the file's location, starts up the XML reader, and normalizes the file
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+		Document doc = dBuilder.parse(inputFile);
+		doc.getDocumentElement().normalize();
+		
+		NodeList nList = doc.getElementsByTagName(Elements[0]); //Looks at the first element
+		Node Info;
+
+		String[] URLInfo = new String[(Elements.length-1)*nList.getLength()]; // readys the login string to be filled and passed
+		int loop;
+
+		for (int temp = 0; temp < nList.getLength(); temp++) {
+			loop = (nList.getLength()-1)*temp;
+			Node nNode = nList.item(temp);
+			if (nNode.getNodeType() == Node.ELEMENT_NODE) { // Goes to the element of the type wanted, like SQL
+				Element eElement = (Element) nNode;
+				for (int k = 1; k<Elements.length; k++) {
+					Info = eElement.getElementsByTagName(Elements[k]).item(0); // Gets and Sets all the specified tags, like Username and Password
+					URLInfo[(k-1)+(loop)] = Info.getTextContent();
+				}
+
+				//<a href="download?DownloadFileName=2021&amp;All=true">
+			}
+		}
+		PrintList(URLInfo);
+
+		return URLInfo; // returns the login information
 	}  
 	
 	public static void PrintList(int[] input) throws Exception { // Prints an array of integers
@@ -574,7 +660,7 @@ public class App
 				TagName[i] = data[0][i];
 			}
 
-			CreateTable = "CREATE TABLE " + TableName + " (EntryID INT AUTO_INCREMENT, "; // Creates the Create Table command.
+			CreateTable = "CREATE TABLE " + TableName + " (EntryID INT NOT NULL AUTO_INCREMENT, "; // Creates the Create Table command.
 				// Implicitely,the commandhas a Table name and 1 attribute to be added. More are added as necessary, as seen below
 			for (int j = 0; j < TagName.length ; j++) {// creates the SQL table based on the number of strings in TagName
 				CreateTable += TagName[j] + " VARCHAR(255)";
@@ -584,12 +670,12 @@ public class App
 
 			String AddPK = "EntryID"; //This begins to set to Primary Keys. Automatically, the first attribute is made a PK
 
-			if (PKAdditions != null) { // This sets primary Keys too, based on the PK Additions list passed 
+			/*if (PKAdditions != null) { // This sets primary Keys too, based on the PK Additions list passed 
 				for (int num : PKAdditions) { // This can't handle adding more than 1 PK right now
 					AddPK += ", " + TagName[num];
 					//System.out.println(AddPK);
 				}
-			}
+			} */
 			CreateTable = CreateTable + ", PRIMARY KEY (" + AddPK + "))"; // This adds thoe PK attributes to the create Table command
 			//System.out.println(CreateTable + "\n" + DropTable);
 
@@ -687,17 +773,21 @@ public class App
 		{
 			String DropTable, CreateTable, FirstInsert;
 			DropTable = "DROP TABLE IF EXISTS LinkTable;";
-			CreateTable = "CREATE TABLE LinkTable (UID INT AUTO_INCREMENT PRIMARY KEY, NAME VARCHAR(255), EMAIL VARCHAR(255));"; // Creates the Create Table command.
+			CreateTable = "CREATE TABLE LinkTable (UID INT AUTO_INCREMENT PRIMARY KEY, NAME VARCHAR(255), EMAIL VARCHAR(255), TableID INT);"; // Creates the Create Table command.
+			/*
 			FirstInsert = "INSERT INTO LinkTable(NAME, EMAIL) VALUES(?,?)";
 
 			PreparedStatement preparedStatement = conn.prepareStatement(FirstInsert);
  
 			preparedStatement.setString(1, "Noah Sleeper"); 
 			preparedStatement.setString(2, "Yes"); 
+			preparedStatement.setInt(2, 0); 
+			
 
 			stmt.execute(DropTable); //Drops the current table, if it exists
 			stmt.execute(CreateTable); // Creates the current table
 			preparedStatement.execute();
+			*/
 		}
 		catch (Exception e) {
 			e.printStackTrace(); //Stacktrace for if a crash occurs.
@@ -711,19 +801,18 @@ public class App
 		Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) 
 		{
 			String Test = "Columbia University";
-			String TagName = "", ColumnValue, strSelect, AddFK = "";
-			String FKInsert = "INSERT INTO LinkTable(NAME, EMAIL) VALUES(?,null)";
+			String TagName = "", ColumnValueName, strSelect, AddFK = "";
+			String FKInsert = "INSERT INTO LinkTable(NAME, EMAIL, TableID) VALUES(?,null,?)";
 			PreparedStatement preparedStatement = conn.prepareStatement(FKInsert);
 			int TagIndex = -1;
 			int InpLength = ParsingData.length;
 			int track = 1;
-			int ColumnsNumber, columnMax;
+			int ColumnsNumber, columnMax, ColumnValueTableID, SqlEntryID;
 			int FKIndex = 0;
 			int[] AddToLinkTable = new int[InpLength];
 			boolean LinkTableMatch = false;
-
-			for(int tag = 0; tag < TagList.length; tag++) 
-			{
+			
+			for(int tag = 0; tag < TagList.length; tag++) {
 				if (TagList[tag].equals("School_Name")) 
 				{
 					TagName = "School_Name";
@@ -738,47 +827,52 @@ public class App
 
 			System.out.println("Starting Linkage: " + InpLength);
 
-			for (int k = 1; k<InpLength; k++) 
-			{
+			for (int k = 1; k<InpLength; k++) {
 				LinkTableMatch = true;
-
-				ResultSet rsetCount = stmt.executeQuery("SELECT COUNT(NAME) FROM LinkTable;");
-				rsetCount.next();
-				columnMax = rsetCount.getInt(1);
-				ColumnsNumber = 1;
-				
-				
-				ResultSet rset = stmt.executeQuery("SELECT NAME FROM LinkTable ;");// This selects the Name attribute from the Linktable Database to compare to the names recently found in files.		
-				rset.next();
-				 
-				do {				
-					ColumnValue = rset.getString(1);
-					//System.out.println(ColumnsNumber + " of " + columnMax + ": " + ColumnValue);
+				if (k!=1) {
+					ResultSet rsetCount = stmt.executeQuery("SELECT COUNT(NAME) FROM LinkTable;");
+					rsetCount.next();
+					columnMax = rsetCount.getInt(1);
+					ColumnsNumber = 1;
 					
-					if((ParsingData[k][TagIndex]).equals(ColumnValue))
-					{
-						AddFK = "ALTER TABLE LinkTable ADD FOREIGN KEY (UID) REFERENCES " + CurrentTable + "(EntryID) WHERE \"" + TagName + "\" EQUALS \"" + ColumnValue + "\");";
-						stmt.executeUpdate(AddFK);
-						//"ALTER TABLE LinkTable ADD FOREIGN KEY (UID) REFERENCES tsv1(EntryID) WHERE ORG_NAME EQUALS ExampleValue1);"	
-						//for(int l: AddToLinkTable) 
-						//{
-							//if (track == l) { // this indicates that the column value from SQL not one that's already been examined so far
-								LinkTableMatch = false;
-							//}
-						//}
-					}
-					track++;
-					//ColumnsNumber++;
-				} while (rset.next() && ColumnsNumber <= columnMax);
+					
+					ResultSet rset = stmt.executeQuery("SELECT NAME, TableID FROM LinkTable;");// This selects the Name attribute from the Linktable Database to compare to the names recently found in files.		
+					rset.next();
+					
+					do {				
+						ColumnValueName = rset.getString(1);
+						ColumnValueTableID = rset.getInt(2);
+
+						//System.out.println(ColumnsNumber + " of " + columnMax + ": " + ColumnValueName);
+						
+						if((ParsingData[k][TagIndex]).equals(ColumnValueName))
+						{		
+							//"ALTER TABLE LinkTable ADD FOREIGN KEY (TableID) REFERENCES tsv1(EntryID) WHERE ORG_NAME EQUALS ExampleValue1);"	
+							LinkTableMatch = false;
+						}
+						track++;
+						ColumnsNumber++;
+					} while (rset.next() && ColumnsNumber <= columnMax);
+				}
+
+				System.out.println("SELECT EntryID FROM " + CurrentTable + " WHERE " + TagName + " = \"" + ParsingData[k][TagIndex] + "\";");
+				ResultSet rsetSqlID = stmt.executeQuery("SELECT EntryID FROM " + CurrentTable + " WHERE " + TagName + " = \"" + ParsingData[k][TagIndex] + "\";");
+				rsetSqlID.next();
+				SqlEntryID = rsetSqlID.getInt(1);
 
 				if (LinkTableMatch) {
 					AddToLinkTable[FKIndex] = track;
-					//System.out.println("Inputting: " + ParsingData[k][TagIndex]);
+					System.out.println("Inputting: " + ParsingData[k][TagIndex]);
 					FKIndex++;
 					preparedStatement.setString(1, ParsingData[k][TagIndex]); 
-					preparedStatement.execute();
+					preparedStatement.setInt(2, SqlEntryID); 
+					preparedStatement.execute(); //"INSERT INTO LinkTable(NAME, EMAIL, TableID) VALUES(?,null,?)";
 					LinkTableMatch = false;
 				}
+
+				AddFK = "ALTER TABLE LinkTable ADD FOREIGN KEY (TableID) REFERENCES " + CurrentTable + " (EntryID);"; //WHERE " + TagName + " = \"" + ParsingData[k][TagIndex] + "\";";
+				System.out.println(AddFK);
+				stmt.executeUpdate(AddFK);
 			}
 		} //UID INT PRIMARY KEY, NAME VARCHAR(255), EMAIL VARCHAR(255))
 
