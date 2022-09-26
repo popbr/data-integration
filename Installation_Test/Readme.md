@@ -3,8 +3,6 @@
 This programs serves to test if your set-up match our requirements.
 
 <!--
-Test User: DBTestUser
-Password: wali0e^23
 To work properly, you should be running a MySQL Server (8.0) with a user "DBTestUser" whose password is "wali0e^23". You can edit those information 
 -->
 
