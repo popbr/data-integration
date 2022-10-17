@@ -32,10 +32,14 @@ public class App {
     public static void main(String[] args) throws Exception {
         Class.forName("com.mysql.cj.jdbc.Driver");
 
+        //This method returns the base filepath for the program, like C:\User\JohnS\desktop\
+        //With this, the program can keep track of itself, the files it creates, and looks= for necessary files 
         String BasePath = EstablishFilePath();
 
+        //This creates a path to the example database in the downloads folder
 		String TestFile = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator + "test.xml";
 
+        //This creates a path to the login information folder, then goes and retrieves login information for SQL
         String LoginPath = BasePath + File.separator + "target" + File.separator + "LoginInfo.xml";
 		String[] SQLLogin = GetLoginInfo("SQL", LoginPath);
 
@@ -44,9 +48,9 @@ public class App {
         System.out.println("Attempting to Connect, create, and insert to an SQL database: " + Connect_to_SQL(SQLLogin));
         System.out.println("Attempting to Connect to and output from an SQL database: " + Output_from_SQL(SQLLogin));
 
-        System.out.println("Attempting to Create and insert into an Excel: " + Connect_to_Excel());
+        System.out.println("Attempting to Create and insert into an Excel: " + Connect_to_Excel(SQLLogin , BasePath));
 
-        //System.out.println( "hey" );
+        //System.out.println( "hey" ); //line for debugging
         System.exit(0);
     }
 
@@ -54,16 +58,24 @@ public class App {
 
         String result = "";
         try{
+            //Sets the file to be read to the one passed, test.xml, using the path passed earlier
             File inputFile = new File(Path);
+            //These prepare the XML file to be read by the program
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(inputFile);
             doc.getDocumentElement().normalize();
 
+            //Creates a list of nodes with the XML Element name "Input" from the earler input file
             NodeList nList = doc.getElementsByTagName("Input");
 
+            //A list of strings is created, length of 2, as only 2 things are ever pulled: a Username and Password
             String[] MessageInfo = new String[2];
 
+            /*This goes through the list of nodes established earlier
+            * and, for each node, if it matches the type we want, SQL,
+            * then we pull the data from the node/message, Username and Password */
+            
             for (int temp = 0; temp < nList.getLength(); temp++) {
                 Node nNode = nList.item(temp);
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -77,14 +89,16 @@ public class App {
                 }
             }
 
+            //The Username and Password is concatenated
             String Message = MessageInfo[0] + " " + MessageInfo[1];
 
+            //The username and password is tested. If it reads "Hello World", it reads sucess. 
             if (Message.equals("Hello World")) {
                 result = "Success";
-            } 
+            } //If you get this message, then, somewhere, the message failed. 
             else result = "A file was connected to, it appears to have the wrong contents. \nCheck if any modifictions have occured to the program's target/downloads";
         }
-
+        //This is the exception in case anything happens that forces the method to fail fro reasons other than the data not matching up
         catch(Exception e) {
             result = "Failure";
             e.printStackTrace();;
@@ -99,22 +113,28 @@ public class App {
             + "?user=" + LoginInfo[0] + "&password=" + LoginInfo[1] + "&allowMultiQueries=true" 
             + "&createDatabaseIfNotExist=true" + "&useSSL=true"); 
             Statement stmt = conn.createStatement(); ) {
-
+        
             String DropTable, CreateTable, Statement, TestDatabase, TestAttribute;
 
+            //The following preps the creation of the database, the attributes, and the creation strings 
             TestDatabase = "TestDB";
             TestAttribute = "TestAttribute";
 
+            //The table we need is first dropped, then created with the propper attributes. 
+            //The table is  dropped to prevent SQL from running into an error where the table 
+            //is already made but wasn't dropped since its creation. 
             DropTable = "DROP TABLE IF EXISTS " + TestDatabase + ";";
             CreateTable = "CREATE TABLE " + TestDatabase + " (" + TestAttribute + " VARCHAR(255) PRIMARY KEY)";
     
             stmt.execute(DropTable);
 			stmt.execute(CreateTable);
 
+            //This sets up what will be a prepared string into the test DB.
             Statement = "INSERT INTO " + TestDatabase + " VALUES (?)";
 
             PreparedStatement preparedStatement = conn.prepareStatement(Statement);
 
+            //This fills the previos PS with the data "Hello SQL"
             preparedStatement.setString(1, "Hello SQL");
             preparedStatement.execute();
          
@@ -123,7 +143,9 @@ public class App {
             result = "Success";
         } 
             catch (SQLException ex) 
-        {
+        { 
+        //If any errors happen, this is return. There's no need for a faulure condition in the earlier part
+        //as any error that happens would result in SQL getting the error, thus returning this. 
             result = "Failure";
             ex.printStackTrace();
         }
@@ -139,21 +161,28 @@ public class App {
             + "&createDatabaseIfNotExist=true" + "&useSSL=true");
             Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY); ) {
 
+            //This gets sets up the request from the testDB for the Test attribute
             String TestDatabase, TestAttribute;
             TestDatabase = "TestDB";
             TestAttribute = "TestAttribute";
 
+            //This requests the the test attribute from the testDB, which returns everything in it
             String strSelect = "SELECT " + TestAttribute + " FROM " + TestDatabase;
             ResultSet rset = stmt.executeQuery(strSelect);
             rset.first();
+            //This sets the pointer to read from the first entry in the result set
 
+            //The result set's first entry is looked at. If it's not null, then the retrieval was sucessful.
             if (rset.getString(1).equals("Hello SQL")) {
                 result = "Success";
             } 
-            else result = "An SQL Database was connected to, it appears to have the wrong contents.";
+            else result = "An SQL Database was connected to, but it appears to have the wrong contents.";
+            //This is here in case the earler attempt to put items in the databse put something that wansn't "Hello SQL"
         } 
             catch (SQLException ex) 
-        {
+        { 
+            //In the case of there being nothing to retrieve, or no databse named Testdb, 
+            //or some other error, then this is returned
             result = "Failure";
             ex.printStackTrace();
         }
@@ -185,30 +214,31 @@ public class App {
         return result;
     }
     
-    public static void Conhgvnect_to_Excel() throws Exception {
-        try (Connection conn = 
-        DriverManager.getConnection("jdbc:mysql://localhost:3306/Prospectus_DB"
-        + "?user=DBTestUser"
-        + "&password=wali0e^23"
-        + "&allowMultiQueries=true"
-        + "&createDatabaseIfNotExist=true"
-        + "&useSSL=true"); 
+    public static void Connect_to_Excel(String[] LoginInfo, String Path) throws Exception {
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Prospectus_DB" 
+        + "?user=" + LoginInfo[0] + "&password=" + LoginInfo[1] + "&allowMultiQueries=true" 
+        + "&createDatabaseIfNotExist=true" + "&useSSL=true"); 
         Statement stmt = conn.createStatement();)	  
         { 
+            //The following 
             Scanner myObj = new Scanner(System.in);
             XSSFWorkbook workbook = new XSSFWorkbook(); // workbook object
-            XSSFSheet spreadsheet = workbook.createSheet("Research Data"); // spreadsheet object
+            XSSFSheet spreadsheet = workbook.createSheet("Test Sheet"); // spreadsheet object
             XSSFRow row; // creating a row object
 
-            String strSelect = "SELECT * FROM CompanyDB";
+            //This queries all the info in the TestDB Database and returns it as a resultset
+            String strSelect = "SELECT * FROM TestDB";
             ResultSet rset = stmt.executeQuery(strSelect);
 
+            //This gets the length and width of the database result set to know how long to go for in the loop below.
             ResultSetMetaData rsmd = rset.getMetaData();
             int columnsNumber = rsmd.getColumnCount();
             String columnValue = "";
             int rowNumber = 0;
             String ColumnName = rsmd.getColumnName(1);
             row = spreadsheet.createRow(rowNumber++);
+
+            //This goes through each entry in the resultset and puts it, entry by entry, into the Excel sheet.
             while (rset.next()) 
             {
                 for (int i = 1; i <= columnsNumber; i++) // this loop populates a cell with data
@@ -221,52 +251,84 @@ public class App {
                     row.createCell(i).setCellValue(columnValue);
                 } 
             } 
-            // writing the workbook into the file
-            FileOutputStream out = new FileOutputStream( new File("C:\\Users\\sleep\\Desktop\\Excel\\GFGsheet.xlsx")); //C:\Users\sleep\Desktop\Excel
+            // This writes the workbook into an excel, with the filepath listed below. The workbook is then quit out of and closed.
+            FileOutputStream out = new FileOutputStream(new File(Path + File.separator + "target" + File.separator + "GFGsheet.xlsx")); //C:\Users\sleep\Desktop\Excel
             workbook.write(out);
             out.close();
+
+            result = "Success";
         }
+        catch(Exception e) {
+            result = "Failure";
+            e.printStackTrace();;
+        }
+        return result;
     }
 
     public static String EstablishFilePath() throws Exception {
-		File s = new File("f.txt");
-		String FilePath = "";
-		char[] tempChar = s.getAbsolutePath().toCharArray();
-		char[] newChar = new char[tempChar.length - 6];
-		for (int i = 0; i < newChar.length; i++) {
-			newChar[i] = tempChar[i];
-		}
-		FilePath = String.valueOf(newChar);
-        //System.out.println(FilePath);
-		return FilePath;
-	}
+        try {
 
-    public static String[] GetLoginInfo(String LoginType, String Location) throws Exception{
-		
-		File inputFile = new File(Location);
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		Document doc = dBuilder.parse(inputFile);
-		doc.getDocumentElement().normalize();
-		
-		NodeList nList = doc.getElementsByTagName("Login");
+            //This creates a dummy file that starts as the basis for creating the filepath in the base of the program
+            File s = new File("f.txt");
+            String FilePath = "";
 
-		String[] LoginInfo = new String[2];
+            //This gets the filepath of the dumy file and transforms it into characters, so it can be modified.
+            //The modification snips off the charcters "f.txt" so that the only path left is the base filepath
+            char[] tempChar = s.getAbsolutePath().toCharArray();
+            char[] newChar = new char[tempChar.length - 6];
+            for (int i = 0; i < newChar.length; i++) {
+                newChar[i] = tempChar[i];
+            }
+            //This makes the filepath into a string, minus the "f.txt" bit
+            FilePath = String.valueOf(newChar);
+            //System.out.println(FilePath);
+            //This returns the filepath
+            return FilePath;
 
-		for (int temp = 0; temp < nList.getLength(); temp++) {
-			Node nNode = nList.item(temp);
-			if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-				Element eElement = (Element) nNode;
-
-				Node username = eElement.getElementsByTagName("Username").item(0);
-				LoginInfo[0] = username.getTextContent();
-
-				Node password = eElement.getElementsByTagName("Password").item(0);
-				LoginInfo[1] = password.getTextContent();
-			}
-		}
-
-		return LoginInfo;
+	    } catch(Exception e) {
+            result = "Failure";
+            e.printStackTrace();;
+        }
+        return result;
     }
 
+    public static String[] GetLoginInfo(String LoginType, String Location) throws Exception{	
+        try {
+
+            //Sets the file to be read to the one passed, test.xml, using the path passed earlier
+            File inputFile = new File(Location);
+            //These prepare the XML file to be read by the program
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(inputFile);
+            doc.getDocumentElement().normalize();
+            
+            //This gets the elements from the document that are Login and makes it into a list of nodes
+            NodeList nList = doc.getElementsByTagName("Login");
+
+            //This prepares the Login info to be recieved 
+            String[] LoginInfo = new String[2];
+            /*This goes through the list of nodes and matches it to nodes that are have login info for SQL
+            * When it finds the SQL node, it logs information it has, the Username and Password, it puts it
+            * into the prepared string list.
+            */
+            for (int temp = 0; temp < nList.getLength(); temp++) {
+                Node nNode = nList.item(temp);
+                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element eElement = (Element) nNode;
+
+                    Node username = eElement.getElementsByTagName("Username").item(0);
+                    LoginInfo[0] = username.getTextContent();
+
+                    Node password = eElement.getElementsByTagName("Password").item(0);
+                    LoginInfo[1] = password.getTextContent();
+                }
+            }
+        
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        // The Username and password is passed on
+		return LoginInfo;
+    }
 }
