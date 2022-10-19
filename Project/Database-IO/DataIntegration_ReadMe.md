@@ -1,5 +1,5 @@
+<!--
 ReadMe
-
 Should be documented:
 How to compile,
 How to execute,
@@ -7,6 +7,9 @@ Which parameter(s) can be tweaked (typically, the user / password of the databas
 How to use the project.
 
 >The above is just a reference as I type this out. It will be removed when the ReadMe is satisfactory.
+-->
+
+
 # Popbr Data-integration ReadMe 
 [Github](https://github.com/popbr/data-integration)
 ## Compilation and Execution
