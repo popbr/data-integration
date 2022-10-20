@@ -54,18 +54,26 @@ public class App {
 		XSSFWorkbook workbook = new XSSFWorkbook(); // workbook object
 		String BasePath = EstablishFilePath(); // Getter for user's filepath to program
 		String[] SQLElementList = { "Login", "Username", "Password" };
-		String LoginPath = BasePath + File.separator + "target" + File.separator + "LoginInfo.xml"; // Getter for the Login information file
+		String LoginPath = BasePath + File.separator + "target" + File.separator + "LoginInfo.xml"; // Getter for the
+																									// Login information
+																									// file
 		String[] SQLLogin = GetLoginInfo(LoginPath, SQLElementList); // Retrieves and Stores User SQL Login information
 
-		String FilePath = BasePath + File.separator + "target" + File.separator + "Downloads" + File.separator; // Gets Downloads folder filepath for downloads
+		String FilePath = BasePath + File.separator + "target" + File.separator + "Downloads" + File.separator; // Gets
+																												// Downloads
+																												// folder
+																												// filepath
+																												// for
+																												// downloads
 		File[] fileNames = EstablishFileList(FilePath); // Creates a list of file names in the downloads folder
 
 		String URLPath = BasePath + File.separator + "target" + File.separator + "DBInfo.xml";
 		String[] URLList = CreateURLList(URLPath);
 		PrintList(URLList);
+		/* 
 		for (int q = 0; q < URLList.length; q++) {
 			ScrapeWebsite(URLList[q]);
-		}
+		} */
 		System.exit(0);
 		if (fileNames.length == 0) { // This deals with the Fillearray, checking if it populated
 			System.out.println(
@@ -73,22 +81,26 @@ public class App {
 		} else {
 			String fType;
 			String source = "";
-			String[] Table = new String[fileNames.length]; // This will store the Table names for SQL information retrieval
+			String[] Table = new String[fileNames.length]; // This will store the Table names for SQL information
+															// retrieval
 			String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAME" };
 			String[] tsvTagList = { "School_Name", "Location", "MD_or_DO" };
 			String[] xlsTagList = { "School_Name", "Type", "State" };
 			String[] Search = { "Medical University of South Carolina", "ORG_NAME" };
-			//String[] Search = GetSearchInputs();
+			// String[] Search = GetSearchInputs();
 			String[][] ParsingData;
 			int[] PKAddition = { 1, 2 }; // This denotes what additional Primary Keys there are for a file, given by the
-										 // position in the input statements (index of 1, 2, etc...) tsvTagList = null;
+											// position in the input statements (index of 1, 2, etc...) tsvTagList =
+											// null;
 
 			CreateLinkageTable(SQLLogin); // this starts up the linkage table in SQL that we use to link people to their
-										  // data across the databases
+											// data across the databases
 
 			for (int i = 0; i < fileNames.length; i++) { // Goes through the list of files and parses from each of them,
-															// delegating to the appropriate method based on the file extension
-				fType = FilenameUtils.getExtension(fileNames[i].getName()); // Getter for file extension of the current file
+															// delegating to the appropriate method based on the file
+															// extension
+				fType = FilenameUtils.getExtension(fileNames[i].getName()); // Getter for file extension of the current
+																			// file
 				Table[i] = fType + (i + 1); // this stores the tables names in a retrievable list.
 				source = fileNames[i].getName(); // Getter for the source of the data file
 				if (fType.equals("xml")) {
@@ -159,7 +171,7 @@ public class App {
 		String[] URLList = GetURLList(URL, URLElements);
 		return URLList;
 	}
-
+	/* 
 	public static void ScrapeWebsite(String URL) throws Exception {
 
 		// initialize a headless browser
@@ -181,14 +193,15 @@ public class App {
 		for (DomNode content : headings) {
 			System.out.println(content.asText());
 		}
-
-	}
-
-	/* 
-	public static void ApacheScrapeWebsite(URL url, String Filename) throws Exception {
-		copyURLToFile(url, new File(Filename));
-		FileHandler.copyURLToFile(url, new File(Filename));
 	} */
+
+	/*
+	 * public static void ApacheScrapeWebsite(URL url, String Filename) throws
+	 * Exception {
+	 * copyURLToFile(url, new File(Filename));
+	 * FileHandler.copyURLToFile(url, new File(Filename));
+	 * }
+	 */
 
 	public static String[][] Parsefromtxt(String txtlocation, String Table, String Delim, String[] TagList,
 			String Search[], String source, String[] SQLLogin, int[] PKAddition) throws Exception {
@@ -215,7 +228,8 @@ public class App {
 		}
 		if (index < Limit) // if the total amount of file entries/lines in a file if less than the limit
 							// given, then set the limit to that total amount.
-			Limit = (index + 1); // Without this, the program will try to read lines that don'texist, and throw an exception
+			Limit = (index + 1); // Without this, the program will try to read lines that don'texist, and throw
+									// an exception
 
 		index = 0;
 		txtFile.reset();
@@ -229,7 +243,8 @@ public class App {
 		String currentWord = "";
 		String currentLine = "";
 		int length;
-		if (TagList != null) // If no tags are passed to the method, then the program takes the first 10 attributes it finds
+		if (TagList != null) // If no tags are passed to the method, then the program takes the first 10
+								// attributes it finds
 			length = TagList.length;
 		else
 			length = 10; // length is the basis for how many attributes the program scrapes
@@ -327,9 +342,11 @@ public class App {
 				}
 
 				for (int ind = 0; ind < TagIndex.length; ind++) { // Checks to see if the index/attribute data column
-																	// the reader is on is the same as one of the attribute.
+																	// the reader is on is the same as one of the
+																	// attribute.
 					// System.out.println(TagIndex[ind]); //If so, then this current word is data
-					// the program wants, and it stores that data in the list that gets passed into SQL
+					// the program wants, and it stores that data in the list that gets passed into
+					// SQL
 					if (index == TagIndex[ind]) {
 						data[indexTracker][ind] = currentWord;
 					}
@@ -508,7 +525,8 @@ public class App {
 	public static String[] GetLoginInfo(String Location, String[] Elements) throws Exception { // returns the login info
 																								// of the specified type
 
-		File inputFile = new File(Location); // This gets the file's location, starts up the XML reader, and normalizes the file
+		File inputFile = new File(Location); // This gets the file's location, starts up the XML reader, and normalizes
+												// the file
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		Document doc = dBuilder.parse(inputFile);
@@ -537,9 +555,11 @@ public class App {
 		return LoginInfo; // returns the login information
 	}
 
-	public static String[] GetURLList(String Location, String[] Elements) throws Exception { // returns the login info of the specified type
+	public static String[] GetURLList(String Location, String[] Elements) throws Exception { // returns the login info
+																								// of the specified type
 
-		File inputFile = new File(Location); // This gets the file's location, starts up the XML reader, and normalizes the file
+		File inputFile = new File(Location); // This gets the file's location, starts up the XML reader, and normalizes
+												// the file
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		Document doc = dBuilder.parse(inputFile);
@@ -548,7 +568,8 @@ public class App {
 		NodeList nList = doc.getElementsByTagName(Elements[0]); // Looks at the first element
 		Node Info;
 
-		String[] URLInfo = new String[(Elements.length - 1) * nList.getLength()]; // readys the login string to be filled and passed
+		String[] URLInfo = new String[(Elements.length - 1) * nList.getLength()]; // readys the login string to be
+																					// filled and passed
 		int loop;
 
 		for (int temp = 0; temp < nList.getLength(); temp++) {
@@ -642,7 +663,8 @@ public class App {
 
 		int max = searchHits;
 		searchHits = 0;
-		for (int i = 0; i < dataLimit; i++) { // fills the new array with the data pertaining only to the search parameter
+		for (int i = 0; i < dataLimit; i++) { // fills the new array with the data pertaining only to the search
+												// parameter
 			if (data[i][searchIndex].equalsIgnoreCase(SearchParamaters[0])) {
 				for (int j = 0; j < Length; j++) {
 					SearchData[searchHits + 1][j] = data[i][j];
@@ -657,11 +679,13 @@ public class App {
 	}
 
 	public static String[][] AddTagAndData(String[][] input, String Tag, String Data) throws Exception {
-		// adds an attribute and data to each row of a passed array input, the outputs a modified array
+		// adds an attribute and data to each row of a passed array input, the outputs a
+		// modified array
 		int InpLength = input.length;
 		int InpDepth = input[0].length;
 
-		// System.out.println("pre-Adding input is " + InpLength + " : " + InpDepth + ". Adding " + Data);
+		// System.out.println("pre-Adding input is " + InpLength + " : " + InpDepth + ".
+		// Adding " + Data);
 		String[][] newList = new String[InpLength][InpDepth + 1];
 
 		newList[0][InpDepth] = Tag;
@@ -704,7 +728,8 @@ public class App {
 				TagName[i] = data[0][i];
 			}
 
-			CreateTable = "CREATE TABLE " + TableName + " (EntryID INT NOT NULL AUTO_INCREMENT, "; // Creates the Create Table command.
+			CreateTable = "CREATE TABLE " + TableName + " (EntryID INT NOT NULL AUTO_INCREMENT, "; // Creates the Create
+																									// Table command.
 			// Implicitely,the commandhas a Table name and 1 attribute to be added. More are
 			// added as necessary, as seen below
 			for (int j = 0; j < TagName.length; j++) {// creates the SQL table based on the number of strings in TagName
@@ -713,7 +738,8 @@ public class App {
 					CreateTable += ", ";
 			}
 
-			String AddPK = "EntryID"; // This begins to set to Primary Keys. Automatically, the first attribute is made a PK
+			String AddPK = "EntryID"; // This begins to set to Primary Keys. Automatically, the first attribute is
+										// made a PK
 
 			/*
 			 * if (PKAdditions != null) { // This sets primary Keys too, based on the PK
@@ -733,13 +759,15 @@ public class App {
 			stmt.execute(CreateTable); // Creates the current table
 
 			Statement = "INSERT INTO " + TableName + "(";
-			for (int j = 0; j < TagName.length; j++) {// creates the Prepared Statement based on the number of strings in TagName
+			for (int j = 0; j < TagName.length; j++) {// creates the Prepared Statement based on the number of strings
+														// in TagName
 				Statement += TagName[j];
 				if (j != TagName.length - 1)
 					Statement += ", ";
 			}
 			Statement += ") VALUES(";
-			for (int j = 0; j < TagName.length - 1; j++) {// creates the Prepared Statement based on the number of strings in TagName
+			for (int j = 0; j < TagName.length - 1; j++) {// creates the Prepared Statement based on the number of
+															// strings in TagName
 				Statement += "?, ";
 			}
 
@@ -748,10 +776,12 @@ public class App {
 			// PrintList(TagName);
 			PreparedStatement preparedStatement = conn.prepareStatement(Statement);
 
-			for (int i = 0; i < data.length; i++) { // This adds data to the Prepared String and executes it, one row at a time
+			for (int i = 0; i < data.length; i++) { // This adds data to the Prepared String and executes it, one row at
+													// a time
 				for (int j = 0; j < Limit; j++) {
 					preparedStatement.setString(j + 1, data[i][j]);
-					// sets the Prepared String a number of times equal to the amount of strings in TagName
+					// sets the Prepared String a number of times equal to the amount of strings in
+					// TagName
 				}
 				// System.out.println(preparedStatement);
 				preparedStatement.execute();
@@ -767,7 +797,8 @@ public class App {
 				+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true"
 				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
 				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
-			XSSFSheet spreadsheet = workbook.createSheet("SimilarData"); // This creates a datasheet for the data to beput into
+			XSSFSheet spreadsheet = workbook.createSheet("SimilarData"); // This creates a datasheet for the data to
+																			// beput into
 			XSSFRow row; // creating a row object
 
 			System.out.println("Writing Similar Relations to Excel.");
@@ -783,9 +814,11 @@ public class App {
 			Statement = "SELECT " + Table1Att + " FROM " + Table1 + " WHERE " + Table1Att + " IN ( SELECT " + Table2Att
 					+ " FROM " + Table2 + " WHERE " + Table2Att + " IS NOT NULL);";
 
-			ResultSet rset = stmt.executeQuery(Statement); // Requests the attribute/Attribute Data in Table 1 that alsoappears in Table 2
+			ResultSet rset = stmt.executeQuery(Statement); // Requests the attribute/Attribute Data in Table 1 that
+															// alsoappears in Table 2
 
-			ResultSetMetaData rsmd = rset.getMetaData(); // This parses through the data and outputs in to the Excel sheet, row by row
+			ResultSetMetaData rsmd = rset.getMetaData(); // This parses through the data and outputs in to the Excel
+															// sheet, row by row
 			int columnsNumber = rsmd.getColumnCount();
 			String columnValue = "";
 
@@ -823,7 +856,7 @@ public class App {
 				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
 			String DropTable, CreateTable, FirstInsert;
 			DropTable = "DROP TABLE IF EXISTS LinkTable;";
-			CreateTable = "CREATE TABLE LinkTable (UID INT AUTO_INCREMENT PRIMARY KEY, NAME VARCHAR(255), EMAIL VARCHAR(255), TableID INT);"; 
+			CreateTable = "CREATE TABLE LinkTable (UID INT AUTO_INCREMENT PRIMARY KEY, NAME VARCHAR(255), EMAIL VARCHAR(255), TableID INT);";
 			// Creates the Create Table command.
 			/*
 			 * FirstInsert = "INSERT INTO LinkTable(NAME, EMAIL) VALUES(?,?)";
@@ -883,7 +916,8 @@ public class App {
 					ColumnsNumber = 1;
 
 					ResultSet rset = stmt.executeQuery("SELECT NAME, TableID FROM LinkTable;");
-					// This selects the Name attribute from the Linktable Database to compare to the names recently found in files.
+					// This selects the Name attribute from the Linktable Database to compare to the
+					// names recently found in files.
 					rset.next();
 
 					do {
@@ -920,7 +954,7 @@ public class App {
 					LinkTableMatch = false;
 				}
 
-				AddFK = "ALTER TABLE LinkTable ADD FOREIGN KEY (TableID) REFERENCES " + CurrentTable + " (EntryID);"; 
+				AddFK = "ALTER TABLE LinkTable ADD FOREIGN KEY (TableID) REFERENCES " + CurrentTable + " (EntryID);";
 				// WHERE " + TagName + " = \"" + ParsingData[k][TagIndex] + "\";";
 				System.out.println(AddFK);
 				stmt.executeUpdate(AddFK);
