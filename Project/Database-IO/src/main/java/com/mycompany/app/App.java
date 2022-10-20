@@ -54,18 +54,18 @@ public class App {
 		XSSFWorkbook workbook = new XSSFWorkbook(); // workbook object
 		String BasePath = EstablishFilePath(); // Getter for user's filepath to program
 		String[] SQLElementList = { "Login", "Username", "Password" };
-		String LoginPath = BasePath + File.separator + "target" + File.separator + "LoginInfo.xml"; // Getter for the
-																									// Login information
-																									// file
+		String LoginPath = BasePath + File.separator + "target" + File.separator + "LoginInfo.xml"; 
+		// Getter for the Login information file
 		String[] SQLLogin = GetLoginInfo(LoginPath, SQLElementList); // Retrieves and Stores User SQL Login information
 
-		String FilePath = BasePath + File.separator + "target" + File.separator + "Downloads" + File.separator; // Gets
-																												// Downloads
-																												// folder
-																												// filepath
-																												// for
-																												// downloads
-		File[] fileNames = EstablishFileList(FilePath); // Creates a list of file names in the downloads folder
+		try { // this catches an error when there are no files in the dowloads folder.  
+			String FilePath = BasePath + File.separator + "target" + File.separator + "Downloads" + File.separator; 
+			// Gets Downloads folder filepath for downloads
+			File[] fileNames = EstablishFileList(FilePath); // Creates a list of file names in the downloads folder
+		}
+		catch(Exception e) { //If there are no files in the downloads folder, a blank filelist will be created and handled later 
+			File[] fileNames = new File[0];
+		}
 
 		String URLPath = BasePath + File.separator + "target" + File.separator + "DBInfo.xml";
 		String[] URLList = CreateURLList(URLPath);
@@ -81,8 +81,8 @@ public class App {
 		} else {
 			String fType;
 			String source = "";
-			String[] Table = new String[fileNames.length]; // This will store the Table names for SQL information
-															// retrieval
+			String[] Table = new String[fileNames.length]; 
+			// This will store the Table names for SQL information retrieval
 			String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAME" };
 			String[] tsvTagList = { "School_Name", "Location", "MD_or_DO" };
 			String[] xlsTagList = { "School_Name", "Type", "State" };
@@ -90,17 +90,15 @@ public class App {
 			// String[] Search = GetSearchInputs();
 			String[][] ParsingData;
 			int[] PKAddition = { 1, 2 }; // This denotes what additional Primary Keys there are for a file, given by the
-											// position in the input statements (index of 1, 2, etc...) tsvTagList =
-											// null;
+										// position in the input statements (index of 1, 2, etc...) tsvTagList = null;
 
 			CreateLinkageTable(SQLLogin); // this starts up the linkage table in SQL that we use to link people to their
 											// data across the databases
 
 			for (int i = 0; i < fileNames.length; i++) { // Goes through the list of files and parses from each of them,
-															// delegating to the appropriate method based on the file
-															// extension
-				fType = FilenameUtils.getExtension(fileNames[i].getName()); // Getter for file extension of the current
-																			// file
+														// delegating to the appropriate method based on the file extension
+				fType = FilenameUtils.getExtension(fileNames[i].getName()); 
+				// Getter for file extension of the current file
 				Table[i] = fType + (i + 1); // this stores the tables names in a retrievable list.
 				source = fileNames[i].getName(); // Getter for the source of the data file
 				if (fType.equals("xml")) {
@@ -129,14 +127,14 @@ public class App {
 		}
 
 		System.out.println("Finished");
-		System.exit(0); // Exits the program entirely, without it the program will stall for ~15 seconds
-						// once "finished"
+		System.exit(0); 
+		// Exits the program entirely, without it the program will stall for ~15 seconds once "finished"
 		System.out.println("\n");
 
 	} // ADD NEXT: SQL interaction and test putting a datalist into Excel for output.
 
-	public static String EstablishFilePath() throws Exception { // returns the current filepath of the program by
-																// creating a temp file and getting that file's filepath
+	public static String EstablishFilePath() throws Exception { 
+		// returns the current filepath of the program by creating a temp file and getting that file's filepath
 		File s = new File("f.txt");
 		String FilePath = "";
 		char[] tempChar = s.getAbsolutePath().toCharArray();
@@ -149,8 +147,8 @@ public class App {
 		return FilePath;
 	}
 
-	public static File[] EstablishFileList(String FilePath) throws Exception { // Returns all files at a given
-																				// destination
+	public static File[] EstablishFileList(String FilePath) throws Exception { 
+		//Returns all files at a given destination
 		File f = new File(FilePath);
 		File[] fileN = f.listFiles();
 		File[] fileNames = new File[fileN.length];
@@ -196,8 +194,7 @@ public class App {
 	} */
 
 	/*
-	 * public static void ApacheScrapeWebsite(URL url, String Filename) throws
-	 * Exception {
+	 * public static void ApacheScrapeWebsite(URL url, String Filename) throws Exception {
 	 * copyURLToFile(url, new File(Filename));
 	 * FileHandler.copyURLToFile(url, new File(Filename));
 	 * }
@@ -210,8 +207,8 @@ public class App {
 
 		String txtFields = txtFile.nextLine();
 		Scanner txtFieldsLine = new Scanner(txtFields);
-		txtFieldsLine.useDelimiter(Delim); // Sets the delimiter to a tab, comma, etc... based on the delimeter passed
-											// through
+		txtFieldsLine.useDelimiter(Delim); 
+		// Sets the delimiter to a tab, comma, etc... based on the delimeter passed through
 
 		int index = 0;
 		int Limit = 9050 + 1; // arbitrarily high limit
