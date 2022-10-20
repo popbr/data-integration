@@ -58,13 +58,15 @@ public class App {
 		// Getter for the Login information file
 		String[] SQLLogin = GetLoginInfo(LoginPath, SQLElementList); // Retrieves and Stores User SQL Login information
 
-		try { // this catches an error when there are no files in the dowloads folder.  
-			String FilePath = BasePath + File.separator + "target" + File.separator + "Downloads" + File.separator; 
+		String FilePath = BasePath + File.separator + "target" + File.separator + "Downloads" + File.separator; 
 			// Gets Downloads folder filepath for downloads
-			File[] fileNames = EstablishFileList(FilePath); // Creates a list of file names in the downloads folder
+		File[] fileNames;
+
+		try { // this catches an error when there are no files in the dowloads folder.  
+			fileNames = EstablishFileList(FilePath); // Creates a list of file names in the downloads folder
 		}
 		catch(Exception e) { //If there are no files in the downloads folder, a blank filelist will be created and handled later 
-			File[] fileNames = new File[0];
+			fileNames = new File[0];
 		}
 
 		String URLPath = BasePath + File.separator + "target" + File.separator + "DBInfo.xml";
