@@ -2,22 +2,37 @@
 
 This programs serves to test if your set-up match our requirements.
 
-Test User: DBTestUser
-     Password: wali0e^23
+<!--
+To work properly, you should be running a MySQL Server (8.0) with a user "DBTestUser" whose password is "wali0e^23". You can edit those information 
+-->
 
-
-Using:
-MySQL Server 8.0
-MySQL Workbench 8.0
-Microsoft Visual Studio Code
-See POM file for dependencies
+See POM file for dependencies, you need to be running a be running a MySQL Server (8.0).
 
 For compiling and running the program, please use...
 
-	1. cd ...\MNS_Markdown\Installation_Test\
-	2. mvn compile
-	3. mvn exec:java -Dexec.mainClass="com.mycompany.app.App"
+1. cd Installation_Test
+2. mvn compile
+3. mvn exec:java -Dexec.mainClass="com.mycompany.app.App"
 
+Expected output after executing:
+
+```text
+[INFO] Scanning for projects...
+[INFO]  
+[INFO] ----------------< com.mycompany.app:Installation_Test >-----------------
+[INFO] Building Installation_Test 1.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]  
+[INFO] --- exec-maven-plugin:3.0.0:java (default-cli) @ Installation_Test ---
+Attempting to connect to the Test Data file: Success
+Attempting to Connect, create, and insert to an SQL database: Success
+Attempting to Connect to and output from an SQL database: Success
+Attempting to Create and insert into an Excel: Success
+```
+
+
+
+<!--
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # On Dr. Aubert's computer
@@ -81,4 +96,4 @@ should help in getting started. Obviously, better company, package, url, etc, wi
 
 NOTE TO/FROM NOAH:
 Everything was compiled and run without difficulty. Now, put Maven on the Installation Test and Dependencies Test, after configuring Excel to one sheet.
-
+-->
