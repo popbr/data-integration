@@ -48,7 +48,7 @@ public class App {
         System.out.println("Attempting to Connect, create, and insert to an SQL database: " + Connect_to_SQL(SQLLogin));
         System.out.println("Attempting to Connect to and output from an SQL database: " + Output_from_SQL(SQLLogin));
 
-        System.out.println("Attempting to Create and insert into an Excel: " + Connect_to_Excel(SQLLogin , BasePath));
+        System.out.println("Attempting to Create and insert into an Excel: " + Connect_to_Excel(SQLLogin, BasePath));
 
         //System.out.println( "hey" ); //line for debugging
         System.exit(0);
@@ -154,7 +154,7 @@ public class App {
     }
 
     public static String Output_from_SQL(String[] LoginInfo) throws Exception {
-        
+
         String result;
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" 
             + "?user=" + LoginInfo[0] + "&password=" + LoginInfo[1] + "&allowMultiQueries=true" 
@@ -178,9 +178,7 @@ public class App {
             } 
             else result = "An SQL Database was connected to, but it appears to have the wrong contents.";
             //This is here in case the earler attempt to put items in the databse put something that wansn't "Hello SQL"
-        } 
-            catch (SQLException ex) 
-        { 
+        } catch (SQLException ex) { 
             //In the case of there being nothing to retrieve, or no databse named Testdb, 
             //or some other error, then this is returned
             result = "Failure";
@@ -190,31 +188,10 @@ public class App {
         return result;
     }
     
-    public static String Connect_to_Excel() throws Exception {
+    public static String Connect_to_Excel(String[] LoginInfo, String Path) throws Exception {
+        
+        String result = "failure";
 
-        String result = "";
-        try{
-
-            XSSFWorkbook workbook = new XSSFWorkbook();
-            XSSFSheet spreadsheet = workbook.createSheet("Data");
-            XSSFRow row; // creating a row object
-
-            row = spreadsheet.createRow(0);
-            row.createCell(0).setCellValue("Hola Mundo");
-
-            FileOutputStream out = new FileOutputStream(new File("GFGsheet.xlsx")); // C:\Users\sleep\Desktop\Excel
-            workbook.write(out);
-
-            result = "Success";
-        }
-        catch(Exception e) {
-            result = "Failure";
-            e.printStackTrace();;
-        }
-        return result;
-    }
-    
-    public static void Connect_to_Excel(String[] LoginInfo, String Path) throws Exception {
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Prospectus_DB" 
         + "?user=" + LoginInfo[0] + "&password=" + LoginInfo[1] + "&allowMultiQueries=true" 
         + "&createDatabaseIfNotExist=true" + "&useSSL=true"); 
@@ -257,9 +234,7 @@ public class App {
             out.close();
 
             result = "Success";
-        }
-        catch(Exception e) {
-            result = "Failure";
+        } catch(Exception e) {
             e.printStackTrace();;
         }
         return result;
@@ -271,7 +246,7 @@ public class App {
             //This creates a dummy file that starts as the basis for creating the filepath in the base of the program
             File s = new File("f.txt");
             String FilePath = "";
-
+            
             //This gets the filepath of the dumy file and transforms it into characters, so it can be modified.
             //The modification snips off the charcters "f.txt" so that the only path left is the base filepath
             char[] tempChar = s.getAbsolutePath().toCharArray();
@@ -286,13 +261,14 @@ public class App {
             return FilePath;
 
 	    } catch(Exception e) {
-            result = "Failure";
             e.printStackTrace();;
+            return "failed to find filepath";
         }
-        return result;
     }
 
     public static String[] GetLoginInfo(String LoginType, String Location) throws Exception{	
+        
+        String[] LoginInfo = new String[2];
         try {
 
             //Sets the file to be read to the one passed, test.xml, using the path passed earlier
@@ -307,7 +283,7 @@ public class App {
             NodeList nList = doc.getElementsByTagName("Login");
 
             //This prepares the Login info to be recieved 
-            String[] LoginInfo = new String[2];
+            
             /*This goes through the list of nodes and matches it to nodes that are have login info for SQL
             * When it finds the SQL node, it logs information it has, the Username and Password, it puts it
             * into the prepared string list.
@@ -324,7 +300,6 @@ public class App {
                     LoginInfo[1] = password.getTextContent();
                 }
             }
-        
         } catch(Exception e) {
             e.printStackTrace();
         }
