@@ -54,70 +54,90 @@ public class App {
 		XSSFWorkbook workbook = new XSSFWorkbook(); // workbook object
 		String BasePath = EstablishFilePath(); // Getter for user's filepath to program
 		String[] SQLElementList = { "Login", "Username", "Password" };
-		String LoginPath = BasePath + File.separator + "target" + File.separator + "LoginInfo.xml"; // Getter for the
-																									// Login information
-																									// file
+		String LoginPath = BasePath + File.separator + "target" + File.separator + "LoginInfo.xml"; 
+		// Getter for the Login information file
 		String[] SQLLogin = GetLoginInfo(LoginPath, SQLElementList); // Retrieves and Stores User SQL Login information
 
-		String FilePath = BasePath + File.separator + "target" + File.separator + "Downloads" + File.separator; // Gets
-																												// Downloads
-																												// folder
-																												// filepath
-																												// for
-																												// downloads
-		File[] fileNames = EstablishFileList(FilePath); // Creates a list of file names in the downloads folder
+		String FilePath = BasePath + File.separator + "target" + File.separator + "Downloads" + File.separator; 
+			// Gets Downloads folder filepath for downloads
+		File[] fileNames;
+
+		try { // this catches an error when there are no files in the dowloads folder.  
+			fileNames = EstablishFileList(FilePath); // Creates a list of file names in the downloads folder
+		}
+		catch(Exception e) { //If there are no files in the downloads folder, a blank filelist will be created and handled later 
+			fileNames = new File[0];
+		}
 
 		String URLPath = BasePath + File.separator + "target" + File.separator + "DBInfo.xml";
 		String[] URLList = CreateURLList(URLPath);
-		PrintList(URLList);
+		//PrintList(URLList); //Given that no tampering to the method occurs, CreateURLList works Oct. 20th.
+
 		/* 
 		for (int q = 0; q < URLList.length; q++) {
 			ScrapeWebsite(URLList[q]);
-		} */
-		System.exit(0);
+		} 
+		*/
+
+		//System.exit(0);
+
 		if (fileNames.length == 0) { // This deals with the Fillearray, checking if it populated
-			System.out.println(
-					"There are no databases in the downloads folder.\nPlease download at least one database and try again.");
+			System.out.println("There are no databases in the downloads folder.\nPlease download at least one database before running the program again.");
 		} else {
 			String fType;
 			String source = "";
-			String[] Table = new String[fileNames.length]; // This will store the Table names for SQL information
-															// retrieval
+			String[] Table = new String[fileNames.length]; 
+			// This will store the Table names for SQL information retrieval
 			String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAME" };
 			String[] tsvTagList = { "School_Name", "Location", "MD_or_DO" };
 			String[] xlsTagList = { "School_Name", "Type", "State" };
-			String[] Search = { "Medical University of South Carolina", "ORG_NAME" };
-			// String[] Search = GetSearchInputs();
+
+			String[] Search = new String[2];
+			if (args.length == 2) {
+				Search[0] = args[0];
+				Search[1] = args[1];
+			} else 
+			if (args.length == 1) {
+				Search[0] = args[0];
+				Search[1] = GetSearchInputs("What is the attribute name you would like to search for?");
+			} else {
+				
+				Search[0] = GetSearchInputs("What is the researching entity you would like to search for?");
+				Search[1] = GetSearchInputs("What is the attribute name you would like to search for?");
+				/* 
+				 * there will be another else if here that checks if the user doesn't want to give any search parameters.
+				 * I just haven't implemented it because it'll slow testing down if I have to type in something every time.
+				 */
+				Search[0] = "Medical University of South Carolina";
+				Search[1] = "ORG_NAME";
+			}
+			PrintList(Search);
+			System.exit(0);
+
 			String[][] ParsingData;
-			int[] PKAddition = { 1, 2 }; // This denotes what additional Primary Keys there are for a file, given by the
-											// position in the input statements (index of 1, 2, etc...) tsvTagList =
-											// null;
+			int[] PKAddition = { 1, 2 }; 
+			// This denotes what additional Primary Keys there are for a file, given by the position in the input statements (index of 1, 2, etc...) tsvTagList = null;
 
-			CreateLinkageTable(SQLLogin); // this starts up the linkage table in SQL that we use to link people to their
-											// data across the databases
+			CreateLinkageTable(SQLLogin); 
+			// this starts up the linkage table in SQL that we use to link people to their data across the databases
 
-			for (int i = 0; i < fileNames.length; i++) { // Goes through the list of files and parses from each of them,
-															// delegating to the appropriate method based on the file
-															// extension
-				fType = FilenameUtils.getExtension(fileNames[i].getName()); // Getter for file extension of the current
-																			// file
+			for (int i = 0; i < fileNames.length; i++) { 
+				//Goes through the list of files and parses from each of them, delegating to the appropriate method based on the file extension
+				fType = FilenameUtils.getExtension(fileNames[i].getName()); 
+				// Getter for file extension of the current file
 				Table[i] = fType + (i + 1); // this stores the tables names in a retrievable list.
 				source = fileNames[i].getName(); // Getter for the source of the data file
 				if (fType.equals("xml")) {
-					ParsingData = ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, null, source,
-							SQLLogin, null);
+					ParsingData = ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, null, source, SQLLogin, null);
 					LinkTable(ParsingData, Table[i], SQLLogin, ReporterTagList);
 				} else if (fType.equals("csv")) {
-					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, null, source,
-							SQLLogin, null);
+					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, null, source, SQLLogin, null);
 					LinkTable(ParsingData, Table[i], SQLLogin, ReporterTagList);
 				} else if (fType.equals("tsv")) {
-					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source,
-							SQLLogin, PKAddition);
+					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source, SQLLogin, PKAddition);
 					LinkTable(ParsingData, Table[i], SQLLogin, tsvTagList);
 				} else if (fType.equals("xlsx")) {
-					ParsingData = ParsefromExcel(fileNames[i].getPath(), Table[i], xlsTagList, null, source, SQLLogin,
-							PKAddition);
+					ParsingData = ParsefromExcel(fileNames[i].getPath(), Table[i], xlsTagList, null, source, SQLLogin, PKAddition);
 					LinkTable(ParsingData, Table[i], SQLLogin, xlsTagList);
 				}
 
@@ -129,14 +149,14 @@ public class App {
 		}
 
 		System.out.println("Finished");
-		System.exit(0); // Exits the program entirely, without it the program will stall for ~15 seconds
-						// once "finished"
+		System.exit(0); 
+		// Exits the program entirely, without it the program will stall for ~15 seconds once "finished"
 		System.out.println("\n");
 
 	} // ADD NEXT: SQL interaction and test putting a datalist into Excel for output.
 
-	public static String EstablishFilePath() throws Exception { // returns the current filepath of the program by
-																// creating a temp file and getting that file's filepath
+	public static String EstablishFilePath() throws Exception { 
+		// returns the current filepath of the program by creating a temp file and getting that file's filepath
 		File s = new File("f.txt");
 		String FilePath = "";
 		char[] tempChar = s.getAbsolutePath().toCharArray();
@@ -149,8 +169,8 @@ public class App {
 		return FilePath;
 	}
 
-	public static File[] EstablishFileList(String FilePath) throws Exception { // Returns all files at a given
-																				// destination
+	public static File[] EstablishFileList(String FilePath) throws Exception { 
+		//Returns all files at a given destination
 		File f = new File(FilePath);
 		File[] fileN = f.listFiles();
 		File[] fileNames = new File[fileN.length];
@@ -196,8 +216,7 @@ public class App {
 	} */
 
 	/*
-	 * public static void ApacheScrapeWebsite(URL url, String Filename) throws
-	 * Exception {
+	 * public static void ApacheScrapeWebsite(URL url, String Filename) throws Exception {
 	 * copyURLToFile(url, new File(Filename));
 	 * FileHandler.copyURLToFile(url, new File(Filename));
 	 * }
@@ -210,8 +229,8 @@ public class App {
 
 		String txtFields = txtFile.nextLine();
 		Scanner txtFieldsLine = new Scanner(txtFields);
-		txtFieldsLine.useDelimiter(Delim); // Sets the delimiter to a tab, comma, etc... based on the delimeter passed
-											// through
+		txtFieldsLine.useDelimiter(Delim); 
+		// Sets the delimiter to a tab, comma, etc... based on the delimeter passed through
 
 		int index = 0;
 		int Limit = 9050 + 1; // arbitrarily high limit
@@ -586,8 +605,7 @@ public class App {
 				// <a href="download?DownloadFileName=2021&amp;All=true">
 			}
 		}
-		PrintList(URLInfo);
-
+		//PrintList(URLInfo);
 		return URLInfo; // returns the login information
 	}
 
@@ -703,6 +721,22 @@ public class App {
 		return newList;
 	}
 
+	public static String GetSearchInputs(String Question) throws Exception {
+
+        String Results = "";
+        Scanner myObj = new Scanner(System.in);  // Create a Scanner object
+        
+        System.out.println(Question);
+        Results = myObj.nextLine();  // Reads input for Search entity
+        
+        /*
+         * I know asking users to know thew attribute type is too much.
+         * What I'm thinking is list general attributes, like ORG_Name, 
+         * for them to copy use. is there a better way you might suggest?
+         */ 
+        return Results;
+    }
+
 	public static String GetTime() throws Exception { // Gets the time when called.
 		DateTimeFormatter Format = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
 		// Alternate date format: "dd/MM/yyyy HH:mm:ss"
@@ -797,8 +831,8 @@ public class App {
 				+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true"
 				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
 				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
-			XSSFSheet spreadsheet = workbook.createSheet("SimilarData"); // This creates a datasheet for the data to
-																			// beput into
+			XSSFSheet spreadsheet = workbook.createSheet("SimilarData"); 
+			// This creates a datasheet for the data to beput into
 			XSSFRow row; // creating a row object
 
 			System.out.println("Writing Similar Relations to Excel.");
@@ -877,8 +911,7 @@ public class App {
 		}
 	}
 
-	public static void LinkTable(String[][] ParsingData, String CurrentTable, String[] SQLLogin, String[] TagList)
-			throws Exception {
+	public static void LinkTable(String[][] ParsingData, String CurrentTable, String[] SQLLogin, String[] TagList) throws Exception {
 		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB"
 				+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true"
 				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
@@ -916,20 +949,17 @@ public class App {
 					ColumnsNumber = 1;
 
 					ResultSet rset = stmt.executeQuery("SELECT NAME, TableID FROM LinkTable;");
-					// This selects the Name attribute from the Linktable Database to compare to the
-					// names recently found in files.
+					// This selects the Name attribute from the Linktable Database to compare to the names recently found in files.
 					rset.next();
 
 					do {
 						ColumnValueName = rset.getString(1);
 						ColumnValueTableID = rset.getInt(2);
 
-						// System.out.println(ColumnsNumber + " of " + columnMax + ": " +
-						// ColumnValueName);
+						System.out.println(ColumnsNumber + " of " + columnMax + ": " + ColumnValueName);
 
 						if ((ParsingData[k][TagIndex]).equals(ColumnValueName)) {
-							// "ALTER TABLE LinkTable ADD FOREIGN KEY (TableID) REFERENCES tsv1(EntryID)
-							// WHERE ORG_NAME EQUALS ExampleValue1);"
+							// "ALTER TABLE LinkTable ADD FOREIGN KEY (TableID) REFERENCES tsv1(EntryID) WHERE ORG_NAME EQUALS ExampleValue1);"
 							LinkTableMatch = false;
 						}
 						track++;
