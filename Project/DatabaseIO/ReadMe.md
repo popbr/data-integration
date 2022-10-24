@@ -26,7 +26,6 @@ After Compiling and Executing, the program should be running. If you run into an
     1. for example: `cd C:\Users\JDoe\Desktop\data-integration\Project\Database-IO` will set the current direction to the program's folder
 3. Try uninstalling and reinstalling the program
 4. Open an issue on our [Github](https://github.com/popbr/data-integration)
-    1. Note: Is that something that should be suggested? should it be one of our emails instead?
 
 ## Changing Parameters
 Please ensure that you change the following parameters to suit your use of this program. 
@@ -58,19 +57,20 @@ With an example file, *DBExample.xml*, you would have move this file in to the D
 
 ## Cloning and setting up the enviornment
 1. Clone the repository.
-    > git clone https://github.com/popbr/data-integration.git  
+    `git clone https://github.com/popbr/data-integration.git` 
 2. Run the Installation Test to make sure your use of DatabaseIO will work
     1.  To execute the Installation Test, go the the application's location at
         > C:\Users\sleep\Desktop\data-integration\Installation_Test
    
-    2.  run the following command: `mvn exec:java -Dexec.mainClass="com.mycompany.app.App"`.
+    2. Run the following command: 
+        `mvn exec:java -Dexec.mainClass="com.mycompany.app.App"`.
 3. Make sure to have the following items on your setup
-- MySQL Server 8.0
-- mySQL Workbench 8.0
-- Java technologies:
-    - JDK 16
-    - JRE 1.8 or higher
-- Maven
+    - MySQL Server 8.0
+    - mySQL Workbench 8.0
+    - Java technologies:
+        - JDK 16
+        - JRE 1.8 or higher
+    - Maven
 4. It is strongly suggested you have a Spreadsheet software
     - this Program uses Excel as its default, but other variants, like LibreOffice, work as well   
 
