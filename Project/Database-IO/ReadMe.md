@@ -18,7 +18,7 @@ To compile the program, open an instance of Terminal and navigate to the directo
 ***data-integration/Project/Database-IO/***. Use the command: `mvn compile`. Once compiled, you can now execute it.
 
 ### Execution
-To execute the program, go the the application's location in the directory and run the following command: `mvn exec:java -Dexec.mainClass="com.mycompany.app.App"`.
+To execute the program, go the the application's location in the directory and run the following command: `mvn exec:java -Dexec.mainClass="popbr.App"`.
 
 After Compiling and Executing, the program should be running. If you run into any errors/either step fails, try the following:
 1. Run the installation test and see if the same error persists.
