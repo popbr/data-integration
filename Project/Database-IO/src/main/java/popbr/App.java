@@ -1,4 +1,4 @@
-package com.mycompany.app;
+package popbr;
 
 import java.io.Console;
 import java.io.File;
@@ -102,8 +102,8 @@ public class App {
 				Search[1] = GetSearchInputs("What is the attribute name you would like to search for?");
 			} else {
 				
-				Search[0] = GetSearchInputs("What is the researching entity you would like to search for?");
-				Search[1] = GetSearchInputs("What is the attribute name you would like to search for?");
+				//Search[0] = GetSearchInputs("What is the researching entity you would like to search for?");
+				//Search[1] = GetSearchInputs("What is the attribute name you would like to search for?");
 				/* 
 				 * there will be another else if here that checks if the user doesn't want to give any search parameters.
 				 * I just haven't implemented it because it'll slow testing down if I have to type in something every time.
@@ -111,13 +111,14 @@ public class App {
 				Search[0] = "Medical University of South Carolina";
 				Search[1] = "ORG_NAME";
 			}
-			PrintList(Search);
-			System.exit(0);
+			//PrintList(Search);
+			//System.exit(0);
 
 			String[][] ParsingData;
 			int[] PKAddition = { 1, 2 }; 
 			// This denotes what additional Primary Keys there are for a file, given by the position in the input statements (index of 1, 2, etc...) tsvTagList = null;
 
+			CreateDatabase(SQLLogin);
 			CreateLinkageTable(SQLLogin); 
 			// this starts up the linkage table in SQL that we use to link people to their data across the databases
 
@@ -747,7 +748,7 @@ public class App {
 
 	public static void WriteToSQL(String TableName, String[][] data, String[] SQLLogin, int[] PKAdditions)
 			throws Exception {
-		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB"
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/DatabaseIO"
 				+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true"
 				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
 				Statement stmt = conn.createStatement();) {
@@ -827,7 +828,7 @@ public class App {
 
 	public static void FindSimilarRelation(String Table1, String Table2, String Attribute, String[] SQLLogin,
 			XSSFWorkbook workbook) throws Exception {
-		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB"
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/DatabaseIO"
 				+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true"
 				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
 				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
@@ -883,11 +884,23 @@ public class App {
 		}
 	}
 
+	public static void CreateDatabase(String[] SQLLogin) throws Exception {
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/DatabaseIO" + "?user=" + SQLLogin[0] 
+				+ "&password=" + SQLLogin[1] + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true" + "&useSSL=true");
+			Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
+
+			String DropTable, CreateTable;
+			DropTable = "DROP Database [IF EXISTS] DatabaseIO;";
+			CreateTable = "CREATE Database DatabaseIO;";
+
+
+				}
+			}
+	
 	public static void CreateLinkageTable(String[] SQLLogin) throws Exception {
-		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB"
-				+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true"
-				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
-				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/DatabaseIO" + "?user=" + SQLLogin[0] 
+				+ "&password=" + SQLLogin[1] + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true" + "&useSSL=true");
+			Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
 			String DropTable, CreateTable, FirstInsert;
 			DropTable = "DROP TABLE IF EXISTS LinkTable;";
 			CreateTable = "CREATE TABLE LinkTable (UID INT AUTO_INCREMENT PRIMARY KEY, NAME VARCHAR(255), EMAIL VARCHAR(255), TableID INT);";
@@ -901,20 +914,19 @@ public class App {
 			 * preparedStatement.setString(2, "Yes");
 			 * preparedStatement.setInt(2, 0);
 			 * 
-			 * 
-			 * stmt.execute(DropTable); //Drops the current table, if it exists
-			 * stmt.execute(CreateTable); // Creates the current table
 			 * preparedStatement.execute();
 			 */
+
+			stmt.execute(DropTable); //Drops the current table, if it exists
+			stmt.execute(CreateTable); // Creates the current table
 		} catch (Exception e) {
 			e.printStackTrace(); // Stacktrace for if a crash occurs.
 		}
 	}
 
 	public static void LinkTable(String[][] ParsingData, String CurrentTable, String[] SQLLogin, String[] TagList) throws Exception {
-		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB"
-				+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true"
-				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/DatabaseIO" + "?user=" + SQLLogin[0] 
+				+ "&password=" + SQLLogin[1] + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true" + "&useSSL=true");
 				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) {
 			String Test = "Columbia University";
 			String TagName = "", ColumnValueName, strSelect, AddFK = "";
@@ -973,7 +985,6 @@ public class App {
 						+ " = \"" + ParsingData[k][TagIndex] + "\";");
 				rsetSqlID.next();
 				SqlEntryID = rsetSqlID.getInt(1);
-
 				if (LinkTableMatch) {
 					AddToLinkTable[FKIndex] = track;
 					System.out.println("Inputting: " + ParsingData[k][TagIndex]);
@@ -999,7 +1010,7 @@ public class App {
 
 	public static void WriteToExcel(String DataWanted, String[] Table, XSSFWorkbook workbook, String[] SQLLogin)
 			throws Exception {
-		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB"
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/DatabaseIO"
 				+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true"
 				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
 				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
