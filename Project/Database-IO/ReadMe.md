@@ -22,6 +22,7 @@ To execute the program, go the the application's location in the directory and r
 
 After Compiling and Executing, the program should be running. If you run into any errors/either step fails, try the following:
 1. Run the installation test and see if the same error persists.
+    - https://github.com/popbr/data-integration/tree/main/Installation_Test
 2. Make sure you're executing the commands in the correct directory.
     1. for example: `cd C:\Users\JDoe\Desktop\data-integration\Project\Database-IO` will set the current direction to the program's folder
 3. Try uninstalling and reinstalling the program
