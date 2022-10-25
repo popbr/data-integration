@@ -1,0 +1,6 @@
+<Databases>
+	<DB id= "NSF">
+		<Name>NSF Award Search</Name>
+		<URL>https://www.nsf.gov/awardsearch/download.jsp</URL>
+	</DB>	
+</Databases>
