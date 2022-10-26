@@ -46,7 +46,7 @@ import com.gargoylesoftware.htmlunit.html.DomNodeList;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
-public class App {
+public class DatabaseIO {
 	public static void main(String[] args) throws Exception {
 		Class.forName("com.mysql.cj.jdbc.Driver");
 
@@ -93,7 +93,7 @@ public class App {
 			String[] xlsTagList = { "School_Name", "Type", "State" };
 
 			String[] Search = new String[2];
-			if (args.length == 2) {
+			if (args.length >= 2) {
 				Search[0] = args[0];
 				Search[1] = args[1];
 			} else 
@@ -968,7 +968,7 @@ public class App {
 						ColumnValueName = rset.getString(1);
 						ColumnValueTableID = rset.getInt(2);
 
-						System.out.println(ColumnsNumber + " of " + columnMax + ": " + ColumnValueName);
+						//System.out.println(ColumnsNumber + " of " + columnMax + ": " + ColumnValueName);
 
 						if ((ParsingData[k][TagIndex]).equals(ColumnValueName)) {
 							// "ALTER TABLE LinkTable ADD FOREIGN KEY (TableID) REFERENCES tsv1(EntryID) WHERE ORG_NAME EQUALS ExampleValue1);"
@@ -979,15 +979,13 @@ public class App {
 					} while (rset.next() && ColumnsNumber <= columnMax);
 				}
 
-				System.out.println("SELECT EntryID FROM " + CurrentTable + " WHERE " + TagName + " = \""
-						+ ParsingData[k][TagIndex] + "\";");
-				ResultSet rsetSqlID = stmt.executeQuery("SELECT EntryID FROM " + CurrentTable + " WHERE " + TagName
-						+ " = \"" + ParsingData[k][TagIndex] + "\";");
+				//System.out.println("SELECT EntryID FROM " + CurrentTable + " WHERE " + TagName + " = \"" + ParsingData[k][TagIndex] + "\";");
+				ResultSet rsetSqlID = stmt.executeQuery("SELECT EntryID FROM " + CurrentTable + " WHERE " + TagName + " = \"" + ParsingData[k][TagIndex] + "\";");
 				rsetSqlID.next();
 				SqlEntryID = rsetSqlID.getInt(1);
 				if (LinkTableMatch) {
 					AddToLinkTable[FKIndex] = track;
-					System.out.println("Inputting: " + ParsingData[k][TagIndex]);
+					System.out.println("Inputting: [" + ParsingData[k][TagIndex] + "]");
 					FKIndex++;
 					preparedStatement.setString(1, ParsingData[k][TagIndex]);
 					preparedStatement.setInt(2, SqlEntryID);
@@ -997,7 +995,7 @@ public class App {
 
 				AddFK = "ALTER TABLE LinkTable ADD FOREIGN KEY (TableID) REFERENCES " + CurrentTable + " (EntryID);";
 				// WHERE " + TagName + " = \"" + ParsingData[k][TagIndex] + "\";";
-				System.out.println(AddFK);
+				//System.out.println(AddFK);
 				stmt.executeUpdate(AddFK);
 			}
 		} // UID INT PRIMARY KEY, NAME VARCHAR(255), EMAIL VARCHAR(255))
