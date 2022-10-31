@@ -58,7 +58,7 @@ public class DatabaseIO {
 		// Getter for the Login information file
 		String[] SQLLogin = GetLoginInfo(LoginPath, SQLElementList); // Retrieves and Stores User SQL Login information
 
-		String FilePath = BasePath + File.separator + "target" + File.separator + "Downloads" + File.separator; 
+		String FilePath = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator; 
 			// Gets Downloads folder filepath for downloads
 		File[] fileNames;
 
