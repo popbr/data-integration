@@ -771,7 +771,7 @@ public class DatabaseIO {
 			// Implicitly, the command has a Table name and 1 attribute to be added. More are
 			// added as necessary, as seen below
 			for (int j = 0; j < TagName.length; j++) {// creates the SQL table based on the number of strings in TagName
-				CreateTable += TagName[j] + " VARCHAR(255)";
+				CreateTable += TagName[j] + " TEXT";
 				if (j != TagName.length - 1)
 					CreateTable += ", ";
 			}
