@@ -145,7 +145,7 @@ public class App {
         } 
             catch (SQLException ex) 
         { 
-        //If any errors happen, this is return. There's no need for a faulure condition in the earlier part
+        //If any errors happen, this is return. There's no need for a failure condition in the earlier part
         //as any error that happens would result in SQL getting the error, thus returning this. 
             result = "Failure";
             ex.printStackTrace();
@@ -178,9 +178,9 @@ public class App {
                 result = "Success";
             } 
             else result = "An SQL Database was connected to, but it appears to have the wrong contents.";
-            //This is here in case the earler attempt to put items in the databse put something that wansn't "Hello SQL"
+            //This is here in case the earler attempt to put items in the database put something that wasn't "Hello SQL"
         } catch (SQLException ex) { 
-            //In the case of there being nothing to retrieve, or no databse named Testdb, 
+            //In the case of there being nothing to retrieve, or no database named "Testdb", 
             //or some other error, then this is returned
             result = "Failure";
             ex.printStackTrace();
@@ -248,7 +248,7 @@ public class App {
             File s = new File("f.txt");
             String FilePath = "";
             
-            //This gets the filepath of the dumy file and transforms it into characters, so it can be modified.
+            //This gets the filepath of the dummy file and transforms it into characters, so it can be modified.
             //The modification snips off the charcters "f.txt" so that the only path left is the base filepath
             char[] tempChar = s.getAbsolutePath().toCharArray();
             char[] newChar = new char[tempChar.length - 6];
@@ -283,7 +283,7 @@ public class App {
             //This gets the elements from the document that are Login and makes it into a list of nodes
             NodeList nList = doc.getElementsByTagName("Login");
 
-            //This prepares the Login info to be recieved 
+            //This prepares the Login info to be received 
             
             /*This goes through the list of nodes and matches it to nodes that are have login info for SQL
             * When it finds the SQL node, it logs information it has, the Username and Password, it puts it
