@@ -88,7 +88,7 @@ public class DatabaseIO {
 			String source = "";
 			String[] Table = new String[fileNames.length]; 
 			// This will store the Table names for SQL information retrieval
-			String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAME" };
+			String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME"};// , "PI_NAME" };
 			String[] tsvTagList = { "School_Name", "Location", "MD_or_DO" };
 			String[] xlsTagList = { "School_Name", "Type", "State" };
 
@@ -763,6 +763,7 @@ public class DatabaseIO {
 			String[] TagName = new String[Limit];
 			for (int i = 0; i < Limit; i++) { // gets the attribute names
 				TagName[i] = data[0][i];
+				System.out.print("TagName:" + TagName[i] + "\n data: " + data[0][i]+"\n");
 			}
 
 			CreateTable = "CREATE TABLE " + TableName + " (EntryID INT NOT NULL AUTO_INCREMENT, "; // Creates the Create
