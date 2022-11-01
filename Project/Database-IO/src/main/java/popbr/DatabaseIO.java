@@ -754,7 +754,9 @@ public class DatabaseIO {
 				Statement stmt = conn.createStatement();) {
 
 			String DropTable, CreateTable, Statement;
-			DropTable = "DROP TABLE IF EXISTS " + TableName + ";";
+			DropTable = "DROP TABLE IF EXISTS " + TableName + ";"; // We remove the previous table if it exists.
+			// TODO? Add the possibility of updating the existing table.
+			// Cf. discussion at https://github.com/popbr/data-integration/issues/12
 
 			int Limit = data[0].length; // Sets the amount of attributes to be added
 
