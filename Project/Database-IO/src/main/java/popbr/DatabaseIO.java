@@ -768,7 +768,7 @@ public class DatabaseIO {
 
 			CreateTable = "CREATE TABLE " + TableName + " (EntryID INT NOT NULL AUTO_INCREMENT, "; // Creates the Create
 																									// Table command.
-			// Implicitely,the commandhas a Table name and 1 attribute to be added. More are
+			// Implicitly, the command has a Table name and 1 attribute to be added. More are
 			// added as necessary, as seen below
 			for (int j = 0; j < TagName.length; j++) {// creates the SQL table based on the number of strings in TagName
 				CreateTable += TagName[j] + " VARCHAR(255)";
@@ -789,7 +789,7 @@ public class DatabaseIO {
 			 * }
 			 * }
 			 */
-			CreateTable = CreateTable + ", PRIMARY KEY (" + AddPK + "))"; // This adds thoe PK attributes to the create
+			CreateTable = CreateTable + ", PRIMARY KEY (" + AddPK + "))"; // This adds the PK attributes to the create
 																			// Table command
 			// System.out.println(CreateTable + "\n" + DropTable);
 
@@ -836,7 +836,7 @@ public class DatabaseIO {
 				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
 				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
 			XSSFSheet spreadsheet = workbook.createSheet("SimilarData"); 
-			// This creates a datasheet for the data to beput into
+			// This creates a datasheet for the data to be put into
 			XSSFRow row; // creating a row object
 
 			System.out.println("Writing Similar Relations to Excel.");
@@ -853,7 +853,7 @@ public class DatabaseIO {
 					+ " FROM " + Table2 + " WHERE " + Table2Att + " IS NOT NULL);";
 
 			ResultSet rset = stmt.executeQuery(Statement); // Requests the attribute/Attribute Data in Table 1 that
-															// alsoappears in Table 2
+															// also appears in Table 2
 
 			ResultSetMetaData rsmd = rset.getMetaData(); // This parses through the data and outputs in to the Excel
 															// sheet, row by row
