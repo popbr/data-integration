@@ -54,91 +54,103 @@ public class DatabaseIO {
 		XSSFWorkbook workbook = new XSSFWorkbook(); // workbook object
 		String BasePath = EstablishFilePath(); // Getter for user's filepath to program
 		String[] SQLElementList = { "Login", "Username", "Password" };
-		String LoginPath = BasePath + File.separator + "target" + File.separator + "LoginInfo.xml"; 
+		String LoginPath = BasePath + File.separator + "target" + File.separator + "LoginInfo.xml";
 		// Getter for the Login information file
 		String[] SQLLogin = GetLoginInfo(LoginPath, SQLElementList); // Retrieves and Stores User SQL Login information
 
-		String FilePath = BasePath + File.separator + "target" + File.separator + "Downloads" + File.separator; 
-			// Gets Downloads folder filepath for downloads
+		String FilePath = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator;
+		// Gets Downloads folder filepath for downloads
 		File[] fileNames;
 
-		try { // this catches an error when there are no files in the dowloads folder.  
+		try { // this catches an error when there are no files in the dowloads folder.
 			fileNames = EstablishFileList(FilePath); // Creates a list of file names in the downloads folder
-		}
-		catch(Exception e) { //If there are no files in the downloads folder, a blank filelist will be created and handled later 
+		} catch (Exception e) { // If there are no files in the downloads folder, a blank filelist will be
+								// created and handled later
 			fileNames = new File[0];
 		}
 
 		String URLPath = BasePath + File.separator + "target" + File.separator + "DBInfo.xml";
 		String[] URLList = CreateURLList(URLPath);
-		//PrintList(URLList); //Given that no tampering to the method occurs, CreateURLList works Oct. 20th.
+		// PrintList(URLList); //Given that no tampering to the method occurs,
+		// CreateURLList works Oct. 20th.
 
-		/* 
-		for (int q = 0; q < URLList.length; q++) {
-			ScrapeWebsite(URLList[q]);
-		} 
-		*/
+		/*
+		 * for (int q = 0; q < URLList.length; q++) {
+		 * ScrapeWebsite(URLList[q]);
+		 * }
+		 */
 
-		//System.exit(0);
+		// System.exit(0);
 
 		if (fileNames.length == 0) { // This deals with the Fillearray, checking if it populated
-			System.out.println("There are no databases in the downloads folder.\nPlease download at least one database before running the program again.");
+			System.out.println(
+					"There are no databases in the downloads folder.\nPlease download at least one database before running the program again.");
 		} else {
 			String fType;
 			String source = "";
-			String[] Table = new String[fileNames.length]; 
+			String[] Table = new String[fileNames.length];
 			// This will store the Table names for SQL information retrieval
-			String[] ReporterTagList = { "ORG_CITY", "ORG_NAME", "PI_NAME" }; //"APPLICATION_ID",
+			String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME" };// , "PI_NAME" };
 			String[] tsvTagList = { "School_Name", "Location", "MD_or_DO" };
-			String[] xlsTagList = { "School_Name", "Type", "State" }; 
+			String[] xlsTagList = { "School_Name", "Type", "State" };
 
 			String[] Search = new String[2];
 			if (args.length >= 2) {
 				Search[0] = args[0];
 				Search[1] = args[1];
-			} else 
-			if (args.length == 1) {
+			} else if (args.length == 1) {
 				Search[0] = args[0];
 				Search[1] = GetSearchInputs("What is the attribute name you would like to search for?");
 			} else {
-				
-				//Search[0] = GetSearchInputs("What is the researching entity you would like to search for?");
-				//Search[1] = GetSearchInputs("What is the attribute name you would like to search for?");
-				/* 
-				 * there will be another else if here that checks if the user doesn't want to give any search parameters.
-				 * I just haven't implemented it because it'll slow testing down if I have to type in something every time.
+
+				// Search[0] = GetSearchInputs("What is the researching entity you would like to
+				// search for?");
+				// Search[1] = GetSearchInputs("What is the attribute name you would like to
+				// search for?");
+				/*
+				 * there will be another else if here that checks if the user doesn't want to
+				 * give any search parameters.
+				 * I just haven't implemented it because it'll slow testing down if I have to
+				 * type in something every time.
 				 */
 				Search[0] = "Medical University of South Carolina";
 				Search[1] = "ORG_NAME";
 			}
-			//PrintList(Search);
-			//System.exit(0);
+			// PrintList(Search);
+			// System.exit(0);
 
 			String[][] ParsingData;
-			int[] PKAddition = { 1, 2 }; 
-			// This denotes what additional Primary Keys there are for a file, given by the position in the input statements (index of 1, 2, etc...) tsvTagList = null;
+			int[] PKAddition = { 1, 2 };
+			// This denotes what additional Primary Keys there are for a file, given by the
+			// position in the input statements (index of 1, 2, etc...) tsvTagList = null;
 
 			CreateDatabase(SQLLogin);
-			CreateLinkageTable(SQLLogin); 
-			// this starts up the linkage table in SQL that we use to link people to their data across the databases
+			CreateLinkageTable(SQLLogin);
+			// this starts up the linkage table in SQL that we use to link people to their
+			// data across the databases
 
-			for (int i = 0; i < fileNames.length; i++) { 
-				//Goes through the list of files and parses from each of them, delegating to the appropriate method based on the file extension
-				fType = FilenameUtils.getExtension(fileNames[i].getName()); 
+			for (int i = 0; i < fileNames.length; i++) {
+				// Goes through the list of files and parses from each of them, delegating to
+				// the appropriate method based on the file extension
+				fType = FilenameUtils.getExtension(fileNames[i].getName());
 				// Getter for file extension of the current file
 				Table[i] = fType + (i + 1); // this stores the tables names in a retrievable list.
 				source = fileNames[i].getName(); // Getter for the source of the data file
 				if (fType.equals("xml")) {
-					ParsingData = ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, null, source, SQLLogin, null);
+					ParsingData = ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, null, source,
+							SQLLogin, null);
 					LinkTable(ParsingData, Table[i], SQLLogin, ReporterTagList);
 				} else if (fType.equals("csv")) {
-					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, null, source, SQLLogin, null);
+					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, null, source,
+							SQLLogin, null);
 					LinkTable(ParsingData, Table[i], SQLLogin, ReporterTagList);
 				} else if (fType.equals("tsv")) {
-					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source, SQLLogin, PKAddition);
+					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source,
+							SQLLogin, PKAddition);
 					LinkTable(ParsingData, Table[i], SQLLogin, tsvTagList);
 				} else if (fType.equals("xlsx")) {
-					ParsingData = ParsefromExcel(fileNames[i].getPath(), Table[i], xlsTagList, null, source, SQLLogin, PKAddition);
+					ParsingData = ParsefromExcel(fileNames[i].getPath(), Table[i], xlsTagList, null, source, SQLLogin,
+							PKAddition);
 					LinkTable(ParsingData, Table[i], SQLLogin, xlsTagList);
 				}
 
@@ -150,14 +162,16 @@ public class DatabaseIO {
 		}
 
 		System.out.println("Finished");
-		System.exit(0); 
-		// Exits the program entirely, without it the program will stall for ~15 seconds once "finished"
+		System.exit(0);
+		// Exits the program entirely, without it the program will stall for ~15 seconds
+		// once "finished"
 		System.out.println("\n");
 
 	} // ADD NEXT: SQL interaction and test putting a datalist into Excel for output.
 
-	public static String EstablishFilePath() throws Exception { 
-		// returns the current filepath of the program by creating a temp file and getting that file's filepath
+	public static String EstablishFilePath() throws Exception {
+		// returns the current filepath of the program by creating a temp file and
+		// getting that file's filepath
 		File s = new File("f.txt");
 		String FilePath = "";
 		char[] tempChar = s.getAbsolutePath().toCharArray();
@@ -170,8 +184,8 @@ public class DatabaseIO {
 		return FilePath;
 	}
 
-	public static File[] EstablishFileList(String FilePath) throws Exception { 
-		//Returns all files at a given destination
+	public static File[] EstablishFileList(String FilePath) throws Exception {
+		// Returns all files at a given destination
 		File f = new File(FilePath);
 		File[] fileN = f.listFiles();
 		File[] fileNames = new File[fileN.length];
@@ -192,32 +206,35 @@ public class DatabaseIO {
 		String[] URLList = GetURLList(URL, URLElements);
 		return URLList;
 	}
-	/* 
-	public static void ScrapeWebsite(String URL) throws Exception {
-
-		// initialize a headless browser
-		WebClient webClient = new WebClient();
-
-		// configuring options
-		// webClient.getOptions().setUseInsecureSSL(true);
-		webClient.getOptions().setCssEnabled(false);
-		webClient.getOptions().setJavaScriptEnabled(false);
-		// webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
-		// webClient.getOptions().setThrowExceptionOnScriptError(false);
-
-		HtmlPage page = webClient.getPage(URL); // This fetches the web page
-
-		// selecting all headings
-		DomNodeList<DomNode> headings = page.querySelectorAll("h3._eYtD2XCVieq6emjKBH3m");
-
-		// iterating and extracting
-		for (DomNode content : headings) {
-			System.out.println(content.asText());
-		}
-	} */
+	/*
+	 * public static void ScrapeWebsite(String URL) throws Exception {
+	 * 
+	 * // initialize a headless browser
+	 * WebClient webClient = new WebClient();
+	 * 
+	 * // configuring options
+	 * // webClient.getOptions().setUseInsecureSSL(true);
+	 * webClient.getOptions().setCssEnabled(false);
+	 * webClient.getOptions().setJavaScriptEnabled(false);
+	 * // webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
+	 * // webClient.getOptions().setThrowExceptionOnScriptError(false);
+	 * 
+	 * HtmlPage page = webClient.getPage(URL); // This fetches the web page
+	 * 
+	 * // selecting all headings
+	 * DomNodeList<DomNode> headings =
+	 * page.querySelectorAll("h3._eYtD2XCVieq6emjKBH3m");
+	 * 
+	 * // iterating and extracting
+	 * for (DomNode content : headings) {
+	 * System.out.println(content.asText());
+	 * }
+	 * }
+	 */
 
 	/*
-	 * public static void ApacheScrapeWebsite(URL url, String Filename) throws Exception {
+	 * public static void ApacheScrapeWebsite(URL url, String Filename) throws
+	 * Exception {
 	 * copyURLToFile(url, new File(Filename));
 	 * FileHandler.copyURLToFile(url, new File(Filename));
 	 * }
@@ -230,8 +247,9 @@ public class DatabaseIO {
 
 		String txtFields = txtFile.nextLine();
 		Scanner txtFieldsLine = new Scanner(txtFields);
-		txtFieldsLine.useDelimiter(Delim); 
-		// Sets the delimiter to a tab, comma, etc... based on the delimeter passed through
+		txtFieldsLine.useDelimiter(Delim);
+		// Sets the delimiter to a tab, comma, etc... based on the delimeter passed
+		// through
 
 		int index = 0;
 		int Limit = 9050 + 1; // arbitrarily high limit
@@ -606,7 +624,7 @@ public class DatabaseIO {
 				// <a href="download?DownloadFileName=2021&amp;All=true">
 			}
 		}
-		//PrintList(URLInfo);
+		// PrintList(URLInfo);
 		return URLInfo; // returns the login information
 	}
 
@@ -724,19 +742,19 @@ public class DatabaseIO {
 
 	public static String GetSearchInputs(String Question) throws Exception {
 
-        String Results = "";
-        Scanner myObj = new Scanner(System.in);  // Create a Scanner object
-        
-        System.out.println(Question);
-        Results = myObj.nextLine();  // Reads input for Search entity
-        
-        /*
-         * I know asking users to know thew attribute type is too much.
-         * What I'm thinking is list general attributes, like ORG_Name, 
-         * for them to copy use. is there a better way you might suggest?
-         */ 
-        return Results;
-    }
+		String Results = "";
+		Scanner myObj = new Scanner(System.in); // Create a Scanner object
+
+		System.out.println(Question);
+		Results = myObj.nextLine(); // Reads input for Search entity
+
+		/*
+		 * I know asking users to know thew attribute type is too much.
+		 * What I'm thinking is list general attributes, like ORG_Name,
+		 * for them to copy use. is there a better way you might suggest?
+		 */
+		return Results;
+	}
 
 	public static String GetTime() throws Exception { // Gets the time when called.
 		DateTimeFormatter Format = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
@@ -746,28 +764,33 @@ public class DatabaseIO {
 		return (Format.format(current));
 	}
 
-	public static void WriteToSQL(String TableName, String[][] data, String[] SQLLogin, int[] PKAdditions) throws Exception {
+	public static void WriteToSQL(String TableName, String[][] data, String[] SQLLogin, int[] PKAdditions)
+			throws Exception {
 		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/DatabaseIO"
 				+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true"
 				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
 				Statement stmt = conn.createStatement();) {
 
 			String DropTable, CreateTable, Statement;
-			DropTable = "DROP TABLE IF EXISTS " + TableName + ";";
+			DropTable = "DROP TABLE IF EXISTS " + TableName + ";"; // We remove the previous table if it exists.
+			// TODO? Add the possibility of updating the existing table.
+			// Cf. discussion at https://github.com/popbr/data-integration/issues/12
 
 			int Limit = data[0].length; // Sets the amount of attributes to be added
 
 			String[] TagName = new String[Limit];
 			for (int i = 0; i < Limit; i++) { // gets the attribute names
 				TagName[i] = data[0][i];
+				System.out.print("TagName:" + TagName[i] + "\n data: " + data[0][i] + "\n");
 			}
 
 			CreateTable = "CREATE TABLE " + TableName + " (EntryID INT NOT NULL AUTO_INCREMENT, "; // Creates the Create
 																									// Table command.
-			// Implicitely,the commandhas a Table name and 1 attribute to be added. More are
+			// Implicitly, the command has a Table name and 1 attribute to be added. More
+			// are
 			// added as necessary, as seen below
 			for (int j = 0; j < TagName.length; j++) {// creates the SQL table based on the number of strings in TagName
-				CreateTable += TagName[j] + " VARCHAR(511)";
+				CreateTable += TagName[j] + " TEXT";
 				if (j != TagName.length - 1)
 					CreateTable += ", ";
 			}
@@ -785,7 +808,7 @@ public class DatabaseIO {
 			 * }
 			 * }
 			 */
-			CreateTable = CreateTable + ", PRIMARY KEY (" + AddPK + "))"; // This adds thoe PK attributes to the create
+			CreateTable = CreateTable + ", PRIMARY KEY (" + AddPK + "))"; // This adds the PK attributes to the create
 																			// Table command
 			// System.out.println(CreateTable + "\n" + DropTable);
 
@@ -831,8 +854,8 @@ public class DatabaseIO {
 				+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true"
 				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
 				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
-			XSSFSheet spreadsheet = workbook.createSheet("SimilarData"); 
-			// This creates a datasheet for the data to beput into
+			XSSFSheet spreadsheet = workbook.createSheet("SimilarData");
+			// This creates a datasheet for the data to be put into
 			XSSFRow row; // creating a row object
 
 			System.out.println("Writing Similar Relations to Excel.");
@@ -849,7 +872,7 @@ public class DatabaseIO {
 					+ " FROM " + Table2 + " WHERE " + Table2Att + " IS NOT NULL);";
 
 			ResultSet rset = stmt.executeQuery(Statement); // Requests the attribute/Attribute Data in Table 1 that
-															// alsoappears in Table 2
+															// also appears in Table 2
 
 			ResultSetMetaData rsmd = rset.getMetaData(); // This parses through the data and outputs in to the Excel
 															// sheet, row by row
@@ -884,22 +907,25 @@ public class DatabaseIO {
 	}
 
 	public static void CreateDatabase(String[] SQLLogin) throws Exception {
-		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/DatabaseIO" + "?user=" + SQLLogin[0] 
-				+ "&password=" + SQLLogin[1] + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true" + "&useSSL=true");
-			Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
+		try (Connection conn = DriverManager
+				.getConnection("jdbc:mysql://localhost:3306/DatabaseIO" + "?user=" + SQLLogin[0]
+						+ "&password=" + SQLLogin[1] + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true"
+						+ "&useSSL=true");
+				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
 
 			String DropTable, CreateTable;
 			DropTable = "DROP Database [IF EXISTS] DatabaseIO;";
 			CreateTable = "CREATE Database DatabaseIO;";
 
+		}
+	}
 
-				}
-			}
-	
 	public static void CreateLinkageTable(String[] SQLLogin) throws Exception {
-		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/DatabaseIO" + "?user=" + SQLLogin[0] 
-				+ "&password=" + SQLLogin[1] + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true" + "&useSSL=true");
-			Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
+		try (Connection conn = DriverManager
+				.getConnection("jdbc:mysql://localhost:3306/DatabaseIO" + "?user=" + SQLLogin[0]
+						+ "&password=" + SQLLogin[1] + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true"
+						+ "&useSSL=true");
+				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
 			String DropTable, CreateTable, FirstInsert;
 			DropTable = "DROP TABLE IF EXISTS LinkTable;";
 			CreateTable = "CREATE TABLE LinkTable (UID INT AUTO_INCREMENT PRIMARY KEY, NAME VARCHAR(511), EMAIL VARCHAR(255), TableID INT);";
@@ -916,16 +942,19 @@ public class DatabaseIO {
 			 * preparedStatement.execute();
 			 */
 
-			stmt.execute(DropTable); //Drops the current table, if it exists
+			stmt.execute(DropTable); // Drops the current table, if it exists
 			stmt.execute(CreateTable); // Creates the current table
 		} catch (Exception e) {
 			e.printStackTrace(); // Stacktrace for if a crash occurs.
 		}
 	}
 
-	public static void LinkTable(String[][] ParsingData, String CurrentTable, String[] SQLLogin, String[] TagList) throws Exception {
-		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/DatabaseIO" + "?user=" + SQLLogin[0] 
-				+ "&password=" + SQLLogin[1] + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true" + "&useSSL=true");
+	public static void LinkTable(String[][] ParsingData, String CurrentTable, String[] SQLLogin, String[] TagList)
+			throws Exception {
+		try (Connection conn = DriverManager
+				.getConnection("jdbc:mysql://localhost:3306/DatabaseIO" + "?user=" + SQLLogin[0]
+						+ "&password=" + SQLLogin[1] + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true"
+						+ "&useSSL=true");
 				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) {
 			String Test = "Columbia University";
 			String TagName = "", ColumnValueName, strSelect, AddFK = "";
@@ -960,17 +989,20 @@ public class DatabaseIO {
 					ColumnsNumber = 1;
 
 					ResultSet rset = stmt.executeQuery("SELECT NAME, TableID FROM LinkTable;");
-					// This selects the Name attribute from the Linktable Database to compare to the names recently found in files.
+					// This selects the Name attribute from the Linktable Database to compare to the
+					// names recently found in files.
 					rset.next();
 
 					do {
 						ColumnValueName = rset.getString(1);
 						ColumnValueTableID = rset.getInt(2);
 
-						//System.out.println(ColumnsNumber + " of " + columnMax + ": " + ColumnValueName);
+						// System.out.println(ColumnsNumber + " of " + columnMax + ": " +
+						// ColumnValueName);
 
 						if ((ParsingData[k][TagIndex]).equals(ColumnValueName)) {
-							// "ALTER TABLE LinkTable ADD FOREIGN KEY (TableID) REFERENCES tsv1(EntryID) WHERE ORG_NAME EQUALS ExampleValue1);"
+							// "ALTER TABLE LinkTable ADD FOREIGN KEY (TableID) REFERENCES tsv1(EntryID)
+							// WHERE ORG_NAME EQUALS ExampleValue1);"
 							LinkTableMatch = false;
 						}
 						track++;
@@ -978,8 +1010,10 @@ public class DatabaseIO {
 					} while (rset.next() && ColumnsNumber <= columnMax);
 				}
 
-				//System.out.println("SELECT EntryID FROM " + CurrentTable + " WHERE " + TagName + " = \"" + ParsingData[k][TagIndex] + "\";");
-				ResultSet rsetSqlID = stmt.executeQuery("SELECT EntryID FROM " + CurrentTable + " WHERE " + TagName + " = \"" + ParsingData[k][TagIndex] + "\";");
+				// System.out.println("SELECT EntryID FROM " + CurrentTable + " WHERE " +
+				// TagName + " = \"" + ParsingData[k][TagIndex] + "\";");
+				ResultSet rsetSqlID = stmt.executeQuery("SELECT EntryID FROM " + CurrentTable + " WHERE " + TagName
+						+ " = \"" + ParsingData[k][TagIndex] + "\";");
 				rsetSqlID.next();
 				SqlEntryID = rsetSqlID.getInt(1);
 				if (LinkTableMatch) {
@@ -994,7 +1028,7 @@ public class DatabaseIO {
 
 				AddFK = "ALTER TABLE LinkTable ADD FOREIGN KEY (TableID) REFERENCES " + CurrentTable + " (EntryID);";
 				// WHERE " + TagName + " = \"" + ParsingData[k][TagIndex] + "\";";
-				//System.out.println(AddFK);
+				// System.out.println(AddFK);
 				stmt.executeUpdate(AddFK);
 			}
 		} // UID INT PRIMARY KEY, NAME VARCHAR(255), EMAIL VARCHAR(255))

@@ -33,7 +33,7 @@ public class InstallationTest {
         Class.forName("com.mysql.cj.jdbc.Driver");
 
         //This method returns the base filepath for the program, like C:\User\JohnS\desktop\
-        //With this, the program can keep track of itself, the files it creates, and looks= for necessary files 
+        //With this, the program can keep track of itself, the files it creates, and looks for necessary files 
         String BasePath = EstablishFilePath();
 
         //This creates a path to the example database in the downloads folder
@@ -50,7 +50,6 @@ public class InstallationTest {
 
         System.out.println("Attempting to Create and insert into an Excel: " + Connect_to_Excel(SQLLogin, BasePath));
 
-        //System.out.println( "hey" ); //line for debugging
         System.exit(0);
     }
 
@@ -66,15 +65,17 @@ public class InstallationTest {
             Document doc = dBuilder.parse(inputFile);
             doc.getDocumentElement().normalize();
 
-            //Creates a list of nodes with the XML Element name "Input" from the earler input file
+            //Creates a list of nodes with the XML Element name "Input" from the earlier input file
             NodeList nList = doc.getElementsByTagName("Input");
 
             //A list of strings is created, length of 2, as only 2 things are ever pulled: a Username and Password
             String[] MessageInfo = new String[2];
 
-            /*This goes through the list of nodes established earlier
-            * and, for each node, if it matches the type we want, SQL,
-            * then we pull the data from the node/message, Username and Password */
+            /*
+             * This goes through the list of nodes established earlier
+             * and, for each node, if it matches the type we want, SQL,
+             * then we pull the data from the node/message, Username and Password.
+             */
             
             for (int temp = 0; temp < nList.getLength(); temp++) {
                 Node nNode = nList.item(temp);
@@ -92,13 +93,13 @@ public class InstallationTest {
             //The Username and Password is concatenated
             String Message = MessageInfo[0] + " " + MessageInfo[1];
 
-            //The username and password is tested. If it reads "Hello World", it reads sucess. 
+            //The username and password is tested. If it reads "Hello World", it reads "Success". 
             if (Message.equals("Hello World")) {
                 result = "Success";
             } //If you get this message, then, somewhere, the message failed. 
-            else result = "A file was connected to, it appears to have the wrong contents. \nCheck if any modifictions have occured to the program's target/downloads";
+            else result = "A file was connected to, it appears to have the wrong contents. \nCheck if any modifications have occurred to the program's target/downloads";
         }
-        //This is the exception in case anything happens that forces the method to fail fro reasons other than the data not matching up
+        //This is the exception in case anything happens that forces the method to fail for reasons other than the data not matching up
         catch(Exception e) {
             result = "Failure";
             e.printStackTrace();;
@@ -109,7 +110,7 @@ public class InstallationTest {
     public static String Connect_to_SQL(String[] LoginInfo) throws Exception {
         
         String result = "";
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" 
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Prospectus_DB" 
             + "?user=" + LoginInfo[0] + "&password=" + LoginInfo[1] + "&allowMultiQueries=true" 
             + "&createDatabaseIfNotExist=true" + "&useSSL=true"); 
             Statement stmt = conn.createStatement(); ) {
@@ -144,7 +145,7 @@ public class InstallationTest {
         } 
             catch (SQLException ex) 
         { 
-        //If any errors happen, this is return. There's no need for a faulure condition in the earlier part
+        //If any errors happen, this is return. There's no need for a failure condition in the earlier part
         //as any error that happens would result in SQL getting the error, thus returning this. 
             result = "Failure";
             ex.printStackTrace();
@@ -177,9 +178,9 @@ public class InstallationTest {
                 result = "Success";
             } 
             else result = "An SQL Database was connected to, but it appears to have the wrong contents.";
-            //This is here in case the earler attempt to put items in the databse put something that wansn't "Hello SQL"
+            //This is here in case the earler attempt to put items in the database put something that wasn't "Hello SQL"
         } catch (SQLException ex) { 
-            //In the case of there being nothing to retrieve, or no databse named Testdb, 
+            //In the case of there being nothing to retrieve, or no database named "Testdb", 
             //or some other error, then this is returned
             result = "Failure";
             ex.printStackTrace();
@@ -247,7 +248,7 @@ public class InstallationTest {
             File s = new File("f.txt");
             String FilePath = "";
             
-            //This gets the filepath of the dumy file and transforms it into characters, so it can be modified.
+            //This gets the filepath of the dummy file and transforms it into characters, so it can be modified.
             //The modification snips off the charcters "f.txt" so that the only path left is the base filepath
             char[] tempChar = s.getAbsolutePath().toCharArray();
             char[] newChar = new char[tempChar.length - 6];
@@ -282,7 +283,7 @@ public class InstallationTest {
             //This gets the elements from the document that are Login and makes it into a list of nodes
             NodeList nList = doc.getElementsByTagName("Login");
 
-            //This prepares the Login info to be recieved 
+            //This prepares the Login info to be received 
             
             /*This goes through the list of nodes and matches it to nodes that are have login info for SQL
             * When it finds the SQL node, it logs information it has, the Username and Password, it puts it
