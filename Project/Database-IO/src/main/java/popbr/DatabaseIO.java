@@ -88,9 +88,9 @@ public class DatabaseIO {
 			String source = "";
 			String[] Table = new String[fileNames.length]; 
 			// This will store the Table names for SQL information retrieval
-			String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME", "PI_NAME" };
+			String[] ReporterTagList = { "ORG_CITY", "ORG_NAME", "PI_NAME" }; //"APPLICATION_ID",
 			String[] tsvTagList = { "School_Name", "Location", "MD_or_DO" };
-			String[] xlsTagList = { "School_Name", "Type", "State" };
+			String[] xlsTagList = { "School_Name", "Type", "State" }; 
 
 			String[] Search = new String[2];
 			if (args.length >= 2) {
@@ -380,7 +380,7 @@ public class DatabaseIO {
 
 		txtFieldsLine.close();
 		txtFile.close();
-		// PrintList(data);
+		PrintList(data);
 
 		if (Search != null) { // If no search item was passed (like a specific school), then the program puts
 								// the entire datalist into SQL. Else, the program combs through the data for
@@ -746,8 +746,7 @@ public class DatabaseIO {
 		return (Format.format(current));
 	}
 
-	public static void WriteToSQL(String TableName, String[][] data, String[] SQLLogin, int[] PKAdditions)
-			throws Exception {
+	public static void WriteToSQL(String TableName, String[][] data, String[] SQLLogin, int[] PKAdditions) throws Exception {
 		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/DatabaseIO"
 				+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true"
 				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
@@ -768,7 +767,7 @@ public class DatabaseIO {
 			// Implicitely,the commandhas a Table name and 1 attribute to be added. More are
 			// added as necessary, as seen below
 			for (int j = 0; j < TagName.length; j++) {// creates the SQL table based on the number of strings in TagName
-				CreateTable += TagName[j] + " VARCHAR(255)";
+				CreateTable += TagName[j] + " VARCHAR(511)";
 				if (j != TagName.length - 1)
 					CreateTable += ", ";
 			}
@@ -903,7 +902,7 @@ public class DatabaseIO {
 			Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
 			String DropTable, CreateTable, FirstInsert;
 			DropTable = "DROP TABLE IF EXISTS LinkTable;";
-			CreateTable = "CREATE TABLE LinkTable (UID INT AUTO_INCREMENT PRIMARY KEY, NAME VARCHAR(255), EMAIL VARCHAR(255), TableID INT);";
+			CreateTable = "CREATE TABLE LinkTable (UID INT AUTO_INCREMENT PRIMARY KEY, NAME VARCHAR(511), EMAIL VARCHAR(255), TableID INT);";
 			// Creates the Create Table command.
 			/*
 			 * FirstInsert = "INSERT INTO LinkTable(NAME, EMAIL) VALUES(?,?)";
@@ -985,7 +984,7 @@ public class DatabaseIO {
 				SqlEntryID = rsetSqlID.getInt(1);
 				if (LinkTableMatch) {
 					AddToLinkTable[FKIndex] = track;
-					System.out.println("Inputting: [" + ParsingData[k][TagIndex] + "]");
+					System.out.println("Inputting " + k + ": [" + ParsingData[k][TagIndex] + "]");
 					FKIndex++;
 					preparedStatement.setString(1, ParsingData[k][TagIndex]);
 					preparedStatement.setInt(2, SqlEntryID);

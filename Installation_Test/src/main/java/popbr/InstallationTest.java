@@ -1,4 +1,4 @@
-package com.mycompany.app;
+package popbr;
 
 import java.io.Console;
 import java.io.File;
@@ -28,7 +28,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 
-public class App {
+public class InstallationTest {
     public static void main(String[] args) throws Exception {
         Class.forName("com.mysql.cj.jdbc.Driver");
 
