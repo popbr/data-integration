@@ -17,5 +17,4 @@ jobs:
         run: |
           cd Installation_Test 
           mvn compile
-          mvn exec:java -Dexec.mainClass="com.mycompany.app.App"
-
+          mvn exec:java -Dexec.mainClass="popbr.InstallationTest"
