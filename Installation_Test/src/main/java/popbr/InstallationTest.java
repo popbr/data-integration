@@ -157,7 +157,7 @@ public class InstallationTest {
     public static String Output_from_SQL(String[] LoginInfo) throws Exception {
 
         String result;
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HW_Prospectus_DB" 
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/Prospectus_DB" 
             + "?user=" + LoginInfo[0] + "&password=" + LoginInfo[1] + "&allowMultiQueries=true" 
             + "&createDatabaseIfNotExist=true" + "&useSSL=true");
             Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY); ) {
