@@ -23,3 +23,8 @@ jobs:
           cd Installation_Test 
           mvn compile
           mvn exec:java -Dexec.mainClass="popbr.InstallationTest"
+      - name: Save artifact
+        uses: actions/upload-artifact@v3
+        with:
+            name: my-artifact
+            path: target/GFGsheet.xlsx
