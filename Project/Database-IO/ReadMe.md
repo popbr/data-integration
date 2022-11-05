@@ -18,7 +18,9 @@ To compile the program, open an instance of Terminal and navigate to the directo
 ***data-integration/Project/Database-IO/***. Use the command: `mvn compile`. Once compiled, you can now execute it.
 
 ### Execution
-To execute the program, go the the application's location in the directory and run the following command: `mvn exec:java -Dexec.mainClass="popbr.DatabaseIO"`.
+To execute the program, go the the application's location in the directory and run the following command:
+
+`mvn exec:java -Dexec.mainClass="popbr.DatabaseIO"`.
 
 After Compiling and Executing, the program should be running. If you run into any errors/either step fails, try the following:
 1. Run the installation test and see if the same error persists.
@@ -64,7 +66,7 @@ With an example file, *DBExample.xml*, you would have move this file in to the D
         > C:\Users\sleep\Desktop\data-integration\Installation_Test
    
     2. Run the following command: 
-        `mvn exec:java -Dexec.mainClass="com.mycompany.app.App"`.
+        `mvn exec:java -Dexec.mainClass="popbr.DatabaseIO"`.
 3. Make sure to have the following items on your setup
     - MySQL Server 8.0
     - mySQL Workbench 8.0
