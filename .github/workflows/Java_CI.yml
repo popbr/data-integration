@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v3
       - run: |
           sudo /etc/init.d/mysql start
-          mysql -e "CREATE USER 'testuser'@'localhost' IDENTIFIED BY 'password';" -uroot
+          mysql -e "CREATE USER 'testuser'@'localhost' IDENTIFIED BY 'password';" -uroot -proot
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
