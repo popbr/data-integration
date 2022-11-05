@@ -5,18 +5,12 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    
-    env:
-      DB_USER: 'testuser'
-      DB_PASSWORD: 'password'
-      DB_HOST: localhost
 
     steps:
       - uses: actions/checkout@v3
       - run: |
           sudo /etc/init.d/mysql start
-          mysql -e 'CREATE DATABASE wordpress_test;' -uroot -proot
-          mysql -e 'SHOW DATABASES;' -uroot -proot
+          mysql -e "CREATE USER 'testuser'@'localhost' IDENTIFIED BY 'password';" -uroot
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
