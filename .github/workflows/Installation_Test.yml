@@ -1,7 +1,9 @@
 name: Java CI
 
-on: [push]
-
+on:
+  push:
+    paths:
+      - Installation_Test 
 jobs:
   build:
     runs-on: ubuntu-latest
