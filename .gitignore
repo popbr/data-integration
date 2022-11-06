@@ -15,6 +15,13 @@
 !*/*/*/pom.xml
 !*/*/*/*/pom.xml
 
+# Ignoring the Login information files
+
+!*/LoginInfo.xml
+!*/*/LoginInfo.xml
+!*/*/*/LoginInfo.xml
+!*/*/*/*/LoginInfo.xml
+!*/*/*/*/*/LoginInfo.xml
 
 # Ignoring Maven's targets.
 
