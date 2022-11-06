@@ -1,6 +1,6 @@
 <Logins>
 	<Login id= "SQL">
-		<Username>root</Username>
-		<Password>(Illithid)0</Password>
+		<Username>testuser</Username>
+		<Password>password</Password>
 	</Login>
 </Logins>
