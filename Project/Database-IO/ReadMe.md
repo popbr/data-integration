@@ -35,9 +35,9 @@ Please ensure that you change the following parameters to suit your use of this 
 
 ### Login Information
 Login Information for SQL can be found here:
->*data-integration/Project/Database-IO/target/LoginInfo.xml*
+>*data-integration/Project/Database-IO/target/LoginInfoTemplate.xml*
 
- To change a specific username and password, like SQL, look for that entity's heading and edit the tag contents for Username or Password.
+ To change a specific username and password, like SQL, you must create a new file, titled *LoginInfo.xml* in the *data-integration/Project/Database-IO/target/* folder. To do this efficiently, copy and rename the *LoginInfoTemplate.xml* file. Then edit the username and password fields to match the required information.
 
 ### Websites Scanned
 Websites you wish to be scanned can be added/found in:
