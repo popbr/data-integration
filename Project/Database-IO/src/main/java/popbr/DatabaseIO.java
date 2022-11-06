@@ -54,9 +54,11 @@ public class DatabaseIO {
 		XSSFWorkbook workbook = new XSSFWorkbook(); // workbook object
 		String BasePath = EstablishFilePath(); // Getter for user's filepath to program
 		String[] SQLElementList = { "Login", "Username", "Password" };
-		String LoginPath = BasePath + File.separator + "target" + File.separator + "LoginInfo.xml";
+		String LoginPath = BasePath + File.separator + "target" + File.separator;
 		// Getter for the Login information file
-		String[] SQLLogin = GetLoginInfo(LoginPath, SQLElementList); // Retrieves and Stores User SQL Login information
+		
+		String[] SQLLogin = DetermineSQLLogin(LoginPath);
+		//String[] SQLLogin = GetLoginInfo(LoginPath, SQLElementList); // Retrieves and Stores User SQL Login information
 
 		String FilePath = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator;
 		// Gets Downloads folder filepath for downloads
@@ -117,7 +119,7 @@ public class DatabaseIO {
 				Search[1] = "ORG_NAME";
 			}
 			// PrintList(Search);
-			// System.exit(0);
+			 System.exit(0);
 
 			String[][] ParsingData;
 			int[] PKAddition = { 1, 2 };
@@ -398,7 +400,7 @@ public class DatabaseIO {
 
 		txtFieldsLine.close();
 		txtFile.close();
-		PrintList(data);
+		//PrintList(data);
 
 		if (Search != null) { // If no search item was passed (like a specific school), then the program puts
 								// the entire datalist into SQL. Else, the program combs through the data for
@@ -560,11 +562,10 @@ public class DatabaseIO {
 		}
 	}
 
-	public static String[] GetLoginInfo(String Location, String[] Elements) throws Exception { // returns the login info
-																								// of the specified type
-
-		File inputFile = new File(Location); // This gets the file's location, starts up the XML reader, and normalizes
-												// the file
+	public static String[] GetLoginInfo(String Location, String[] Elements) throws Exception { 
+		// returns the login info of the specified type
+		File inputFile = new File(Location); 
+		// This gets the file's location, starts up the XML reader, and normalizes the file
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		Document doc = dBuilder.parse(inputFile);
@@ -580,11 +581,10 @@ public class DatabaseIO {
 			if (nNode.getNodeType() == Node.ELEMENT_NODE) { // Goes to the element of the type wanted, like SQL
 				Element eElement = (Element) nNode;
 				for (int k = 1; k < (Elements.length); k++) {
-					Info = eElement.getElementsByTagName(Elements[k]).item(0); // Gets and Sets all the specified tags,
-																				// like Username and Password
+					Info = eElement.getElementsByTagName(Elements[k]).item(0); 
+					// Gets and Sets all the specified tags, like Username and Password
 					LoginInfo[(k - 1)] = Info.getTextContent();
 				}
-
 				// <a href="download?DownloadFileName=2021&amp;All=true">
 			}
 		}
@@ -593,6 +593,23 @@ public class DatabaseIO {
 		return LoginInfo; // returns the login information
 	}
 
+	public static String[] DetermineSQLLogin(String Location) throws Exception {
+
+		String[] result = {"", ""};
+		String[] SQLElementList = { "Login", "Username", "Password" };
+		File LoginInfo = new File(Location + "LoginInfo.xml");
+
+		if(LoginInfo.isFile()) {
+			result = GetLoginInfo(Location + "LoginInfo.xml", SQLElementList);
+		} else {
+			result = GetLoginInfo(Location + "LoginInfoTemplate.xml", SQLElementList);
+		}
+
+		PrintList(result);
+		return result;
+
+	}
+	
 	public static String[] GetURLList(String Location, String[] Elements) throws Exception { // returns the login info
 																								// of the specified type
 
@@ -781,14 +798,12 @@ public class DatabaseIO {
 			String[] TagName = new String[Limit];
 			for (int i = 0; i < Limit; i++) { // gets the attribute names
 				TagName[i] = data[0][i];
-				System.out.print("TagName:" + TagName[i] + "\n data: " + data[0][i] + "\n");
+				//System.out.print("TagName:" + TagName[i] + "\n data: " + data[0][i] + "\n");
 			}
 
 			CreateTable = "CREATE TABLE " + TableName + " (EntryID INT NOT NULL AUTO_INCREMENT, "; // Creates the Create
 																									// Table command.
-			// Implicitly, the command has a Table name and 1 attribute to be added. More
-			// are
-			// added as necessary, as seen below
+			// Implicitly, the command has a Table name and 1 attribute to be added. More are added as necessary, as seen below
 			for (int j = 0; j < TagName.length; j++) {// creates the SQL table based on the number of strings in TagName
 				CreateTable += TagName[j] + " TEXT";
 				if (j != TagName.length - 1)
@@ -837,8 +852,7 @@ public class DatabaseIO {
 													// a time
 				for (int j = 0; j < Limit; j++) {
 					preparedStatement.setString(j + 1, data[i][j]);
-					// sets the Prepared String a number of times equal to the amount of strings in
-					// TagName
+					// sets the Prepared String a number of times equal to the amount of strings in TagName
 				}
 				// System.out.println(preparedStatement);
 				preparedStatement.execute();
@@ -871,11 +885,11 @@ public class DatabaseIO {
 			Statement = "SELECT " + Table1Att + " FROM " + Table1 + " WHERE " + Table1Att + " IN ( SELECT " + Table2Att
 					+ " FROM " + Table2 + " WHERE " + Table2Att + " IS NOT NULL);";
 
-			ResultSet rset = stmt.executeQuery(Statement); // Requests the attribute/Attribute Data in Table 1 that
-															// also appears in Table 2
+			ResultSet rset = stmt.executeQuery(Statement); 
+			// Requests the attribute/Attribute Data in Table 1 that also appears in Table 2
 
-			ResultSetMetaData rsmd = rset.getMetaData(); // This parses through the data and outputs in to the Excel
-															// sheet, row by row
+			ResultSetMetaData rsmd = rset.getMetaData(); 
+			// This parses through the data and outputs in to the Excel sheet, row by row
 			int columnsNumber = rsmd.getColumnCount();
 			String columnValue = "";
 
@@ -890,9 +904,9 @@ public class DatabaseIO {
 				for (int i = 1; i <= columnsNumber; i++) // this loop populates a cell with data
 				{
 					columnValue = rset.getString(i);
-					if (rsmd.getColumnName(i) == rsmd.getColumnName(1)) { // this detects if the column at the current
-																			// is equal to the first entry. If so, that
-																			// means we need a new row.
+					if (rsmd.getColumnName(i) == rsmd.getColumnName(1)) { 
+						// this detects if the column at the current is equal to the first entry. 
+						// If so, that means we need a new row.
 						row = spreadsheet.createRow(rowNumber++); // This line create a new row
 					}
 					// System.out.println(columnValue);
@@ -1018,7 +1032,7 @@ public class DatabaseIO {
 				SqlEntryID = rsetSqlID.getInt(1);
 				if (LinkTableMatch) {
 					AddToLinkTable[FKIndex] = track;
-					System.out.println("Inputting " + k + ": [" + ParsingData[k][TagIndex] + "]");
+					//System.out.println("Inputting " + k + ": [" + ParsingData[k][TagIndex] + "]");
 					FKIndex++;
 					preparedStatement.setString(1, ParsingData[k][TagIndex]);
 					preparedStatement.setInt(2, SqlEntryID);
@@ -1075,9 +1089,9 @@ public class DatabaseIO {
 					for (int i = 1; i <= columnsNumber; i++) // this loop populates a cell with data
 					{
 						columnValue = rset.getString(i);
-						if (rsmd.getColumnName(i) == rsmd.getColumnName(1)) { // this detects if the column at the
-																				// current is equal to the first entry.
-																				// If so, that means we need a new row.
+						if (rsmd.getColumnName(i) == rsmd.getColumnName(1)) { 
+							// this detects if the column at the current is equal to the first entry.
+							// If so, that means we need a new row.
 							row = spreadsheet.createRow(rowNumber++); // This line create a new row
 						}
 						// System.out.println(columnValue);
