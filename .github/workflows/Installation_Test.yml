@@ -1,8 +1,9 @@
-name: Java CI
+name: Installation_Test
 
 on:
   push:
-    paths: ['Installation_Test']
+    paths:
+    - 'Installation_Test/'
   
 jobs:
   build:
