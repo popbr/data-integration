@@ -96,7 +96,7 @@ public class InstallationTest {
             else result = "A file was connected to, it appears to have the wrong contents. \nCheck if any modifications have occurred to the program's target/downloads";
         }
         //This is the exception in case anything happens that forces the method to fail for reasons other than the data not matching up
-        catch(Exception e) {
+        catch (Exception e) {
             result = "Failure";
             e.printStackTrace();;
         }
@@ -229,9 +229,8 @@ public class InstallationTest {
             FileOutputStream out = new FileOutputStream(new File(Path + File.separator + "target" + File.separator + "GFGsheet.xlsx")); //C:\Users\sleep\Desktop\Excel
             workbook.write(out);
             out.close();
-
             result = "Success";
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();;
         }
         return result;
@@ -257,7 +256,7 @@ public class InstallationTest {
             //This returns the filepath
             return FilePath;
 
-	    } catch(Exception e) {
+	    } catch (Exception e) {
             e.printStackTrace();;
             return "failed to find filepath";
         }
@@ -297,7 +296,7 @@ public class InstallationTest {
                     LoginInfo[1] = password.getTextContent();
                 }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         // The Username and password is passed on
