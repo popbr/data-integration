@@ -33,11 +33,11 @@ public class InstallationTest {
         String BasePath = EstablishFilePath();
 
         //This creates a path to the example database in the downloads folder
-		String TestFile = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator + "test.xml";
+        String TestFile = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator + "test.xml";
 
         //This creates a path to the login information folder, then goes and retrieves login information for SQL
         String LoginPath = BasePath + File.separator + "target" + File.separator + "LoginInfo.xml";
-		String[] SQLLogin = GetLoginInfo("SQL", LoginPath);
+        String[] SQLLogin = GetLoginInfo("SQL", LoginPath);
 
         System.out.println("Attempting to connect to the Test Data file: " + Connect_to_File(TestFile));
 
@@ -124,7 +124,7 @@ public class InstallationTest {
             CreateTable = "CREATE TABLE " + TestDatabase + " (" + TestAttribute + " VARCHAR(255) PRIMARY KEY)";
     
             stmt.execute(DropTable);
-			stmt.execute(CreateTable);
+        	stmt.execute(CreateTable);
 
             //This sets up what will be a prepared string into the test DB.
             Statement = "INSERT INTO " + TestDatabase + " VALUES (?)";
@@ -300,6 +300,6 @@ public class InstallationTest {
             e.printStackTrace();
         }
         // The Username and password is passed on
-		return LoginInfo;
+        return LoginInfo;
     }
 }
