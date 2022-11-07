@@ -1,10 +1,14 @@
 name: Installation_Test
+ 
+on: [push]
 
-on:
-  push:
-    paths:
-    - 'Installation_Test/*'
-  
+# The following should make this action start only if something is pushed in the relevant folder, but I can't make it work.
+#on:
+#  push:
+#    paths:
+#    - 'Installation_Test/*'
+# 
+
 jobs:
   build:
     runs-on: ubuntu-latest
