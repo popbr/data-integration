@@ -3,7 +3,7 @@ name: Installation_Test
 on:
   push:
     paths:
-    - 'Installation_Test/'
+    - 'Installation_Test/*'
   
 jobs:
   build:
