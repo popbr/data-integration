@@ -1,4 +1,5 @@
 package popbr;
+// mvn exec:java -Dexec.mainClass="popbr.InstallationTest"
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -48,7 +49,7 @@ public class InstallationTest {
         System.exit(0);
     }
 
-    public static String Connect_to_File(String Path) throws Exception {
+    public static String Connect_to_File(final String Path) throws Exception {
 
         String result = "";
         try{
