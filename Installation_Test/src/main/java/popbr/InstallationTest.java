@@ -1,12 +1,8 @@
 package popbr;
 
-import java.io.Console;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
-import org.apache.commons.io.FilenameUtils;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -18,7 +14,6 @@ import java.util.TreeMap;
 
 import java.sql.*;
 
-import java.text.CharacterIterator;
 import java.util.Scanner;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
