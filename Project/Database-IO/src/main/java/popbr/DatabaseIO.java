@@ -22,7 +22,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.FileHandler;
 import java.sql.*;
-
+import java.text.BreakIterator;
 import java.text.CharacterIterator;
 import java.util.Scanner;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -204,6 +204,7 @@ public class DatabaseIO {
 		String[] URLList = GetURLList(URL, URLElements);
 		return URLList;
 	}
+	
 	/*
 	 * public static void ScrapeWebsite(String URL) throws Exception {
 	 * 
@@ -231,8 +232,7 @@ public class DatabaseIO {
 	 */
 
 	/*
-	 * public static void ApacheScrapeWebsite(URL url, String Filename) throws
-	 * Exception {
+	 * public static void ApacheScrapeWebsite(URL url, String Filename) throws Exception {
 	 * copyURLToFile(url, new File(Filename));
 	 * FileHandler.copyURLToFile(url, new File(Filename));
 	 * }
@@ -600,11 +600,11 @@ public class DatabaseIO {
 		return result;
 	}
 	
-	public static String[] GetURLList(String Location, String[] Elements) throws Exception { // returns the login info
-																								// of the specified type
+	public static String[] GetURLList(String Location, String[] Elements) throws Exception { 
+		// returns the login info of the specified type
 
-		File inputFile = new File(Location); // This gets the file's location, starts up the XML reader, and normalizes
-												// the file
+		File inputFile = new File(Location); 
+		// This gets the file's location, starts up the XML reader, and normalizes the file
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		Document doc = dBuilder.parse(inputFile);
@@ -613,8 +613,8 @@ public class DatabaseIO {
 		NodeList nList = doc.getElementsByTagName(Elements[0]); // Looks at the first element
 		Node Info;
 
-		String[] URLInfo = new String[(Elements.length - 1) * nList.getLength()]; // readys the login string to be
-																					// filled and passed
+		String[] URLInfo = new String[(Elements.length - 1) * nList.getLength()]; 
+		// readys the login string to be filled and passed
 		int loop;
 
 		for (int temp = 0; temp < nList.getLength(); temp++) {
@@ -723,6 +723,14 @@ public class DatabaseIO {
 		return SearchData;
 	}
 
+	public static String[] AddRow(String[] data) {
+		String[] newString = new String[data.length+1];
+		for(int i = 0; i < data.length; i++) {
+			newString[i] = data[i];
+		}
+		return newString;
+	}
+
 	public static String[][] AddTagAndData(String[][] input, String Tag, String Data) throws Exception {
 		// adds an attribute and data to each row of a passed array input, the outputs a modified array
 		int InpLength = input.length;
@@ -782,7 +790,6 @@ public class DatabaseIO {
 			data = FillEmpty(data);
 			String DropTable, CreateTable, Statement;
 			DropTable = "DROP TABLE IF EXISTS " + TableName + ";"; // We remove the previous table if it exists.
-			// TODO? Add the possibility of updating the existing table.
 			// Cf. discussion at https://github.com/popbr/data-integration/issues/12
 
 			int Limit = data[0].length; // Sets the amount of attributes to be added
@@ -793,8 +800,8 @@ public class DatabaseIO {
 				//System.out.print("TagName:" + TagName[i] + "\n data: " + data[0][i] + "\n");
 			}
 
-			CreateTable = "CREATE TABLE " + TableName + " (EntryID INT NOT NULL AUTO_INCREMENT, "; // Creates the Create
-																									// Table command.
+			CreateTable = "CREATE TABLE " + TableName + " (Position INT NOT NULL AUTO_INCREMENT, EntryID INT, "; 
+			// Creates the Create Table command.
 			// Implicitly, the command has a Table name and 1 attribute to be added. More are added as necessary, as seen below
 			for (int j = 0; j < TagName.length; j++) {// creates the SQL table based on the number of strings in TagName
 				CreateTable += TagName[j] + " TEXT";
@@ -802,36 +809,34 @@ public class DatabaseIO {
 					CreateTable += ", ";
 			}
 
-			String AddPK = "EntryID"; // This begins to set to Primary Keys. Automatically, the first attribute is
-										// made a PK
+			String AddPK = "Position"; 
+			// This begins to set to Primary Keys. Automatically, the first attribute is made a PK
 
 			/*
-			 * if (PKAdditions != null) { // This sets primary Keys too, based on the PK
-			 * Additions list passed
-			 * for (int num : PKAdditions) { // This can't handle adding more than 1 PK
-			 * right now
+			 * if (PKAdditions != null) { // This sets primary Keys too, based on the PKAdditions list passed
+			 * for (int num : PKAdditions) { // This can't handle adding more than 1 PK right now
 			 * AddPK += ", " + TagName[num];
 			 * //System.out.println(AddPK);
 			 * }
 			 * }
 			 */
-			CreateTable = CreateTable + ", PRIMARY KEY (" + AddPK + "))"; // This adds the PK attributes to the create
-																			// Table command
+			CreateTable = CreateTable + ", PRIMARY KEY (" + AddPK + "))"; 
+			// This adds the PK attributes to the create Table command
 			// System.out.println(CreateTable + "\n" + DropTable);
 
 			stmt.execute(DropTable); // Drops the current table, if it exists
 			stmt.execute(CreateTable); // Creates the current table
 
 			Statement = "INSERT INTO " + TableName + "(";
-			for (int j = 0; j < TagName.length; j++) {// creates the Prepared Statement based on the number of strings
-														// in TagName
+			for (int j = 0; j < TagName.length; j++) {
+				// creates the Prepared Statement based on the number of strings in TagName
 				Statement += TagName[j];
 				if (j != TagName.length - 1)
 					Statement += ", ";
 			}
 			Statement += ") VALUES(";
-			for (int j = 0; j < TagName.length - 1; j++) {// creates the Prepared Statement based on the number of
-															// strings in TagName
+			for (int j = 0; j < TagName.length - 1; j++) {
+				// creates the Prepared Statement based on the number of strings in TagName
 				Statement += "?, ";
 			}
 
@@ -840,8 +845,8 @@ public class DatabaseIO {
 			// PrintList(TagName);
 			PreparedStatement preparedStatement = conn.prepareStatement(Statement);
 
-			for (int i = 0; i < data.length; i++) { // This adds data to the Prepared String and executes it, one row at
-													// a time
+			for (int i = 0; i < data.length; i++) { 
+				// This adds data to the Prepared String and executes it, one row at a time
 				for (int j = 0; j < Limit; j++) {
 					preparedStatement.setString(j + 1, data[i][j]);
 					// sets the Prepared String a number of times equal to the amount of strings in TagName
@@ -919,48 +924,45 @@ public class DatabaseIO {
 				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
 
 			String DropTable, CreateTable;
-			DropTable = "DROP Database [IF EXISTS] DatabaseIO;";
+			DropTable = "DROP Database DatabaseIO;";
 			CreateTable = "CREATE Database DatabaseIO;";
 
+			stmt.executeUpdate(DropTable);
+			stmt.executeUpdate(CreateTable);
 		}
 	}
 
 	public static void CreateLinkageTable(String[] SQLLogin) throws Exception {
 		try (Connection conn = DriverManager
 				.getConnection("jdbc:mysql://localhost:3306/DatabaseIO" + "?user=" + SQLLogin[0]
-						+ "&password=" + SQLLogin[1] + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true"
-						+ "&useSSL=true");
+					+ "&password=" + SQLLogin[1] + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true" + "&useSSL=true");
 				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
-			String DropTable, CreateTable, FirstInsert;
+			String DropTable, CreateTable, InitInsert = "INSERT INTO LinkTable(NAME) VALUES(?)", InitValue = "Test";
+			PreparedStatement preparedStatement = conn.prepareStatement(InitInsert);
+
 			DropTable = "DROP TABLE IF EXISTS LinkTable;";
-			CreateTable = "CREATE TABLE LinkTable (UID INT AUTO_INCREMENT PRIMARY KEY, NAME VARCHAR(511), EMAIL VARCHAR(255), TableID INT);";
+			CreateTable = "CREATE TABLE LinkTable (UID INT AUTO_INCREMENT PRIMARY KEY, NAME TEXT);";
 			// Creates the Create Table command.
 
 			stmt.execute(DropTable); // Drops the current table, if it exists
 			stmt.execute(CreateTable); // Creates the current table
+			preparedStatement.setString(1, InitValue);
+			preparedStatement.execute();
+
 		} catch (Exception e) {
 			e.printStackTrace(); // Stacktrace for if a crash occurs.
 		}
 	}
 
-	public static void LinkTable(String[][] ParsingData, String CurrentTable, String[] SQLLogin, String[] TagList)
-			throws Exception {
-		try (Connection conn = DriverManager
-				.getConnection("jdbc:mysql://localhost:3306/DatabaseIO" + "?user=" + SQLLogin[0]
-						+ "&password=" + SQLLogin[1] + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true"
-						+ "&useSSL=true");
+	public static void LinkTable(String[][] ParsingData, String CurrentTable, String[] SQLLogin, String[] TagList) throws Exception {
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/DatabaseIO" + "?user=" + SQLLogin[0] 
+			+ "&password=" + SQLLogin[1] + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true" + "&useSSL=true");
 				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);) {
-			String Test = "Columbia University";
-			String TagName = "", ColumnValueName, strSelect, AddFK = "";
-			String FKInsert = "INSERT INTO LinkTable(NAME, EMAIL, TableID) VALUES(?,null,?)";
+			String Test = "Columbia University", TagName = "", ColumnValueName = "", AddFK = "", AddID = "";
+			String FKInsert = "INSERT INTO LinkTable(NAME) VALUES(?)";
 			PreparedStatement preparedStatement = conn.prepareStatement(FKInsert);
-			int TagIndex = -1;
-			int InpLength = ParsingData.length;
-			int track = 1;
-			int ColumnsNumber, columnMax, ColumnValueTableID, SqlEntryID;
-			int FKIndex = 0;
-			int[] AddToLinkTable = new int[InpLength];
-			boolean LinkTableMatch = false;
+			int ColumnsNumber = 0, columnMax, ColumnValueTableID = 0, InpLength = ParsingData.length, TagIndex = -1, length = 0;
+			boolean noMatch = false;
 
 			for (int tag = 0; tag < TagList.length; tag++) {
 				if (TagList[tag].equals("School_Name")) {
@@ -974,58 +976,79 @@ public class DatabaseIO {
 
 			System.out.println("Starting Linkage: " + InpLength);
 
+			ResultSet rsetCount = stmt.executeQuery("SELECT COUNT(NAME) FROM LinkTable;");
+			rsetCount.next();
+			columnMax = rsetCount.getInt(1);
+			//System.out.println(columnMax);
+			// This is where the initial length of the LinkTable is established
+
+			ResultSet rset = stmt.executeQuery("SELECT NAME, UID FROM LinkTable;");
+			// This selects the Name attribute from the Linktable Database to compare to the names recently found in files.
+			rset.next();
+			String[] LinkData = new String[columnMax];
+
+			do {
+
+				ColumnValueName = rset.getString(1);
+				ColumnValueTableID = rset.getInt(2);
+
+				LinkData[ColumnsNumber] = ColumnValueName;
+
+				ColumnsNumber++;
+			} while (rset.next()); 
+
+			rset.close();
+
+			//PrintList(LinkData);
 			for (int k = 1; k < InpLength; k++) {
-				LinkTableMatch = true;
-				if (k != 1) {
-					ResultSet rsetCount = stmt.executeQuery("SELECT COUNT(NAME) FROM LinkTable;");
-					rsetCount.next();
-					columnMax = rsetCount.getInt(1);
-					ColumnsNumber = 1;
+				//This iterates  every entity in the parsing data 
+				length = LinkData.length;
+				noMatch = true;
 
-					ResultSet rset = stmt.executeQuery("SELECT NAME, TableID FROM LinkTable;");
-					// This selects the Name attribute from the Linktable Database to compare to the
-					// names recently found in files.
-					rset.next();
+				for(int l = 0; l < length; l++) 
+				{
+					if (ParsingData[k][TagIndex] == LinkData[l]) {
 
-					do {
-						ColumnValueName = rset.getString(1);
+						rset = stmt.executeQuery("SELECT NAME, UID FROM LinkTable WHERE NAME = \"" + ParsingData[k][TagIndex] + "\";");
+						rset.next();
 						ColumnValueTableID = rset.getInt(2);
+						AddID = "Update " + CurrentTable + " SET EntryID = " + ColumnValueTableID + " WHERE " + TagName + " = \"" + ParsingData[k][TagIndex] + "\";";
+						stmt.execute(AddID);
+						rset.close();
 
-						// System.out.println(ColumnsNumber + " of " + columnMax + ": " +
-						// ColumnValueName);
+						noMatch = false;
+						break;
+					} 
+				}	
 
-						if ((ParsingData[k][TagIndex]).equals(ColumnValueName)) {
-							// "ALTER TABLE LinkTable ADD FOREIGN KEY (TableID) REFERENCES tsv1(EntryID)
-							// WHERE ORG_NAME EQUALS ExampleValue1);"
-							LinkTableMatch = false;
-						}
-						track++;
-						ColumnsNumber++;
-					} while (rset.next() && ColumnsNumber <= columnMax);
-				}
+				if(noMatch) {
 
-				// System.out.println("SELECT EntryID FROM " + CurrentTable + " WHERE " +
-				// TagName + " = \"" + ParsingData[k][TagIndex] + "\";");
-				String stmtA = "SELECT EntryID FROM " + CurrentTable + " WHERE " + TagName+ " = \"" + ParsingData[k][TagIndex] + "\";"
-				ResultSet rsetSqlID = stmt.executeQuery(stmtA);
-				rsetSqlID.next();
-				SqlEntryID = rsetSqlID.getInt(1);
-				if (LinkTableMatch) {
-					AddToLinkTable[FKIndex] = track;
-					//System.out.println("Inputting " + k + ": [" + ParsingData[k][TagIndex] + "]");
-					FKIndex++;
 					preparedStatement.setString(1, ParsingData[k][TagIndex]);
-					preparedStatement.setInt(2, SqlEntryID);
-					preparedStatement.execute(); // "INSERT INTO LinkTable(NAME, EMAIL, TableID) VALUES(?,null,?)";
-					LinkTableMatch = false;
-				}
+					preparedStatement.execute(); // "INSERT INTO LinkTable(NAME) VALUES(?)";
 
-				// AddFK = "ALTER TABLE LinkTable ADD FOREIGN KEY (TableID) REFERENCES " + CurrentTable + " (EntryID);";
-				AddFK = "ALTER TABLE " + CurrentTable + " ADD FOREIGN KEY (EntryID) REFERENCES LinkTable (TableID);";
-				// WHERE " + TagName + " = \"" + ParsingData[k][TagIndex] + "\";";
-				// System.out.println(AddFK);
-				stmt.executeUpdate(AddFK);
-			}
+					rset = stmt.executeQuery("SELECT NAME, UID FROM LinkTable WHERE NAME = \"" + ParsingData[k][TagIndex] + "\";");
+					rset.next();
+					ColumnValueTableID = rset.getInt(2);
+					AddID = "Update " + CurrentTable + " SET EntryID = " + ColumnValueTableID + " WHERE " + TagName + " = \"" + ParsingData[k][TagIndex] + "\";";
+					stmt.execute(AddID);
+					rset.close();
+
+					LinkData = AddRow(LinkData);
+					LinkData[LinkData.length-1] = ParsingData[k][TagIndex];	
+
+					noMatch = false;
+
+					//System.out.println("\n" + k + ";");
+					//PrintList(LinkData);
+				}
+						
+			} 
+			
+			AddFK = "ALTER TABLE " + CurrentTable + " ADD FOREIGN KEY (EntryID) REFERENCES LinkTable (UID);";
+			stmt.executeUpdate(AddFK);
+
+			System.out.println("\n");
+			PrintList(LinkData);		
 		} // UID INT PRIMARY KEY, NAME VARCHAR(255), EMAIL VARCHAR(255))
 
 		catch (Exception e) {
