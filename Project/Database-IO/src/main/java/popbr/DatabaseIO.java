@@ -119,10 +119,11 @@ public class DatabaseIO {
 				Search[1] = "ORG_NAME";
 			}
 			// PrintList(Search);
-			 System.exit(0);
+			// System.exit(0);
 
 			String[][] ParsingData;
 			int[] PKAddition = { 1, 2 };
+			int Limit = 50;
 			// This denotes what additional Primary Keys there are for a file, given by the
 			// position in the input statements (index of 1, 2, etc...) tsvTagList = null;
 
@@ -139,20 +140,16 @@ public class DatabaseIO {
 				Table[i] = fType + (i + 1); // this stores the tables names in a retrievable list.
 				source = fileNames[i].getName(); // Getter for the source of the data file
 				if (fType.equals("xml")) {
-					ParsingData = ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, null, source,
-							SQLLogin, null);
+					ParsingData = ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, null, source, SQLLogin, null, Limit);
 					LinkTable(ParsingData, Table[i], SQLLogin, ReporterTagList);
 				} else if (fType.equals("csv")) {
-					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, null, source,
-							SQLLogin, null);
+					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, null, source, SQLLogin, null, Limit);
 					LinkTable(ParsingData, Table[i], SQLLogin, ReporterTagList);
 				} else if (fType.equals("tsv")) {
-					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source,
-							SQLLogin, PKAddition);
+					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "	", tsvTagList, null, source, SQLLogin, PKAddition, Limit);
 					LinkTable(ParsingData, Table[i], SQLLogin, tsvTagList);
 				} else if (fType.equals("xlsx")) {
-					ParsingData = ParsefromExcel(fileNames[i].getPath(), Table[i], xlsTagList, null, source, SQLLogin,
-							PKAddition);
+					ParsingData = ParsefromExcel(fileNames[i].getPath(), Table[i], xlsTagList, null, source, SQLLogin, PKAddition, Limit);
 					LinkTable(ParsingData, Table[i], SQLLogin, xlsTagList);
 				}
 
@@ -165,8 +162,7 @@ public class DatabaseIO {
 
 		System.out.println("Finished");
 		System.exit(0);
-		// Exits the program entirely, without it the program will stall for ~15 seconds
-		// once "finished"
+		// Exits the program. Without it the program will stall for ~15 seconds once "finished"
 		System.out.println("\n");
 
 	} // ADD NEXT: SQL interaction and test putting a datalist into Excel for output.
@@ -243,7 +239,7 @@ public class DatabaseIO {
 	 */
 
 	public static String[][] Parsefromtxt(String txtlocation, String Table, String Delim, String[] TagList,
-			String Search[], String source, String[] SQLLogin, int[] PKAddition) throws Exception {
+			String Search[], String source, String[] SQLLogin, int[] PKAddition, int Limit) throws Exception {
 		// This parses information from a txt file, typically a TSV or CSV
 		Scanner txtFile = new Scanner(new File(txtlocation)); // Opens a text scanner on the file in question
 
@@ -254,7 +250,6 @@ public class DatabaseIO {
 		// through
 
 		int index = 0;
-		int Limit = 9050 + 1; // arbitrarily high limit
 
 		while (txtFile.hasNextLine()) { // Gets the total amount of lines/data entries in a file
 			/*
@@ -381,9 +376,9 @@ public class DatabaseIO {
 					}
 				}
 
-				for (int ind = 0; ind < TagIndex.length; ind++) { // Checks to see if the index/attribute data column
-																	// the reader is on is the same as one of the
-																	// attribute.
+				for (int ind = 0; ind < TagIndex.length; ind++) { 
+					// Checks to see if the index/attribute data column the reader 
+					// is on is the same as one of the attribute.
 					// System.out.println(TagIndex[ind]); //If so, then this current word is data
 					// the program wants, and it stores that data in the list that gets passed into
 					// SQL
@@ -402,9 +397,9 @@ public class DatabaseIO {
 		txtFile.close();
 		//PrintList(data);
 
-		if (Search != null) { // If no search item was passed (like a specific school), then the program puts
-								// the entire datalist into SQL. Else, the program combs through the data for
-								// that search item, and passed only that data to SQL
+		if (Search != null) { 
+			// If no search item was passed (like a specific school), then the program puts the entire datalist into SQL. 
+			//Else, the program combs through the data for that search item, and passed only that data to SQL
 			String[][] SearchData = SearchforAttributeData(data, Search, Limit); // This outputs a new list of data
 																					// relating only to that search item
 			// PrintList(SearchData);
@@ -423,26 +418,26 @@ public class DatabaseIO {
 	}
 
 	public static String[][] ParsefromExcel(String ExcelLocation, String Table, String[] TagList, String Search[],
-			String source, String[] SQLLogin, int[] PKAddition) throws Exception {
+			String source, String[] SQLLogin, int[] PKAddition, int Limit) throws Exception {
 		try {
 			// String WorkbookName = ExcelLocation.getName();
-			OPCPackage pkg = OPCPackage.open(new File(ExcelLocation)); // These lines find the Excel file, workbook, and
-																		// work sheet
+			OPCPackage pkg = OPCPackage.open(new File(ExcelLocation)); 
+			// These lines find the Excel file, workbook, and work sheet
 			XSSFWorkbook ParsingWorkbook = new XSSFWorkbook(pkg);
 			XSSFSheet ParsingSheet = ParsingWorkbook.getSheetAt(0);
 
-			int Limit = 50 + 1; // arbitrary limit
-			int foundLimit = ParsingSheet.getLastRowNum() + 1; // Since Excel starts at 1, and this program starts at 0,
-																// this will make sure the last row isn't skipped over
-			if (foundLimit > Limit) // This checks if the given limit is greater than the max amount of rows in the
-									// sheet.
-				Limit = foundLimit; // If so, then the limit given is changed to the max amount of rows in a sheet
-			// System.out.println(Limit);
+			int foundLimit = 0;
+			if(Limit <= 0) {
+			Limit = ParsingSheet.getLastRowNum() + 1; 
+			} else 
+			// Since Excel starts at 1, and this program starts at 0, this will make sure the last row isn't skipped over
+
+			System.out.println(Limit);
 
 			int[] TagIndex = new int[TagList.length]; // This is where the attribute names are stored
 
-			String[][] data = new String[Limit][TagList.length]; // Here is the list of Attribute data that will be
-																	// passedto SQL
+			String[][] data = new String[Limit][TagList.length]; 
+			// Here is the list of Attribute data that will be passed to SQL
 
 			for (int i = 0; i < TagList.length; i++) { // This makes the first row the Attribute names.
 				data[0][i] = TagList[i];
@@ -456,30 +451,28 @@ public class DatabaseIO {
 			XSSFCell Headercell;
 			String cellValue = "";
 
-			for (int j = 0; j < columnNum; j++) { // this goes through each column and finds the name. If it's in the
-													// taglist, then the program notes its position
+			for (int j = 0; j < columnNum; j++) { 
+				// this goes through each column and finds the name. If it's in the taglist, then the program notes its position
 				Headercell = rowHeader.getCell(j);
 				cellValue = Headercell.getStringCellValue();
 				for (int i = 0; i < TagList.length; i++) {
-					if (TagList[i].equalsIgnoreCase(cellValue)) { // This determines at what index the tags are located
-																	// at for more precise searching
+					if (TagList[i].equalsIgnoreCase(cellValue)) { 
+						// This determines at what index the tags are located at for more precise searching
 						TagIndex[i] = j;
 					}
 				}
-			} // As a fun note, I've been bug testing this for so long that the word "cell"
-				// looks made-up now.
+			} // As a fun note, I've been bug testing this for so long that the word "cell" looks made-up now.
 
 			XSSFCell DataCell;
 			XSSFRow row;
 			cellValue = "";
-			for (int TagName = 0; TagName < TagList.length; TagName++) { // This gets the data from the cells, row by
-																			// row, only if they're under the same row
-																			// as an attribute wanted.
+			for (int TagName = 0; TagName < TagList.length; TagName++) { 
+				// This gets the data from the cells, row by row, only if they're 
+				// under the same row as an attribute wanted.
 				for (int i = 1; i < Limit; i++) {
 					row = ParsingSheet.getRow(i);
 					DataCell = row.getCell(TagIndex[TagName]);
 					cellValue = DataCell.getStringCellValue();
-
 					data[i][TagName] = cellValue;
 				}
 			}
@@ -497,18 +490,18 @@ public class DatabaseIO {
 	}
 
 	public static String[][] ParsefromXML(String Location, String Table, String[] TagList, String Search[],
-			String source, String[] SQLLogin, int[] PKAddition) throws Exception {
+			String source, String[] SQLLogin, int[] PKAddition, int Limit) throws Exception {
 		try {
-			File inputFile = new File(Location); // This gets the file's location, starts up the XML reader, and
-													// normalizes the file
+			File inputFile = new File(Location); 
+			// This gets the file's location, starts up the XML reader, and normalizes the file
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			Document doc = dBuilder.parse(inputFile);
 			doc.getDocumentElement().normalize();
-			int Limit = 50 + 1; // arbitrary limit
+			//Limit = 50 + 1;
 
-			String[][] data = new String[Limit][TagList.length]; // Here is the list of Attribute data that will be
-																	// passedto SQL
+			String[][] data = new String[Limit][TagList.length]; 
+			// Here is the list of Attribute data that will be passed to SQL
 
 			for (int i = 0; i < TagList.length; i++) { // sets the first elements of data to be the Tags
 				data[0][i] = TagList[i];
@@ -537,9 +530,9 @@ public class DatabaseIO {
 			}
 			// PrintList(data);
 
-			if (Search != null) { // If no search item was passed (like a specific school), then the program puts
-									// the entire datalist into SQL. Else, the program combs through the data for
-									// that search item, and passed only that data to SQL
+			if (Search != null) { 
+				// If no search item was passed (like a specific school), then the program puts the entire datalist into SQL. 
+				//Else, the program combs through the data for that search item, and passed only that data to SQL
 				data = SearchforAttributeData(data, Search, Limit);
 				// PrintList(data);
 				data = AddTagAndData(data, "Source", source); // Adds a source attribute
@@ -604,10 +597,7 @@ public class DatabaseIO {
 		} else {
 			result = GetLoginInfo(Location + "LoginInfoTemplate.xml", SQLElementList);
 		}
-
-		PrintList(result);
 		return result;
-
 	}
 	
 	public static String[] GetURLList(String Location, String[] Elements) throws Exception { // returns the login info
@@ -678,8 +668,9 @@ public class DatabaseIO {
 			for (int j = 0; j < input[0].length; j++) {
 				// if(input[i][j].equals("") || input[i][j].equals("\t"))
 				// input[i][j].equals("No_Data_Found");
-				if (input[i][j].isEmpty())
-					input[i][j].equals("No_Data_Found");
+				if (input[i][j]==null || input[i][j] == "") {
+					input[i][j] = "No_Data_Found";
+				}
 			}
 		}
 		return input;
@@ -733,8 +724,7 @@ public class DatabaseIO {
 	}
 
 	public static String[][] AddTagAndData(String[][] input, String Tag, String Data) throws Exception {
-		// adds an attribute and data to each row of a passed array input, the outputs a
-		// modified array
+		// adds an attribute and data to each row of a passed array input, the outputs a modified array
 		int InpLength = input.length;
 		int InpDepth = input[0].length;
 
@@ -786,8 +776,10 @@ public class DatabaseIO {
 		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/DatabaseIO"
 				+ "?user=" + SQLLogin[0] + "&password=" + SQLLogin[1] + "&allowMultiQueries=true"
 				+ "&createDatabaseIfNotExist=true" + "&useSSL=true");
-				Statement stmt = conn.createStatement();) {
+				Statement stmt = conn.createStatement();) 
+			{
 
+			data = FillEmpty(data);
 			String DropTable, CreateTable, Statement;
 			DropTable = "DROP TABLE IF EXISTS " + TableName + ";"; // We remove the previous table if it exists.
 			// TODO? Add the possibility of updating the existing table.
@@ -923,8 +915,7 @@ public class DatabaseIO {
 	public static void CreateDatabase(String[] SQLLogin) throws Exception {
 		try (Connection conn = DriverManager
 				.getConnection("jdbc:mysql://localhost:3306/DatabaseIO" + "?user=" + SQLLogin[0]
-						+ "&password=" + SQLLogin[1] + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true"
-						+ "&useSSL=true");
+					+ "&password=" + SQLLogin[1] + "&allowMultiQueries=true" + "&createDatabaseIfNotExist=true" + "&useSSL=true");
 				Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
 
 			String DropTable, CreateTable;
@@ -944,17 +935,6 @@ public class DatabaseIO {
 			DropTable = "DROP TABLE IF EXISTS LinkTable;";
 			CreateTable = "CREATE TABLE LinkTable (UID INT AUTO_INCREMENT PRIMARY KEY, NAME VARCHAR(511), EMAIL VARCHAR(255), TableID INT);";
 			// Creates the Create Table command.
-			/*
-			 * FirstInsert = "INSERT INTO LinkTable(NAME, EMAIL) VALUES(?,?)";
-			 * 
-			 * PreparedStatement preparedStatement = conn.prepareStatement(FirstInsert);
-			 * 
-			 * preparedStatement.setString(1, "Noah Sleeper");
-			 * preparedStatement.setString(2, "Yes");
-			 * preparedStatement.setInt(2, 0);
-			 * 
-			 * preparedStatement.execute();
-			 */
 
 			stmt.execute(DropTable); // Drops the current table, if it exists
 			stmt.execute(CreateTable); // Creates the current table
@@ -1026,8 +1006,8 @@ public class DatabaseIO {
 
 				// System.out.println("SELECT EntryID FROM " + CurrentTable + " WHERE " +
 				// TagName + " = \"" + ParsingData[k][TagIndex] + "\";");
-				ResultSet rsetSqlID = stmt.executeQuery("SELECT EntryID FROM " + CurrentTable + " WHERE " + TagName
-						+ " = \"" + ParsingData[k][TagIndex] + "\";");
+				String stmtA = "SELECT EntryID FROM " + CurrentTable + " WHERE " + TagName+ " = \"" + ParsingData[k][TagIndex] + "\";"
+				ResultSet rsetSqlID = stmt.executeQuery(stmtA);
 				rsetSqlID.next();
 				SqlEntryID = rsetSqlID.getInt(1);
 				if (LinkTableMatch) {
@@ -1040,7 +1020,8 @@ public class DatabaseIO {
 					LinkTableMatch = false;
 				}
 
-				AddFK = "ALTER TABLE LinkTable ADD FOREIGN KEY (TableID) REFERENCES " + CurrentTable + " (EntryID);";
+				// AddFK = "ALTER TABLE LinkTable ADD FOREIGN KEY (TableID) REFERENCES " + CurrentTable + " (EntryID);";
+				AddFK = "ALTER TABLE " + CurrentTable + " ADD FOREIGN KEY (EntryID) REFERENCES LinkTable (TableID);";
 				// WHERE " + TagName + " = \"" + ParsingData[k][TagIndex] + "\";";
 				// System.out.println(AddFK);
 				stmt.executeUpdate(AddFK);
