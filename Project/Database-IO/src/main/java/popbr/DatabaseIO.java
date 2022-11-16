@@ -66,8 +66,8 @@ public class DatabaseIO {
 
 		try { // this catches an error when there are no files in the dowloads folder.
 			fileNames = EstablishFileList(FilePath); // Creates a list of file names in the downloads folder
-		} catch (Exception e) { // If there are no files in the downloads folder, a blank filelist will be
-								// created and handled later
+		} catch (Exception e) { 
+			// If there are no files in the downloads folder, a blank filelist will be created and handled later
 			fileNames = new File[0];
 		}
 
