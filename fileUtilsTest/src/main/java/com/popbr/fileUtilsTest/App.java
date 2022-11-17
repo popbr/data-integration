@@ -16,17 +16,13 @@ public class App {
         String url = "https://www.nsf.gov/awardsearch/download?DownloadFileName="; // don't just assign the string to the url: create a URL object with it. https://www.nsf.gov/awardsearch/download.jsp
         String Fname = "target" + File.separator +"webpages" + File.separator; // Give some extension to your file (here, I added ".html").
         String Fdestination = "target" + File.separator +"downloads" + File.separator; 
-        Fdestination = "C:" + File.separator + "Users" + File.separator + "sleep" + File.separator + "Desktop" + File.separator + "fileUtilsTest" + File.separator + "target" + File.separator + "downloads";
-
-        listFiles(Fdestination);
-
+        
         //scrapeWebsite(url, Fname);
-        /*
-        for(int i = 2000; i < 2003; i++) {
+        
+        for(int i = 2000; i < 2002; i++) {
             getFile(url + i + "&All=true", Fname + i + "DB.zip");
-            unzipFile( Fname + i + "DB.zip", Fdestination + i + "DB");
+            unzipFile( Fname + i + "DB.zip", Fdestination);
         } 
-        */
 
     }
 
@@ -105,27 +101,4 @@ public class App {
     
         return destFile;
     }
-
-    public static void listFiles(String destinationDir) {
-        
-        File f = new File(destinationDir);
-		File[] fileN = f.listFiles(); // target\downloads\2000DB
-
-        for (int i = 0; i < fileN.length; i++) {
-            f = fileN[i];
-            File[] fileInFileN = f.listFiles();
-            //System.out.println(fileN[i]);
-            for(int j = 0; j < fileInFileN.length; j++) {
-                //System.out.println(fileInFileN[j]);
-                moveFile(fileInFileN[j], destinationDir);
-            }
-        }
-    }
-    
-    public static void moveFile(File sourceFile, String targetPath) {
-
-        File fileToMove = sourceFile;
-        fileToMove.renameTo(new File(targetPath));
-    }
-
 } //https://www.nsf.gov/awardsearch/download?DownloadFileName=2023&All=true
