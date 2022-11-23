@@ -8,6 +8,10 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
+import java.io.BufferedInputStream;
+import java.util.zip.*;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -50,6 +54,8 @@ public class DatabaseIO {
 	public static void main(String[] args) throws Exception {
 		Class.forName("com.mysql.cj.jdbc.Driver");
 
+		final long startTime = System.nanoTime();
+		
 		System.out.println("\n");
 		XSSFWorkbook workbook = new XSSFWorkbook(); // workbook object
 		String BasePath = EstablishFilePath(); // Getter for user's filepath to program
@@ -64,6 +70,20 @@ public class DatabaseIO {
 		// Gets Downloads folder filepath for downloads
 		File[] fileNames;
 
+		String webScrapePath =  BasePath + File.separator + "target" + File.separator + "webpages" + File.separator;
+		String[][] downloadLocationsList = {{ "NSF", "https://www.nsf.gov/awardsearch/download?DownloadFileName="}};
+
+		/* 
+		for(int h = 0; h < downloadLocationsList.length; h++) {
+			if (downloadLocationsList[h][0] == "NSF") {
+				for(int i = 2000; i < 2001; i++) {
+					getFile(downloadLocationsList[h][1] + i + "&All=true", BasePath + i + "DB.zip");
+					unzipFile( BasePath + i + "DB.zip", FilePath);
+				}
+			}
+		} 
+		*/
+
 		try { // this catches an error when there are no files in the dowloads folder.
 			fileNames = EstablishFileList(FilePath); // Creates a list of file names in the downloads folder
 		} catch (Exception e) { 
@@ -76,13 +96,7 @@ public class DatabaseIO {
 		// PrintList(URLList); //Given that no tampering to the method occurs,
 		// CreateURLList works Oct. 20th.
 
-		/*
-		 * for (int q = 0; q < URLList.length; q++) {
-		 * ScrapeWebsite(URLList[q]);
-		 * }
-		 */
-
-		// System.exit(0);
+		//System.exit(0);
 
 		if (fileNames.length == 0) { // This deals with the Fillearray, checking if it populated
 			System.out.println(
@@ -93,6 +107,7 @@ public class DatabaseIO {
 			String[] Table = new String[fileNames.length];
 			// This will store the Table names for SQL information retrieval
 			String[] ReporterTagList = { "APPLICATION_ID", "ORG_CITY", "ORG_NAME" };// , "PI_NAME" };
+			String[][] nsfTagList = { {"AwardAmount", "Name", "SignBlockName"}, {"Award", "Institution", "ProgramOfficer"} };
 			String[] tsvTagList = { "School_Name", "Location", "MD_or_DO" };
 			String[] xlsTagList = { "School_Name", "Type", "State" };
 
@@ -140,8 +155,8 @@ public class DatabaseIO {
 				Table[i] = fType + (i + 1); // this stores the tables names in a retrievable list.
 				source = fileNames[i].getName(); // Getter for the source of the data file
 				if (fType.equals("xml")) {
-					ParsingData = ParsefromXML(fileNames[i].getPath(), Table[i], ReporterTagList, null, source, SQLLogin, null, Limit);
-					LinkTable(ParsingData, Table[i], SQLLogin, ReporterTagList);
+					ParsingData = ParsefromSingleXML(fileNames[i].getPath(), Table[i], nsfTagList, null, source, SQLLogin, null, Limit);
+					//LinkTable(ParsingData, Table[i], SQLLogin, ReporterTagList);
 				} else if (fType.equals("csv")) {
 					ParsingData = Parsefromtxt(fileNames[i].getPath(), Table[i], "\",\"", ReporterTagList, null, source, SQLLogin, null, Limit);
 					LinkTable(ParsingData, Table[i], SQLLogin, ReporterTagList);
@@ -161,11 +176,13 @@ public class DatabaseIO {
 		}
 
 		System.out.println("Finished");
+		final long duration = System.nanoTime() - startTime;
+		System.out.println(duration);
 		System.exit(0);
 		// Exits the program. Without it the program will stall for ~15 seconds once "finished"
 		System.out.println("\n");
 
-	} // ADD NEXT: SQL interaction and test putting a datalist into Excel for output.
+	}
 
 	public static String EstablishFilePath() throws Exception {
 		// returns the current filepath of the program by creating a temp file and
@@ -205,38 +222,71 @@ public class DatabaseIO {
 		return URLList;
 	}
 	
-	/*
-	 * public static void ScrapeWebsite(String URL) throws Exception {
-	 * 
-	 * // initialize a headless browser
-	 * WebClient webClient = new WebClient();
-	 * 
-	 * // configuring options
-	 * // webClient.getOptions().setUseInsecureSSL(true);
-	 * webClient.getOptions().setCssEnabled(false);
-	 * webClient.getOptions().setJavaScriptEnabled(false);
-	 * // webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
-	 * // webClient.getOptions().setThrowExceptionOnScriptError(false);
-	 * 
-	 * HtmlPage page = webClient.getPage(URL); // This fetches the web page
-	 * 
-	 * // selecting all headings
-	 * DomNodeList<DomNode> headings =
-	 * page.querySelectorAll("h3._eYtD2XCVieq6emjKBH3m");
-	 * 
-	 * // iterating and extracting
-	 * for (DomNode content : headings) {
-	 * System.out.println(content.asText());
-	 * }
-	 * }
-	 */
+	public static void getFile(String fileURL, String destination) {
+        System.out.println("Retrieving file...");
+        try (BufferedInputStream in = new BufferedInputStream(new URL(fileURL).openStream());          
+            FileOutputStream fileOutputStream = new FileOutputStream(destination)) {
+            byte dataBuffer[] = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+                fileOutputStream.write(dataBuffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	/*
-	 * public static void ApacheScrapeWebsite(URL url, String Filename) throws Exception {
-	 * copyURLToFile(url, new File(Filename));
-	 * FileHandler.copyURLToFile(url, new File(Filename));
-	 * }
-	 */
+    public static void unzipFile(String fileURL, String destination) {
+        System.out.println("Unzipping file...");
+        try {
+            String fileZip = fileURL;
+            File destDir = new File(destination);
+            byte[] buffer = new byte[1024];
+            ZipInputStream zis = new ZipInputStream(new FileInputStream(fileZip));
+            ZipEntry zipEntry = zis.getNextEntry();
+            while (zipEntry != null) {
+                File newFile = newFile(destDir, zipEntry);
+                if (zipEntry.isDirectory()) {
+                    if (!newFile.isDirectory() && !newFile.mkdirs()) {
+                        throw new IOException("Failed to create directory " + newFile);
+                    }
+                } else {
+                    // fix for Windows-created archives
+                    File parent = newFile.getParentFile();
+                    if (!parent.isDirectory() && !parent.mkdirs()) {
+                        throw new IOException("Failed to create directory " + parent);
+                    }
+                    
+                    // write file content
+                    FileOutputStream fos = new FileOutputStream(newFile);
+                    int len;
+                    while ((len = zis.read(buffer)) > 0) {
+                        fos.write(buffer, 0, len);
+                    }
+                    fos.close();
+                }
+                zipEntry = zis.getNextEntry();
+            }
+            zis.closeEntry();
+            zis.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
+        File destFile = new File(destinationDir, zipEntry.getName());
+    
+        String destDirPath = destinationDir.getCanonicalPath();
+        String destFilePath = destFile.getCanonicalPath();
+    
+        if (!destFilePath.startsWith(destDirPath + File.separator)) {
+            throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
+        }
+    
+        return destFile;
+    }
 
 	public static String[][] Parsefromtxt(String txtlocation, String Table, String Delim, String[] TagList,
 			String Search[], String source, String[] SQLLogin, int[] PKAddition, int Limit) throws Exception {
@@ -489,8 +539,80 @@ public class DatabaseIO {
 		}
 	}
 
-	public static String[][] ParsefromXML(String Location, String Table, String[] TagList, String Search[],
-			String source, String[] SQLLogin, int[] PKAddition, int Limit) throws Exception {
+	public static String[][] ParsefromSingleXML(String Location, String Table, String[][] TagList, String Search[], String source, String[] SQLLogin, int[] PKAddition, int Limit) {
+		try {
+			System.out.println("Start Parsing from XML");
+
+			String[][] data = new String[1][TagList[1].length]; 
+
+			System.out.println(TagList[1].length);
+
+			for(int i = 0 ; i<TagList[1].length; i++) { // this goes through a files and searches for the tags and their data
+				data[0][i] = ParseXMLTag(Location, TagList[0][i], TagList[1][i]);
+			}
+			//PrintList(data);
+			
+
+			if (Search != null) { 
+				// If no search item was passed (like a specific school), then the program puts the entire datalist into SQL. 
+				//Else, the program combs through the data for that search item, and passed only that data to SQL
+				data = SearchforAttributeData(data, Search, Limit);
+				// PrintList(data);
+				data = AddTagAndData(data, "Source", source); // Adds a source attribute
+				data = AddTagAndData(data, "Time_Retrieved", GetTime()); // Adds a Time retrieved attribute
+				WriteToSQL(Table, data, SQLLogin, null); // Inputs the searched list into SQL
+				return data;
+			} else {
+				data = AddTagAndData(data, "Source", source); // Adds a source attribute
+				data = AddTagAndData(data, "Time_Retrieved", GetTime()); // Adds a Time retrieved attribute
+				// PrintList(data);
+				WriteToSQL(Table, data, SQLLogin, null); // Inputs the whole data list into SQL
+				return data;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static String ParseXMLTag(String Location, String element, String tag) {
+		try {
+			File inputFile = new File(Location); 
+			// This gets the file's location, starts up the XML reader, and normalizes the file
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(inputFile);
+			doc.getDocumentElement().normalize();
+
+			NodeList nList = doc.getElementsByTagName(tag);
+
+			String data = "";
+			for (int temp = 0; temp < nList.getLength(); temp++)
+			{
+				Node dataElement;
+				Node nNode = nList.item(temp);
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) 
+				{
+					Element eElement = (Element) nNode;
+
+					dataElement = eElement.getElementsByTagName(element).item(0);
+					if (dataElement != null) 
+					{
+						data = dataElement.getTextContent(); // maybe encapsul this in a try catch?
+					} 
+					else data = "NO_DATA_FOUND";
+				}
+			}
+			return data;
+
+		}	catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static String[][] ParsefromXML(String Location, String Table, String[] TagList, String Search[], String source, String[] SQLLogin, int[] PKAddition, int Limit) throws Exception {
 		try {
 			File inputFile = new File(Location); 
 			// This gets the file's location, starts up the XML reader, and normalizes the file
@@ -1048,7 +1170,7 @@ public class DatabaseIO {
 			stmt.executeUpdate(AddFK);
 
 			System.out.println("\n");
-			PrintList(LinkData);		
+			//PrintList(LinkData);		
 		} // UID INT PRIMARY KEY, NAME VARCHAR(255), EMAIL VARCHAR(255))
 
 		catch (Exception e) {

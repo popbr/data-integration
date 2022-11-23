@@ -19,7 +19,7 @@ public class App {
         
         //scrapeWebsite(url, Fname);
         
-        for(int i = 2000; i < 2002; i++) {
+        for(int i = 2000; i < 2001; i++) {
             getFile(url + i + "&All=true", Fname + i + "DB.zip");
             unzipFile( Fname + i + "DB.zip", Fdestination);
         } 
