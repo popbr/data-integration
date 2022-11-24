@@ -17,7 +17,7 @@ This project relies on the use of different [technologies](#technologies) to fun
 
 The purpose, motivation and challenges behind this project are presented in
 
-C. Aubert, A. Balas, T. Townsend, N. Sleeper, C. Tran, _Data integration for the study of outstanding productivity in biomedical research_, in: Proceedings of the 15th International Conference on [Current Research Information Systems (Cris2022)](https://cris2022.srce.hr/), 2022. <http://hdl.handle.net/11366/1987>.
+C. Aubert, A. Balas, T. Townsend, N. Sleeper, C.J. Tran, _Data integration for the study of outstanding productivity in biomedical research_, in: Proceedings of the 15th International Conference on [Current Research Information Systems (Cris2022)](https://cris2022.srce.hr/), Procedia Computer Science, Volume 211, 2022, pp. 196-200. <http://hdl.handle.net/11366/1987>, <https://doi.org/10.1016/j.procs.2022.10.191>.
 
 ## Technologies
 
