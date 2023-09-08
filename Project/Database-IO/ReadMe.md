@@ -35,7 +35,7 @@ To change a specific username and password, like SQL, you must create a new file
 Now you can also use this method for the Installation_Test. Create a new file, titled *LoginInfoTemplate.xml*, copy the information from *LoginInfo.xml*, and then add your username and password fields to match the information of the user that will be running the SQL request. 
 
 For the Installation_Test, make sure the new file is added to:
->*data-integration/Project/Installation_Test/target*
+>*data-integration/Installation_Test/target*
 
 ### Websites Scanned
 
