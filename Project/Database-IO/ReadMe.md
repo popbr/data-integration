@@ -30,7 +30,12 @@ Please ensure that you change the following parameters to suit your use of this 
 Login Information for SQL can be found here:
 >*data-integration/Project/Database-IO/target/LoginInfoTemplate.xml*
 
- To change a specific username and password, like SQL, you must create a new file, titled *LoginInfo.xml* in the *data-integration/Project/Database-IO/target/* folder. To do this efficiently, copy and rename the *LoginInfoTemplate.xml* file. Then edit the username and password fields to match the required information.
+To change a specific username and password, like SQL, you must create a new file, titled *LoginInfo.xml* in the *data-integration/Project/Database-IO/target/* folder. To do this efficiently, copy and rename the *LoginInfoTemplate.xml* file. Then edit the username and password fields to match the required information.
+
+Now you can also use this method for the Installation_Test. Create a new file, titled *LoginInfoTemplate.xml*, copy the information from *LoginInfo.xml*, and then add your username and password fields to match the information of the user that will be running the SQL request. 
+
+For the Installation_Test, make sure the new file is added to:
+>*data-integration/Project/Installation_Test/target*
 
 ### Websites Scanned
 
