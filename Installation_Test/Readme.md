@@ -32,7 +32,7 @@ Attempting to Connect to and output from an SQL database: Success
 Attempting to Create and insert into an Excel: Success
 ```
 
-###Login Information
+### Login Information
 
 Login Information for SQL can be found here:
 
