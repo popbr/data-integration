@@ -1,3 +1,5 @@
+<-- Don't insert your information here, refer to https://github.com/popbr/data-integration/tree/main/Project/Database-IO#login-information -->
+<-- When creating a LoginInfoTemplate.xml file, make sure to implement your username and password for the user running the installation test -->
 <Logins>
 	<Login id= "SQL">
 		<Username>testuser</Username>
