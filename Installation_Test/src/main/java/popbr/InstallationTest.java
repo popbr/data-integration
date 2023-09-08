@@ -302,4 +302,17 @@ public class InstallationTest {
         // The Username and password is passed on
         return LoginInfo;
     }
+    public static String[] DetermineSQLLogin(String Location) throws Exception {
+
+		String[] result = {"", ""};
+		String[] SQLElementList = { "Login", "Username", "Password" };
+		File LoginInfo = new File(Location + "LoginInfo.xml");
+
+		if(LoginInfo.isFile()) {
+			result = GetLoginInfo(Location + "LoginInfo.xml", SQLElementList);
+		} else {
+			result = GetLoginInfo(Location + "LoginInfoTemplate.xml", SQLElementList);
+		}
+		return result;
+     }
 }
