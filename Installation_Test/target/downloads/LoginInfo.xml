@@ -2,7 +2,7 @@
 <-- When creating a LoginInfoTemplate.xml file, make sure to implement your username and password for the user running the installation test -->
 <Logins>
 	<Login id= "SQL">
-		<Username>adam_rey</Username>
-		<Password>Squeal007!</Password>
+		<Username>testuser</Username>
+		<Password>password</Password>
 	</Login>
 </Logins>
