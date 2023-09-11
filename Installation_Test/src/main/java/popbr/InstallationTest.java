@@ -25,7 +25,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 
 public class InstallationTest {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception { 
+System.out.println("hello world");
         Class.forName("com.mysql.cj.jdbc.Driver");
 
         //This method returns the base filepath for the program, like C:\User\JohnS\desktop\
