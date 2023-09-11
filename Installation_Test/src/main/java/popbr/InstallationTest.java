@@ -37,7 +37,7 @@ public class InstallationTest {
 
         //This creates a path to the login information folder, then goes and retrieves login information for SQL
         String LoginPath = BasePath + File.separator + "target" + File.separator + "LoginInfo.xml";
-        String[] SQLLogin = GetLoginInfo("SQL", LoginPath);
+        String[] SQLLogin = DetermineSQLLogin(LoginPath);
 
         System.out.println("Attempting to connect to the Test Data file: " + Connect_to_File(TestFile));
 
