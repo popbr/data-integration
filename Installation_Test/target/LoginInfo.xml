@@ -1,6 +1,8 @@
+<-- Do not change this files' credentials -->
+<-- Please follow the directions located at data-integration/Project/Database-IO/ReadMe.md -->
 <Logins>
 	<Login id= "SQL">
-		<Username>testuser</Username>
-		<Password>password</Password>
+		<Username>adam_rey</Username>
+		<Password>Squeal007!</Password>
 	</Login>
 </Logins>
