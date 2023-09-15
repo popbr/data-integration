@@ -26,7 +26,6 @@ import org.w3c.dom.Element;
 
 public class InstallationTest {
     public static void main(String[] args) throws Exception { 
-System.out.println("hello world");
         Class.forName("com.mysql.cj.jdbc.Driver");
 
         //This method returns the base filepath for the program, like C:\User\JohnS\desktop\
@@ -37,8 +36,8 @@ System.out.println("hello world");
         String TestFile = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator + "test.xml";
 
         //This creates a path to the login information folder, then goes and retrieves login information for SQL
-        String LoginPath = BasePath + File.separator + "target" + File.separator + "LoginInfo.xml";
-        String[] SQLLogin = GetLoginInfo("SQL", LoginPath);
+        String LoginPath = BasePath + File.separator + "target" + File.separator;
+        String[] SQLLogin = DetermineSQLLogin(LoginPath);
 
         System.out.println("Attempting to connect to the Test Data file: " + Connect_to_File(TestFile));
 
@@ -263,7 +262,7 @@ System.out.println("hello world");
         }
     }
 
-    public static String[] GetLoginInfo(String LoginType, String Location) throws Exception{	
+    public static String[] GetLoginInfo(String Location, String[] Elements) throws Exception{	
         
         String[] LoginInfo = new String[2];
         try {
@@ -303,4 +302,17 @@ System.out.println("hello world");
         // The Username and password is passed on
         return LoginInfo;
     }
+    public static String[] DetermineSQLLogin(String Location) throws Exception {
+
+		String[] result = {"", ""};
+		String[] SQLElementList = { "Login", "Username", "Password" };
+		File LoginInfo = new File(Location + "LoginInfo.xml");
+
+		if(LoginInfo.isFile()) {
+			result = GetLoginInfo(Location + "LoginInfo.xml", SQLElementList);
+		} else {
+			result = GetLoginInfo(Location + "LoginInfoTemplate.xml", SQLElementList);
+		}
+		return result;
+	}
 }
