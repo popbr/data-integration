@@ -1,9 +1,0 @@
-<-- Use this template to enter your credentials -->
-<-- After this, change the name of this file to LoginInfo.xml -->
-<-- If there is another LoginInfo.xml, delete that file or move it to data-integration/Installation_Test/target -->
-<Logins>
-	<Login id= "SQL">
-		<Username>testuser</Username>
-		<Password>password</Password>
-	</Login>
-</Logins>
