@@ -1,8 +1,0 @@
-<!-- Do not change this files' credentials -->
-<!-- Please follow the directions located at data-integration/Installation_Test/ReadMe.md -->
-<Logins>
-	<Login id= "SQL">
-		<Username>testuser</Username>
-		<Password>password</Password>
-	</Login>
-</Logins>
