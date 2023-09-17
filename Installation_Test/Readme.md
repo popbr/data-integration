@@ -35,6 +35,8 @@ Attempting to Create and insert into an Excel: Success
 ### Login Information
 
 Login Information for SQL can be found here:
->*data-integration/Project/Database-IO/target/LoginInfoTemplate.xml*
+>*data-integration/Installation_Test/target/LoginInfoTemplate.xml*
 
 To change a specific username and password, like SQL, you must create a new file, titled *LoginInfo.xml* in the *data-integration/Installation_Test/target/* folder. To do this efficiently, copy and rename the *LoginInfoTemplate.xml* file. Then edit the username and password fields to match the required information.
+
+Do not edit the *LoginInfoTemplate.xml* file. The *LoginInfo.xml* file is intended to only be used on one's local machine, with the *LoginInfoTemplate.xml* file being used as a base. 
