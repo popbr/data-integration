@@ -1,6 +1,7 @@
 name: Installation_Test
  
-#The following should make this action start only if something is pushed in the relevant folder, but I can't make it work.
+#The following only runs when pushed on the source code for the Installation_Test directory
+
 on:
   push:
     paths:
@@ -28,8 +29,10 @@ jobs:
           cd Installation_Test 
           mvn compile
           mvn exec:java -Dexec.mainClass="popbr.InstallationTest"
+      # This should save an excel sheet to the specified path with the artifact being a zipped folder called Installation_Test-artifact.zip.
+      # The zipped folder contains an excel file titled GFGsheet.xlsx which should contain a cell with "Hello SQL"
       - name: Save artifact
         uses: actions/upload-artifact@v3
         with:
-            name: my-artifact
+            name: Installation_Test-artifact
             path: Installation_Test/target/GFGsheet.xlsx

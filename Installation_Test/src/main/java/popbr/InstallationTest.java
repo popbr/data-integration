@@ -28,6 +28,8 @@ public class InstallationTest {
     public static void main(String[] args) throws Exception { 
         Class.forName("com.mysql.cj.jdbc.Driver");
 
+        System.out.println("Testing the workflow to ensure it still works after adding some comments and changing the artifact name");
+
         //This method returns the base filepath for the program, like C:\User\JohnS\desktop\
         //With this, the program can keep track of itself, the files it creates, and looks for necessary files 
         String BasePath = EstablishFilePath();
