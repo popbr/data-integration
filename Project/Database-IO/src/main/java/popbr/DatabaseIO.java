@@ -53,6 +53,8 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 public class DatabaseIO {
 	public static void main(String[] args) throws Exception {
 		Class.forName("com.mysql.cj.jdbc.Driver");
+                System.out.println("Testing workflow so it is not running when something else is pushed");
+                System.out.println("Should work only on the source code for InstallationTest");
 
 		final long startTime = System.nanoTime();
 		
