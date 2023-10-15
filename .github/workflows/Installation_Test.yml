@@ -4,7 +4,7 @@ name: Installation_Test
 on:
   push:
     paths:
-    - 'Installation_Test\src\main\java\popbr\*'
+    - 'Installation_Test/src/main/java/popbr/InstallationTest.java'
  
 
 jobs:

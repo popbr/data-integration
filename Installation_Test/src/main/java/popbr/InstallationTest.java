@@ -26,7 +26,8 @@ import org.w3c.dom.Element;
 
 public class InstallationTest {
     public static void main(String[] args) throws Exception { 
-        System.out.println("Another source code change, but in directory popbr, but maybe fixed syntax");
+        System.out.println("Source code change, testing workflow but I realized I had the slashes the wrong way");
+        System.out.println("Testing if it will work on this specific file again");
         Class.forName("com.mysql.cj.jdbc.Driver");
 
         //This method returns the base filepath for the program, like C:\User\JohnS\desktop\
