@@ -19,13 +19,31 @@ import java.util.Scanner;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 
+/*
+// Those classes clash with Jsoup's classes, 
+// I am commenting them out for now,
+// as well as the methods using them.
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
+*/
+
+import java.io.IOException;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 public class AbstractFinder {
     public static void main(String[] args) throws Exception { 
+    
+    System.out.println("Welcome to Abstract Finder.");
+    
+    System.out.println(RetrieveAbstract());
+    
+    /*
         Class.forName("com.mysql.cj.jdbc.Driver");
 
         //This method returns the base filepath for the program, like C:\User\JohnS\desktop\
@@ -45,10 +63,106 @@ public class AbstractFinder {
         System.out.println("Attempting to Connect to and output from an SQL database: " + Output_from_SQL(SQLLogin));
 
         System.out.println("Attempting to Create and insert into an Excel: " + Connect_to_Excel(SQLLogin, BasePath));
-
+    */
         System.exit(0);
     }
+    
+    public static String RetrieveAbstract(){
+    
+    String abstracttext = "error"; // Will be overwritten by the abstract if we succeed.
+    
+    // Documentation at 
+    // https://jsoup.org/apidocs/org/jsoup/nodes/Document.html
+    Document doc;
+    try {
+        // Warning, my searchstring is very "poor", as it is *only the title* of the article.
+        // You may need to improve the search criteria.
+        // You can read the doc, e.g. at
+        // https://pubmed.ncbi.nlm.nih.gov/help/#citation-matcher-auto-search
+        // to get some idea on how to add e.g., author's names to that query.
+        String searchstring = "Characterization of ribonuclease NU cleavage sites in a bacteriophage phi80-induced ribonucleic acid";
+        // We retrieve that webpage as a document:
+        doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + searchstring).get();
 
+        // By looking at the source code of 
+        // https://pubmed.ncbi.nlm.nih.gov/1089660/
+        // which is where I land when I enter the 
+        // https://pubmed.ncbi.nlm.nih.gov/?term=Characterization%20of%20ribonuclease%20NU%20cleavage%20sites%20in%20a%20bacteriophage%20phi80-induced%20ribonucleic%20acid
+        // url, I can see that the part that interest us is as follows:
+        
+        /*
+        <div class="abstract" id="abstract">
+    
+      <h2 class="title">
+        Abstract
+        
+      </h2>
+      
+        
+          
+            <div class="abstract-content selected" id="eng-abstract">
+              
+                
+
+
+  
+    <p>
+      
+      Ribonuclease NU, an endoribonuclease isolated from human KB tissue culture cells, can cleave a bacteriophage phi80-induced RNA at four distinct sites. Nucleotide sequence analysis of the eight cleavage products has shown that the enzyme produces oligonucleotides terminating in 3'-phosphate groups, and that the four cleavage sites are in the only nonhydrogen-bonded region of the substrate. Various aspects of the cleavage reaction with this RNA and with other substrates are discussed.
+    </p>
+  
+
+  
+
+
+              
+            </div>
+          
+        
+      
+
+      
+    
+
+    
+
+    
+
+  </div>*/
+        
+        
+        // Warning, "abstract" is a keyword in java ;-)
+        
+        // Warning: we do something dangerous here, which is that we select the first element
+        // with id "abstract". If the page contains more than one result, this may be problematic.
+        
+        // Refer to 
+        // https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#selectFirst(java.lang.String)
+        // for the documentation of that class, and an indication of other methods that may be best suited.
+        
+        // For the syntax of the argument of selectFirst, refer to 
+        // https://jsoup.org/cookbook/extracting-data/selector-syntax
+        // We are selecting the content of the "p" element under the id "abstract"
+
+        // The 
+        
+        Element abstractelement = doc.selectFirst("#abstract p");
+        // At this point, element contains
+        // <p>Ribonuclease NU, an endoribonuclease isolated from human KB tissue culture cells, can cleave a bacteriophage phi80-induced RNA at four distinct sites. Nucleotide sequence analysis of the eight cleavage products has shown that the enzyme produces oligonucleotides terminating in 3'-phosphate groups, and that the four cleavage sites are in the only nonhydrogen-bonded region of the substrate. Various aspects of the cleavage reaction with this RNA and with other substrates are discussed.</p>
+        // The following line remove the <p> … </p>, cf.
+        // https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#text(java.lang.String)
+        abstracttext = abstractelement.text();
+        
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+
+    return abstracttext;
+    
+    }
+
+    /*
+    // This method is using W3C's classes, so I am commenting it out.
     public static String Connect_to_File(final String Path) throws Exception {
 
         String result = "";
@@ -67,11 +181,12 @@ public class AbstractFinder {
             //A list of strings is created, length of 2, as only 2 things are ever pulled: a Username and Password
             String[] MessageInfo = new String[2];
 
-            /*
+            
+            / *
              * This goes through the list of nodes established earlier
              * and, for each node, if it matches the type we want, SQL,
              * then we pull the data from the node/message, Username and Password.
-             */
+             * /
             
             for (int temp = 0; temp < nList.getLength(); temp++) {
                 Node nNode = nList.item(temp);
@@ -102,6 +217,7 @@ public class AbstractFinder {
         }
         return result;
     }
+    */
     
     public static String Connect_to_SQL(String[] LoginInfo) throws Exception {
         
@@ -262,6 +378,8 @@ public class AbstractFinder {
         }
     }
 
+    /*
+    // This method is using W3C's classes, so I am commenting it out.
     public static String[] GetLoginInfo(String Location, String[] Elements) throws Exception{	
         
         String[] LoginInfo = new String[2];
@@ -280,10 +398,10 @@ public class AbstractFinder {
 
             //This prepares the Login info to be received 
             
-            /*This goes through the list of nodes and matches it to nodes that are have login info for SQL
+            / *This goes through the list of nodes and matches it to nodes that are have login info for SQL
             * When it finds the SQL node, it logs information it has, the Username and Password, it puts it
             * into the prepared string list.
-            */
+            * /
             for (int temp = 0; temp < nList.getLength(); temp++) {
                 Node nNode = nList.item(temp);
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -302,6 +420,10 @@ public class AbstractFinder {
         // The Username and password is passed on
         return LoginInfo;
     }
+    */
+
+    /*
+    // The methods used in this method have been commented out.
     public static String[] DetermineSQLLogin(String Location) throws Exception {
 
 		String[] result = {"", ""};
@@ -315,4 +437,5 @@ public class AbstractFinder {
 		}
 		return result;
 	}
+	*/
 }
