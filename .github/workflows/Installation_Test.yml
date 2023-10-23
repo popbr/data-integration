@@ -5,7 +5,8 @@ name: Installation_Test
 on:
   push:
     paths:
-    - 'Installation_Test/src/main/java/popbr/InstallationTest.java'
+    - 'Installation_Test/**.java'
+    - 'Installation_Test/**.xml'
  
 
 jobs:
