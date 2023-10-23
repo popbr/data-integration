@@ -50,7 +50,7 @@ public class InstallationTest {
     }
 
     public static String Connect_to_File(final String Path) throws Exception {
-
+        System.out.println("Hello world");
         String result = "";
         try{
             //Sets the file to be read to the one passed, test.xml, using the path passed earlier
