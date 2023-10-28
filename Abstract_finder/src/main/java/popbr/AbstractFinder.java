@@ -39,6 +39,8 @@ import org.jsoup.select.Elements;
 public class AbstractFinder {
     public static void main(String[] args) throws Exception { 
     
+    System.out.println(ReadFromExcel());
+
     System.out.println("Welcome to Abstract Finder.");
     
     System.out.println(RetrieveAbstract());
@@ -80,7 +82,7 @@ public class AbstractFinder {
         // You can read the doc, e.g. at
         // https://pubmed.ncbi.nlm.nih.gov/help/#citation-matcher-auto-search
         // to get some idea on how to add e.g., author's names to that query.
-        String searchstring = "Characterization of ribonuclease NU cleavage sites in a bacteriophage phi80-induced ribonucleic acid";
+        String searchstring = "Processing of E. coli tRNA Tyr precursor RNA in vitro Alfred Boswell";
         // We retrieve that webpage as a document:
         doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + searchstring).get();
 
@@ -159,6 +161,12 @@ public class AbstractFinder {
 
     return abstracttext;
     
+    }
+
+    public static String ReadFromExcel(){
+       String title = "result";
+       String name = "Name";
+       return title + " " + name;
     }
 
     /*
