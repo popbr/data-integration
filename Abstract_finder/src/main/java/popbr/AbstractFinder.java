@@ -165,10 +165,19 @@ public class AbstractFinder {
 
     public static String ReadFromExcel(){
 
-       String title = "result";
-       String name = "Name";
+       String title = "";
+       String name = "";
+
+       XSSFWorkbook wb = null;
+       FileInputStream file = new FileInputStream(new File("C:\\Users\\reyno\\Downloads\\Abstracts.xlsx"));
+       wb = WorkbookFactory.create(file);
+
        return title + " " + name;
 
+    }
+
+    public static void Write_To_Excel(){
+ 
     }
 
     /*
