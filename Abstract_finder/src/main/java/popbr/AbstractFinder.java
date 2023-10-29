@@ -9,10 +9,12 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.CellType;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.ArrayList;
 
 import java.sql.*;
 
@@ -164,10 +166,14 @@ public class AbstractFinder {
     
     }
 
-    public static String Read_From_Excel() throws IOException{
-
+    public static ArrayList<String> Read_From_Excel() throws IOException{
+       
+       /*
        String title = "";
        String name = "";
+       */
+
+       ArrayList<String> searchList = new ArrayList<String>();
        
        FileInputStream fins = new FileInputStream(new File("C:\\Users\\reyno\\Downloads\\Abstacts.xlsx"));
 
@@ -178,17 +184,71 @@ public class AbstractFinder {
        // "Bothwell, A Pub Abstracts"
        XSSFSheet sheet = wb.getSheetAt(2);
 
-       System.out.println(wb.getNumberOfSheets());
-       System.out.println(sheet.getSheetName());
-       
-       for(int i = 0; i < sheet.getLastRowNum(); i++)
+       int rows = sheet.getLastRowNum(); // gets number of rows
+       int cols = sheet.getRow(1).getLastCellNum(); // gets the number of columns
+
+       XSSFRow row = sheet.getRow(0); // starting the row at 0 for sheet 2
+
+       for (int i = 0; i < cols; i++)
        {
-          XSSFRow row = getRow(i);
-          System.out.println(row.toString());
-       } 
+          XSSFCell cell = row.getCell(i);
+          if (cell == null)
+             continue;
+          if (cell.getCellType() == CellType.STRING)
+          {
+             String cellValue = cell.getStringCellValue();
+             if (cellValue.toLowerCase().equals("researcher")
+             {
+                XSSFRow tempRow = sheet.getRow(1);
+                XSSFCell tempCell = tempRow.getCell(i + 1);
+                cellValue = tempCell.getStringCellValue();
+                searchList.add(cellValue);
+             }
+             if (cellValue.toLowerCase().equals("title"))
+             {
+                for (int j = 1; j < rows; j++)
+                {
+                   row = sheet.getRow(j);
+                   cell = row.getCell(i);
+                   cellValue = cell.getStringCellValue();
+                   searchList.add(cellValue);
+                }
+             }
+          }
 
-       return title + " " + name;
+          return searchList;
+       }
+       /*
+       for(int i = 0; i < rows; i++)
+       {
 
+          for(int j = 0; j < cols; j++)
+          {
+             XSSFCell cell = row.getCell(j);
+
+             if (cell == null)
+                continue;
+
+             if (cell.getCellType() == CellType.STRING)
+             {
+                
+                String cellValue = cell.getStringCellValue();
+                
+                if (cellValue.toLowerCase().equals("title"))
+                {
+                   title = cell.getStringCellValue();
+                   System.out.println(title);
+                }
+
+                if (cellValue.toLowerCase().equals("researcher"))
+                {
+                   name = cell.getStringCellValue();
+                   System.out.println(name);
+                }
+                
+             }
+          }
+          */
     }
 
     public static void Write_To_Excel(){
