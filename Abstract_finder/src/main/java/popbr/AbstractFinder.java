@@ -2,6 +2,7 @@ package popbr;
 // mvn exec:java -Dexec.mainClass="popbr.AbstractFinder"
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -39,7 +40,7 @@ import org.jsoup.select.Elements;
 public class AbstractFinder {
     public static void main(String[] args) throws Exception { 
     
-    System.out.println(ReadFromExcel());
+    System.out.println(Read_From_Excel());
 
     System.out.println("Welcome to Abstract Finder.");
     
@@ -163,16 +164,25 @@ public class AbstractFinder {
     
     }
 
-    public static String ReadFromExcel(){
+    public static void Read_From_Excel() throws IOException{
 
        String title = "";
        String name = "";
+       
+       FileInputStream fins = new FileInputStream(new File("C:\\Users\\reyno\\Downloads\\Abstacts.xlsx"));
 
-       XSSFWorkbook wb = null;
-       FileInputStream file = new FileInputStream(new File("C:\\Users\\reyno\\Downloads\\Abstracts.xlsx"));
-       wb = WorkbookFactory.create(file);
+       XSSFWorkbook wb = new XSSFWorkbook(fins);
+       
+       // Currently manually inputting the sheet index
+       // Starting at 2 which would be:
+       // "Bothwell, A Pub Abstracts"
+       XSSFSheet sheet = new XSSFSheet(2); 
+       XSSFRow row = new XSSFRow();
+       XSSFCell cell = new XSSFCell();
 
-       return title + " " + name;
+       System.out.println(wb.getNumberOfSheets());
+
+       //return title + " " + name;
 
     }
 
