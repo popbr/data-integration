@@ -82,7 +82,7 @@ public class AbstractFinder {
         // You can read the doc, e.g. at
         // https://pubmed.ncbi.nlm.nih.gov/help/#citation-matcher-auto-search
         // to get some idea on how to add e.g., author's names to that query.
-        String searchstring = "Processing of E. coli tRNA Tyr precursor RNA in vitro Alfred Boswell";
+        String searchstring = "Characterization of ribonuclease NU cleavage sites in a bacteriophage phi80-induced ribonucleic acid";
         // We retrieve that webpage as a document:
         doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + searchstring).get();
 
@@ -164,6 +164,8 @@ public class AbstractFinder {
     }
 
     public static String ReadFromExcel(){
+
+       Workbook wb = new Workbook();
        String title = "result";
        String name = "Name";
        return title + " " + name;
