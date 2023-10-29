@@ -165,10 +165,10 @@ public class AbstractFinder {
 
     public static String ReadFromExcel(){
 
-       Workbook wb = new Workbook();
        String title = "result";
        String name = "Name";
        return title + " " + name;
+
     }
 
     /*
