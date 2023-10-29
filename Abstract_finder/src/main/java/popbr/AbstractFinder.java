@@ -164,7 +164,7 @@ public class AbstractFinder {
     
     }
 
-    public static void Read_From_Excel() throws IOException{
+    public static String Read_From_Excel() throws IOException{
 
        String title = "";
        String name = "";
@@ -176,13 +176,18 @@ public class AbstractFinder {
        // Currently manually inputting the sheet index
        // Starting at 2 which would be:
        // "Bothwell, A Pub Abstracts"
-       XSSFSheet sheet = new XSSFSheet(2); 
-       XSSFRow row = new XSSFRow();
-       XSSFCell cell = new XSSFCell();
+       XSSFSheet sheet = wb.getSheetAt(2);
 
        System.out.println(wb.getNumberOfSheets());
+       System.out.println(sheet.getSheetName());
+       
+       for(int i = 0; i < sheet.getLastRowNum(); i++)
+       {
+          XSSFRow row = getRow(i);
+          System.out.println(row.toString());
+       } 
 
-       //return title + " " + name;
+       return title + " " + name;
 
     }
 
