@@ -48,7 +48,7 @@ public class AbstractFinder {
 
     ArrayList<String> searchList = Read_From_Excel(); // might need to take the file path to the data source
     
-    ArrayList<String> abstractList = RetrieveAbstract(searchList);
+    ArrayList<String> abstractList = RetrieveAbstract(searchList); //takes 2 and a half minutes on Adam's laptop to do this
 
     for (String ab : abstractList)
        System.out.println(ab + "\n");
@@ -203,7 +203,7 @@ public class AbstractFinder {
        
        ArrayList<String> searchList = new ArrayList<String>();
        
-       FileInputStream fins = new FileInputStream(new File("C:\\Users\\reyno\\Downloads\\Abstacts.xlsx"));
+       FileInputStream fins = new FileInputStream(new File("C:\\Users\\reyno\\Downloads\\Abstacts.xlsx")); // misspelled abstracts
 
        XSSFWorkbook wb = new XSSFWorkbook(fins);
        
@@ -234,7 +234,7 @@ public class AbstractFinder {
              }
              if (cellValue.toLowerCase().equals("title"))
              {
-                for (int j = 1; j < rows; j++)
+                for (int j = 1; j <= rows; j++)
                 {
                    row = sheet.getRow(j);
                    cell = row.getCell(i);
@@ -250,7 +250,50 @@ public class AbstractFinder {
        return searchList;
     }
 
-    public static void Write_To_Excel(ArrayList<String> writingList){
+    public static void Write_To_Excel(ArrayList<String> writingList) throws Exception {
+        try {
+
+           FileInputStream fins = new FileInputStream(new File("C:\\Users\\reyno\\Downloads\\Abstacts.xlsx")); // misspelled abstracts
+
+           XSSFWorkbook wb = new XSSFWorkbook(fins);
+
+           // Currently manually inputting the sheet index
+           // Starting at 2 which would be:
+           // "Bothwell, A Pub Abstracts"
+           XSSFSheet sheet = wb.getSheetAt(2);
+
+           int rows = sheet.getLastRowNum(); //gets the number of rows in the sheet
+           int cols = sheet.getRow(1).getLastCellNum(); //gets the number of columns in the sheet
+
+           XSSFRow row = sheet.getRow(0);
+
+           for(int i = 0; i < cols; i++)
+           {
+              XSSFCell cell = row.getCell(i);
+              if (cell == null) // if the cell is null for whatever reason, it will throw an error when trying to get the cell type
+                 continue;
+              if (cell.getCellType() == CellType.STRING)
+              {
+                 String cellValue = cell.getStringValue();
+                 if (cellValue.toLowerCase().equals("abstract"));
+                 {
+                    for (int j = 1; j <= rows; j++)
+                    {
+                       row = sheet.getRow(j);
+                       cell = row.getCell(i);
+                       setCellValue(writingList.get(j));
+                    }
+                 }
+              }
+           }
+           FileOutputStream out = new FileOutputStream(new File("C:\\Users\\reyno\\Downloads\\abstract2.xlsx");
+           wb.write(out);
+           out.close();
+           fins.close();
+       }
+       catch (Exception e) {
+          e.printStackTrace();
+       }
        
     }
 
