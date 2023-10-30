@@ -50,6 +50,9 @@ public class AbstractFinder {
     
     ArrayList<String> abstractList = RetrieveAbstract(searchList); //takes 2:30 minutes to 3 minutes on Adam's laptop to do this
 
+    System.out.println(abstractList.get(0));
+    System.out.println(abstractList.get(1));
+
     Write_To_Excel(abstractList); // Currently only does one sheet
 
     System.out.println("Thanks for coming! Your abstracts should be in your Excel file now");
@@ -259,7 +262,7 @@ public class AbstractFinder {
            // "Bothwell, A Pub Abstracts"
            XSSFSheet sheet = wb.getSheetAt(2);
 
-           int rows = sheet.getLastRowNum(); //gets the number of rows in the sheet
+           int rows = sheet.getLastRowNum() + 1; //gets the number of rows in the sheet
            int cols = sheet.getRow(1).getLastCellNum(); //gets the number of columns in the sheet
 
            XSSFRow row = sheet.getRow(0);
@@ -274,12 +277,10 @@ public class AbstractFinder {
                  String valueOfCell = cell.getStringCellValue();
                  if (valueOfCell.toLowerCase().equals("abstract"));
                  {
-                    for (int j = 1; j < rows; j++)
+                    for (int j = 0; j < rows; j++)
                     {
                        row = sheet.getRow(j);
-                       cell = row.getCell(i);
-                       if (cell == null)
-                          cell.setCellValue(writingList.get(j)); // this literally created a cell and wrote the data to every String type cell in the excel sheet so I need to rework this
+                       row.createCell(i, CellType.STRING).setCellValue(writingList.get(j)); 
                     }
                  }
               }
