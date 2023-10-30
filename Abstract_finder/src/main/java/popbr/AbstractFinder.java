@@ -34,6 +34,7 @@ import org.w3c.dom.Element;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.net.MalformedURLException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -42,12 +43,19 @@ import org.jsoup.select.Elements;
 
 public class AbstractFinder {
     public static void main(String[] args) throws Exception { 
-    
-    ArrayList<String> searchList = Read_From_Excel();
 
     System.out.println("Welcome to Abstract Finder.");
+
+    ArrayList<String> searchList = Read_From_Excel(); // might need to take the file path to the data source
     
-    System.out.println(RetrieveAbstract(searchList));
+    ArrayList<String> abstractList = RetrieveAbstract(searchList);
+
+    for (String ab : abstractList)
+       System.out.println(ab + "\n");
+
+    //Write_To_Excel(abstractList);
+
+    System.out.println("Thanks for coming! Your abstracts should be in your Excel file now");
     
     /*
         Class.forName("com.mysql.cj.jdbc.Driver");
@@ -93,14 +101,13 @@ public class AbstractFinder {
         // String searchstring = "Characterization of ribonuclease NU cleavage sites in a bacteriophage phi80-induced ribonucleic acid";
         // We retrieve that webpage as a document:
 
-        String searchString = searchFor.get(0) + " ";     
+        String searchString = "";     
 
         for(int i = 1; i < searchFor.size(); i++)
         {
+           try {
 
-           searchString = searchString + searchFor.get(i);
-
-           System.out.println(searchString);
+           searchString = searchFor.get(0) + " " + searchFor.get(i);
 
            doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + searchString).get();
 
@@ -173,6 +180,15 @@ public class AbstractFinder {
            // https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#text(java.lang.String)
            abstracttext = abstractelement.text();
            abstractList.add(abstracttext);
+           }
+           catch (NullPointerException npe) {
+              abstracttext = "no abstract";
+              abstractList.add(abstracttext);
+           }
+           catch (MalformedURLException mue) {
+              abstracttext = "error";
+              abstractList.add(abstracttext);
+           }
        }
         
     } catch (IOException e) {
@@ -229,12 +245,13 @@ public class AbstractFinder {
           }
 
        }
+       fins.close(); //closes the inputstream
        // the author's name will always be the first index followed by the titles
        return searchList;
     }
 
-    public static void Write_To_Excel(){
- 
+    public static void Write_To_Excel(ArrayList<String> writingList){
+       
     }
 
     /*
