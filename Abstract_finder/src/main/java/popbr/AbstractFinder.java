@@ -48,12 +48,9 @@ public class AbstractFinder {
 
     ArrayList<String> searchList = Read_From_Excel(); // might need to take the file path to the data source
     
-    ArrayList<String> abstractList = RetrieveAbstract(searchList); //takes 2 and a half minutes on Adam's laptop to do this
+    ArrayList<String> abstractList = RetrieveAbstract(searchList); //takes 2:30 minutes to 3 minutes on Adam's laptop to do this
 
-    for (String ab : abstractList)
-       System.out.println(ab + "\n");
-
-    //Write_To_Excel(abstractList);
+    Write_To_Excel(abstractList); // Currently only does one sheet
 
     System.out.println("Thanks for coming! Your abstracts should be in your Excel file now");
     
@@ -274,19 +271,20 @@ public class AbstractFinder {
                  continue;
               if (cell.getCellType() == CellType.STRING)
               {
-                 String cellValue = cell.getStringValue();
-                 if (cellValue.toLowerCase().equals("abstract"));
+                 String valueOfCell = cell.getStringCellValue();
+                 if (valueOfCell.toLowerCase().equals("abstract"));
                  {
-                    for (int j = 1; j <= rows; j++)
+                    for (int j = 1; j < rows; j++)
                     {
                        row = sheet.getRow(j);
                        cell = row.getCell(i);
-                       setCellValue(writingList.get(j));
+                       if (cell == null)
+                          row.setCellValue(writingList.get(j)); // this literally created a cell and wrote the data to every String type cell in the excel sheet so I need to rework this
                     }
                  }
               }
            }
-           FileOutputStream out = new FileOutputStream(new File("C:\\Users\\reyno\\Downloads\\abstract2.xlsx");
+           FileOutputStream out = new FileOutputStream(new File("C:\\Users\\reyno\\Downloads\\abstract2.xlsx"));
            wb.write(out);
            out.close();
            fins.close();
