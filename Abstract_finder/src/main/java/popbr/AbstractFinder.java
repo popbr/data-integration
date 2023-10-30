@@ -33,7 +33,7 @@ import org.w3c.dom.Element;
 */
 
 import java.io.IOException;
-import java.io.UnknownHostException;
+import java.net.UnknownHostException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -47,7 +47,7 @@ public class AbstractFinder {
 
     System.out.println("Welcome to Abstract Finder.");
     
-    System.out.println(RetrieveAbstract());
+    System.out.println(RetrieveAbstract(searchList));
     
     /*
         Class.forName("com.mysql.cj.jdbc.Driver");
@@ -98,7 +98,9 @@ public class AbstractFinder {
 
            searchString = searchString + searchFor.get(i);
 
-           doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + searchstring).get();
+           System.out.println(searchString);
+
+           doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + searchString).get();
 
            // By looking at the source code of 
            // https://pubmed.ncbi.nlm.nih.gov/1089660/
