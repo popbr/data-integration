@@ -80,6 +80,10 @@ public class AbstractFinder {
     // Documentation at 
     // https://jsoup.org/apidocs/org/jsoup/nodes/Document.html
     Document doc;
+
+    ArrayList<String> abstractList = new ArrayList<String>();
+
+
     try {
         // Warning, my searchstring is very "poor", as it is *only the title* of the article.
         // You may need to improve the search criteria.
@@ -89,9 +93,7 @@ public class AbstractFinder {
         // String searchstring = "Characterization of ribonuclease NU cleavage sites in a bacteriophage phi80-induced ribonucleic acid";
         // We retrieve that webpage as a document:
 
-        String searchString = searchFor.get(0) + " ";
-
-        ArrayList<String> abstractList = new ArrayList<String>();      
+        String searchString = searchFor.get(0) + " ";     
 
         for(int i = 1; i < searchFor.size(); i++)
         {
@@ -175,9 +177,6 @@ public class AbstractFinder {
         
     } catch (IOException e) {
         e.printStackTrace();
-    }
-    catch (UnknownHostException ue) {
-        ue.printStackTrace();
     }
 
     return abstractList;
