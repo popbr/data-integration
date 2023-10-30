@@ -33,6 +33,7 @@ import org.w3c.dom.Element;
 */
 
 import java.io.IOException;
+import java.io.UnknownHostException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -42,7 +43,7 @@ import org.jsoup.select.Elements;
 public class AbstractFinder {
     public static void main(String[] args) throws Exception { 
     
-    System.out.println(Read_From_Excel());
+    ArrayList<String> searchList = Read_From_Excel();
 
     System.out.println("Welcome to Abstract Finder.");
     
@@ -72,7 +73,7 @@ public class AbstractFinder {
         System.exit(0);
     }
     
-    public static String RetrieveAbstract(){
+    public static ArrayList<String> RetrieveAbstract(ArrayList<String> searchFor){
     
     String abstracttext = "error"; // Will be overwritten by the abstract if we succeed.
     
@@ -85,36 +86,46 @@ public class AbstractFinder {
         // You can read the doc, e.g. at
         // https://pubmed.ncbi.nlm.nih.gov/help/#citation-matcher-auto-search
         // to get some idea on how to add e.g., author's names to that query.
-        String searchstring = "Characterization of ribonuclease NU cleavage sites in a bacteriophage phi80-induced ribonucleic acid";
+        // String searchstring = "Characterization of ribonuclease NU cleavage sites in a bacteriophage phi80-induced ribonucleic acid";
         // We retrieve that webpage as a document:
-        doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + searchstring).get();
 
-        // By looking at the source code of 
-        // https://pubmed.ncbi.nlm.nih.gov/1089660/
-        // which is where I land when I enter the 
-        // https://pubmed.ncbi.nlm.nih.gov/?term=Characterization%20of%20ribonuclease%20NU%20cleavage%20sites%20in%20a%20bacteriophage%20phi80-induced%20ribonucleic%20acid
-        // url, I can see that the part that interest us is as follows:
-        
-        /*
-        <div class="abstract" id="abstract">
+        String searchString = searchFor.get(0) + " ";
+
+        ArrayList<String> abstractList = new ArrayList<String>();      
+
+        for(int i = 1; i < searchFor.size(); i++)
+        {
+
+           searchString = searchString + searchFor.get(i);
+
+           doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + searchstring).get();
+
+           // By looking at the source code of 
+           // https://pubmed.ncbi.nlm.nih.gov/1089660/
+           // which is where I land when I enter the 
+           // https://pubmed.ncbi.nlm.nih.gov/?term=Characterization%20of%20ribonuclease%20NU%20cleavage%20sites%20in%20a%20bacteriophage%20phi80-induced%20ribonucleic%20acid
+           // url, I can see that the part that interest us is as follows:
+       
+           /*
+           <div class="abstract" id="abstract">
     
-      <h2 class="title">
-        Abstract
+           <h2 class="title">
+           Abstract
         
-      </h2>
+           </h2>
       
         
           
-            <div class="abstract-content selected" id="eng-abstract">
+               <div class="abstract-content selected" id="eng-abstract">
               
                 
 
 
   
-    <p>
+           <p>
       
-      Ribonuclease NU, an endoribonuclease isolated from human KB tissue culture cells, can cleave a bacteriophage phi80-induced RNA at four distinct sites. Nucleotide sequence analysis of the eight cleavage products has shown that the enzyme produces oligonucleotides terminating in 3'-phosphate groups, and that the four cleavage sites are in the only nonhydrogen-bonded region of the substrate. Various aspects of the cleavage reaction with this RNA and with other substrates are discussed.
-    </p>
+           Ribonuclease NU, an endoribonuclease isolated from human KB tissue culture cells, can cleave a bacteriophage phi80-induced RNA at four distinct sites. Nucleotide sequence analysis of the eight cleavage products has shown that the enzyme produces oligonucleotides terminating in 3'-phosphate groups, and that the four cleavage sites are in the only nonhydrogen-bonded region of the substrate. Various aspects of the cleavage reaction with this RNA and with other substrates are discussed.
+          </p>
   
 
   
@@ -133,46 +144,46 @@ public class AbstractFinder {
 
     
 
-  </div>*/
+            </div>*/
         
         
-        // Warning, "abstract" is a keyword in java ;-)
+           // Warning, "abstract" is a keyword in java ;-)
         
-        // Warning: we do something dangerous here, which is that we select the first element
-        // with id "abstract". If the page contains more than one result, this may be problematic.
+           // Warning: we do something dangerous here, which is that we select the first element
+           // with id "abstract". If the page contains more than one result, this may be problematic.
         
-        // Refer to 
-        // https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#selectFirst(java.lang.String)
-        // for the documentation of that class, and an indication of other methods that may be best suited.
+           // Refer to 
+           // https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#selectFirst(java.lang.String)
+           // for the documentation of that class, and an indication of other methods that may be best suited.
         
-        // For the syntax of the argument of selectFirst, refer to 
-        // https://jsoup.org/cookbook/extracting-data/selector-syntax
-        // We are selecting the content of the "p" element under the id "abstract"
+           // For the syntax of the argument of selectFirst, refer to 
+           // https://jsoup.org/cookbook/extracting-data/selector-syntax
+           // We are selecting the content of the "p" element under the id "abstract"
 
-        // The 
+           // The 
         
-        Element abstractelement = doc.selectFirst("#abstract p");
-        // At this point, element contains
-        // <p>Ribonuclease NU, an endoribonuclease isolated from human KB tissue culture cells, can cleave a bacteriophage phi80-induced RNA at four distinct sites. Nucleotide sequence analysis of the eight cleavage products has shown that the enzyme produces oligonucleotides terminating in 3'-phosphate groups, and that the four cleavage sites are in the only nonhydrogen-bonded region of the substrate. Various aspects of the cleavage reaction with this RNA and with other substrates are discussed.</p>
-        // The following line remove the <p> … </p>, cf.
-        // https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#text(java.lang.String)
-        abstracttext = abstractelement.text();
+           Element abstractelement = doc.selectFirst("#abstract p");
+           // At this point, element contains
+           // <p>Ribonuclease NU, an endoribonuclease isolated from human KB tissue culture cells, can cleave a bacteriophage phi80-induced RNA at four distinct sites. Nucleotide sequence analysis of the eight cleavage products has shown that the enzyme produces oligonucleotides terminating in 3'-phosphate groups, and that the four cleavage sites are in the only nonhydrogen-bonded region of the substrate. Various aspects of the cleavage reaction with this RNA and with other substrates are discussed.</p>
+           // The following line remove the <p> … </p>, cf.
+           // https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#text(java.lang.String)
+           abstracttext = abstractelement.text();
+           abstractList.add(abstracttext);
+       }
         
     } catch (IOException e) {
         e.printStackTrace();
     }
+    catch (UnknownHostException ue) {
+        ue.printStackTrace();
+    }
 
-    return abstracttext;
+    return abstractList;
     
     }
 
     public static ArrayList<String> Read_From_Excel() throws IOException{
        
-       /*
-       String title = "";
-       String name = "";
-       */
-
        ArrayList<String> searchList = new ArrayList<String>();
        
        FileInputStream fins = new FileInputStream(new File("C:\\Users\\reyno\\Downloads\\Abstacts.xlsx"));
@@ -197,10 +208,10 @@ public class AbstractFinder {
           if (cell.getCellType() == CellType.STRING)
           {
              String cellValue = cell.getStringCellValue();
-             if (cellValue.toLowerCase().equals("researcher")
+             if (cellValue.toLowerCase().equals("researcher"))
              {
                 XSSFRow tempRow = sheet.getRow(1);
-                XSSFCell tempCell = tempRow.getCell(i + 1);
+                XSSFCell tempCell = tempRow.getCell(i);
                 cellValue = tempCell.getStringCellValue();
                 searchList.add(cellValue);
              }
@@ -216,39 +227,9 @@ public class AbstractFinder {
              }
           }
 
-          return searchList;
        }
-       /*
-       for(int i = 0; i < rows; i++)
-       {
-
-          for(int j = 0; j < cols; j++)
-          {
-             XSSFCell cell = row.getCell(j);
-
-             if (cell == null)
-                continue;
-
-             if (cell.getCellType() == CellType.STRING)
-             {
-                
-                String cellValue = cell.getStringCellValue();
-                
-                if (cellValue.toLowerCase().equals("title"))
-                {
-                   title = cell.getStringCellValue();
-                   System.out.println(title);
-                }
-
-                if (cellValue.toLowerCase().equals("researcher"))
-                {
-                   name = cell.getStringCellValue();
-                   System.out.println(name);
-                }
-                
-             }
-          }
-          */
+       // the author's name will always be the first index followed by the titles
+       return searchList;
     }
 
     public static void Write_To_Excel(){
