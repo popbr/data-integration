@@ -279,7 +279,7 @@ public class AbstractFinder {
                        row = sheet.getRow(j);
                        cell = row.getCell(i);
                        if (cell == null)
-                          row.setCellValue(writingList.get(j)); // this literally created a cell and wrote the data to every String type cell in the excel sheet so I need to rework this
+                          cell.setCellValue(writingList.get(j)); // this literally created a cell and wrote the data to every String type cell in the excel sheet so I need to rework this
                     }
                  }
               }
