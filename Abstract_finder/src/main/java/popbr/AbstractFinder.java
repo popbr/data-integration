@@ -93,7 +93,8 @@ public class AbstractFinder {
                 This most likely fails, but since PubMed defaults to an auto search if the heuristic search fails
                 It still allows us to find the article we are searching for
               */
-              doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + searchString).get(); 
+              System.out.print("https://pubmed.ncbi.nlm.nih.gov/?term=" + java.net.URLEncoder.encode(searchString, "UTF-8"));
+              doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + java.net.URLEncoder.encode(searchString, "UTF-8")).get(); 
         
               // Selects the id "abstract" and look for the paragraph element of the first occurrence of the id abstract
               // In theory, this should not cause an issue, since only one HTML element is allowed to have the id abstract
@@ -101,7 +102,7 @@ public class AbstractFinder {
               // More documentation: https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#selectFirst(java.lang.String)
               // More documentation: https://jsoup.org/cookbook/extracting-data/selector-syntax
 
-              Element abstractelement = doc.selectFirst("#abstract p"); 
+              Element abstractelement = doc.selectFirst("#abstract p");
 
               abstracttext = abstractelement.text(); // gets only the text of the abstract from the paragraph (<p>) HTML element
               // For more info: https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#text(java.lang.String)
