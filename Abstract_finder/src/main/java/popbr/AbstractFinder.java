@@ -109,7 +109,6 @@ public class AbstractFinder {
               abstractList.add(abstracttext);
             }
             catch (NullPointerException npe) {
-               npe.printStackTrace();
                abstracttext = "no abstract";
                abstractList.add(abstracttext);
             }
@@ -127,7 +126,6 @@ public class AbstractFinder {
             {
                if (abstractList.get(k).equals("no abstract"))
                {
-                  System.out.println("index: " + k);
                   count++;
                }
             }
@@ -141,7 +139,7 @@ public class AbstractFinder {
        
        ArrayList<String> searchList = new ArrayList<String>();
        
-       FileInputStream fins = new FileInputStream(new File("C:\\Users\\reyno\\Downloads\\Abstracts_Copy.xlsx"));
+       FileInputStream fins = new FileInputStream(new File("C:\\Users\\reyno\\Downloads\\Abstacts.xlsx"));
 
        XSSFWorkbook wb = new XSSFWorkbook(fins); // creates a workbook that we can search, which allows us to get the author's name and the titles of each publication
        
