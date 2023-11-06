@@ -135,11 +135,14 @@ public class AbstractFinder {
     
     }
 
-    public static ArrayList<String> Read_From_Excel() throws IOException{
+    public static ArrayList<String> Read_From_Excel() throws IOException, Exception{
        
        ArrayList<String> searchList = new ArrayList<String>();
        
-       FileInputStream fins = new FileInputStream(new File("C:\\Users\\reyno\\Downloads\\Abstacts.xlsx"));
+       String BasePath = EstablishFilePath();
+       String SourceFile = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator + "Publication_Abstracts_Only_Dataset_9-26-23.xlsx";
+       
+       FileInputStream fins = new FileInputStream(new File(SourceFile));
 
        XSSFWorkbook wb = new XSSFWorkbook(fins); // creates a workbook that we can search, which allows us to get the author's name and the titles of each publication
        
@@ -195,8 +198,10 @@ public class AbstractFinder {
 
     public static void Write_To_Excel(ArrayList<String> writingList) throws Exception {
         try {
+            String BasePath = EstablishFilePath();
+            String AbstractFile = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator + "Publication_Abstracts_Only_Dataset_9-26-23.xlsx";
 
-           FileInputStream fins = new FileInputStream(new File("C:\\Users\\reyno\\Downloads\\Abstacts.xlsx")); // misspelled abstracts
+           FileInputStream fins = new FileInputStream(new File(AbstractFile)); 
 
            XSSFWorkbook wb = new XSSFWorkbook(fins);
 
@@ -235,7 +240,9 @@ public class AbstractFinder {
                  }
               }
            }
-           FileOutputStream out = new FileOutputStream(new File("C:\\Users\\reyno\\Downloads\\abstract2.xlsx"));
+            String AbstractFile2 = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator + "Abstacts2.xlsx";
+
+           FileOutputStream out = new FileOutputStream(new File(AbstractFile2));
            wb.write(out);
            out.close();
            fins.close();
