@@ -47,17 +47,11 @@ public class AbstractFinder {
     System.out.println("Welcome to Abstract Finder.");
 
     
-    ArrayList<String> searchList = Read_From_Excel(); // might need to take the file path to the data source
+    ArrayList<String> searchList = Read_From_Excel(); // will return a searchList that has the author's name and all of the titles for our search query
     
-    ArrayList<String> abstractList = RetrieveAbstract(searchList); //takes 2:30 minutes to 3 minutes on Adam's laptop to do this
+    ArrayList<String> abstractList = RetrieveAbstract(searchList); //takes a few minutes to accomplish due to having to search on the Internet    
 
-
-    System.out.println(abstractList.size());    
-
-    Write_To_Excel(abstractList); // Currently only does one sheet
-    
-
-    //Write_To_ExcelAlt();
+    Write_To_Excel(abstractList); // Currently only does one sheet at a time and needs to be manually updated
 
     System.out.println("Thanks for coming! Your abstracts should be in your Excel file now");
     
@@ -216,8 +210,8 @@ public class AbstractFinder {
        // "Bothwell, A Pub Abstracts"
        XSSFSheet sheet = wb.getSheetAt(2);
 
-       int rows = sheet.getLastRowNum() + 1; // gets number of rows
-       int cols = sheet.getRow(1).getLastCellNum(); // gets the number of columns
+       int rows = sheet.getLastRowNum(); // gets number of rows
+       int cols = sheet.getRow(0).getLastCellNum(); // gets the number of columns
 
        XSSFRow row = sheet.getRow(0); // starting the row at 0 for sheet 2
 
@@ -266,7 +260,7 @@ public class AbstractFinder {
            // "Bothwell, A Pub Abstracts"
            XSSFSheet sheet = wb.getSheetAt(2);
 
-           //int rows = sheet.getLastRowNum() + 1; //gets the number of rows in the sheet
+           //int rows = sheet.getLastRowNum(); //gets the number of rows in the sheet
            int rows = writingList.size(); // SocketTimeoutException causing it to not work
            int cols = sheet.getRow(1).getLastCellNum(); //gets the number of columns in the sheet
 
@@ -282,11 +276,11 @@ public class AbstractFinder {
                  String valueOfCell = cell.getStringCellValue();
                  if (valueOfCell.toLowerCase().equals("abstract"));
                  {
-                    for (int j = 1; j < rows; j++)
+                    for (int j = 1; j <= rows; j++)
                     {
-                       int abIndex = j - 1;
+                       int abIndex = j - 1; // allows us to access the correct abstract in our list
                        row = sheet.getRow(j);
-                       row.createCell(10, CellType.STRING).setCellValue(writingList.get(abIndex)); 
+                       row.createCell(10, CellType.STRING).setCellValue(writingList.get(abIndex)); // 10 is number of the column that contains "Abstract"
                     }
                  }
               }
