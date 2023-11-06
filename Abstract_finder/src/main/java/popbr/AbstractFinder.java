@@ -45,7 +45,8 @@ import org.jsoup.select.Elements;
 
 public class AbstractFinder {
     public static void main(String[] args) throws Exception { 
-
+       
+       System.out.println(EstablishFilePath()); //need to figure out exactly what to do
        // can improve this a bit maybe, will ask
        System.out.println("Welcome to Abstract Finder.");
 
@@ -99,6 +100,7 @@ public class AbstractFinder {
               // Meaning it should be okay to only search for the first occurrence
               // More documentation: https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#selectFirst(java.lang.String)
               // More documentation: https://jsoup.org/cookbook/extracting-data/selector-syntax
+
               Element abstractelement = doc.selectFirst("#abstract p"); 
 
               abstracttext = abstractelement.text(); // gets only the text of the abstract from the paragraph (<p>) HTML element
@@ -120,6 +122,16 @@ public class AbstractFinder {
      } catch (IOException e) {
         e.printStackTrace();
     }
+            int count = 0;
+            for (int k = 0; k < abstractList.size(); k++)
+            {
+               if (abstractList.get(k).equals("no abstract"))
+               {
+                  System.out.println("index: " + k);
+                  count++;
+               }
+            }
+    System.out.println("Number of abstracts that did not have an abstract or failed to get an abstract: " + count);
 
     return abstractList;
     
@@ -219,7 +231,7 @@ public class AbstractFinder {
                     {
                        int abIndex = j - 1; // allows us to access the correct abstract in our list
                        row = sheet.getRow(j); // sets us on the right row 
-                       row.createCell(10, CellType.STRING).setCellValue(writingList.get(abIndex)); // 10 is number of the column that contains "Abstract"
+                       row.createCell(i, CellType.STRING).setCellValue(writingList.get(abIndex)); // 10 is number of the column that contains "Abstract"
                        // we then "create" a cell which has a cell type of String, which allows us to write our abstract to the cell.
                     }
                  }
@@ -234,5 +246,31 @@ public class AbstractFinder {
           e.printStackTrace();
        }
        
+    }
+
+    public static String EstablishFilePath() throws Exception {
+        try {
+
+            //This creates a dummy file that starts as the basis for creating the filepath in the base of the program
+            File s = new File("f.txt");
+            String FilePath = "";
+            
+            //This gets the filepath of the dummy file and transforms it into characters, so it can be modified.
+            //The modification snips off the charcters "f.txt" so that the only path left is the base filepath
+            char[] tempChar = s.getAbsolutePath().toCharArray();
+            char[] newChar = new char[tempChar.length - 6];
+            for (int i = 0; i < newChar.length; i++) {
+                newChar[i] = tempChar[i];
+            }
+            //This makes the filepath into a string, minus the "f.txt" bit
+            FilePath = String.valueOf(newChar);
+            //System.out.println(FilePath);
+            //This returns the filepath
+            return FilePath;
+
+	    } catch (Exception e) {
+            e.printStackTrace();
+            return "failed to find filepath";
+        }
     }
 }
