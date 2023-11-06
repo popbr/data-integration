@@ -46,16 +46,18 @@ public class AbstractFinder {
 
     System.out.println("Welcome to Abstract Finder.");
 
-    /*
+    
     ArrayList<String> searchList = Read_From_Excel(); // might need to take the file path to the data source
     
     ArrayList<String> abstractList = RetrieveAbstract(searchList); //takes 2:30 minutes to 3 minutes on Adam's laptop to do this
-    
+
+
+    System.out.println(abstractList.size());    
 
     Write_To_Excel(abstractList); // Currently only does one sheet
-    */
+    
 
-    Write_To_ExcelAlt();
+    //Write_To_ExcelAlt();
 
     System.out.println("Thanks for coming! Your abstracts should be in your Excel file now");
     
@@ -205,7 +207,7 @@ public class AbstractFinder {
        
        ArrayList<String> searchList = new ArrayList<String>();
        
-       FileInputStream fins = new FileInputStream(new File("C:\\Users\\reyno\\Downloads\\Abstacts.xlsx")); // misspelled abstracts
+       FileInputStream fins = new FileInputStream(new File("C:\\Users\\reyno\\Downloads\\Abstracts_Copy.xlsx"));
 
        XSSFWorkbook wb = new XSSFWorkbook(fins);
        
@@ -214,7 +216,7 @@ public class AbstractFinder {
        // "Bothwell, A Pub Abstracts"
        XSSFSheet sheet = wb.getSheetAt(2);
 
-       int rows = sheet.getLastRowNum(); // gets number of rows
+       int rows = sheet.getLastRowNum() + 1; // gets number of rows
        int cols = sheet.getRow(1).getLastCellNum(); // gets the number of columns
 
        XSSFRow row = sheet.getRow(0); // starting the row at 0 for sheet 2
@@ -264,7 +266,8 @@ public class AbstractFinder {
            // "Bothwell, A Pub Abstracts"
            XSSFSheet sheet = wb.getSheetAt(2);
 
-           int rows = sheet.getLastRowNum() + 1; //gets the number of rows in the sheet
+           //int rows = sheet.getLastRowNum() + 1; //gets the number of rows in the sheet
+           int rows = writingList.size(); // SocketTimeoutException causing it to not work
            int cols = sheet.getRow(1).getLastCellNum(); //gets the number of columns in the sheet
 
            XSSFRow row = sheet.getRow(0);
@@ -279,10 +282,11 @@ public class AbstractFinder {
                  String valueOfCell = cell.getStringCellValue();
                  if (valueOfCell.toLowerCase().equals("abstract"));
                  {
-                    for (int j = 0; j < rows; j++)
+                    for (int j = 1; j < rows; j++)
                     {
+                       int abIndex = j - 1;
                        row = sheet.getRow(j);
-                       row.createCell(i, CellType.STRING).setCellValue(writingList.get(j)); 
+                       row.createCell(10, CellType.STRING).setCellValue(writingList.get(abIndex)); 
                     }
                  }
               }
@@ -303,14 +307,16 @@ public class AbstractFinder {
        try {
           XSSFWorkbook wb = new XSSFWorkbook();
           XSSFSheet sheet = wb.createSheet(" Testing Sheet ");
-          int rowNum = 0;
-          XSSFRow row = sheet.createRow(rowNum++);
-          for (int i = 0; i < 10; i++)
+          for (int j = 0; j < 10; j++)
           {
-             int cellNum = 0;
-             System.out.println(cellNum);
-             XSSFCell cell = row.createCell(cellNum++);
-             cell.setCellValue("Testing works");
+             XSSFRow row = sheet.createRow(j);
+             for (int i = 0; i < 10; i++)
+             {
+                System.out.println("i: " + i); //aka the cell number or col
+                System.out.println("j: " + j); //aka the row
+                XSSFCell cell = row.createCell(i);
+                cell.setCellValue("Testing works");
+             }
           }
           FileOutputStream out = new FileOutputStream(new File("C:\\Users\\reyno\\Downloads\\test.xlsx"));
           wb.write(out);
