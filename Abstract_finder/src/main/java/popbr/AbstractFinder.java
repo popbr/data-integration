@@ -37,17 +37,19 @@ public class AbstractFinder {
     public static void main(String[] args) throws Exception { 
        
        System.out.println("Welcome to Abstract Finder.");
-       System.out.println(RetrieveDOI());
-       /*
+
        ArrayList<String> searchList = Read_From_Excel(); // will return a searchList that has the author's name and all of the titles for our search query
     
-       ArrayList<String> abstractList = RetrieveAbstract(searchList); //takes a few minutes to accomplish due to having to search on the Internet    
+       ArrayList<String> abstractList = RetrieveAbstract(searchList); //takes a few minutes to accomplish due to having to search on the Internet
+
+       ArrayList<String> doiList = RetrieveDOI(searchList); //may take the same time as the RetrieveAbstract method --> 3 minutes
 
        Write_To_Excel(abstractList); // Currently only does one sheet at a time and needs to be manually updated
 
-       System.out.println("Thanks for coming! Your abstracts should be in your Excel file now");
-       */
+       //Write_To_Excel_DOI(doiList); // Need to write the method, but need to figure out where the DOI should go
 
+       System.out.println("Thanks for coming! Your abstracts should be in your Excel file now");
+       
        System.exit(0);
     }
     
@@ -66,7 +68,7 @@ public class AbstractFinder {
          /*
            Our current searchstring uses the author's name + the name of an article from our searchFor list.
            This currently works for most cases since all test cases provide 1 search result
-           If the search querery needs to be improved, the documentation below will help: 
+           If the search query needs to be improved, the documentation below will help: 
            https://pubmed.ncbi.nlm.nih.gov/help/#citation-matcher-auto-search
          */
 
@@ -119,7 +121,7 @@ public class AbstractFinder {
                   count++;
                }
             }
-    System.out.println("Number of abstracts that did not have an abstract or failed to get an abstract: " + count);
+    System.out.println("Number of publications that did not have an abstract on PubMed: " + count);
 
     return abstractList;
     
@@ -243,41 +245,25 @@ public class AbstractFinder {
        
     }
 
-    // Param: ArrayList<String> searchFor
-    // Return Type: ArrayList<String>
-    public static String RetrieveDOI() throws Exception // takes the same thing as our RetrieveAbstract method
+    public static ArrayList<String> RetrieveDOI(ArrayList<String> searchFor) throws Exception // takes the same thing as our RetrieveAbstract method
     {
-       String doi_text = " "; // Will be overwritten by the doi if we succeed.
-       try{
-       
+
+       String doi_text = " "; // Will be overwritten by the abstract if we succeed.
     
        Document doc; // creates a new Document object that we will use to extract the html page and then extract the doi text
 
-       String searchString = "Alfred Bothwell Identification of a ribonuclease P-like activity from human KB cells";
+       ArrayList<String> doi_List = new ArrayList<String>(); // creates a list that we will store our DOIs in
 
-       doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + java.net.URLEncoder.encode(searchString, "UTF-8")).get();
-
-       Element doi_element = doc.selectFirst(".identifier a");
-
-       doi_text = doi_element.text();
-       }
-       catch (NullPointerException npe) {
-          npe.printStackTrace();
-       }
-
-       //ArrayList<String> doi_List = new ArrayList<String>(); // creates a list that we will store our abstracts in
-
-       /*
        try 
        {
-         
+         /*
            Our current searchstring uses the author's name + the name of an article from our searchFor list.
            This currently works for most cases since all test cases provide 1 search result
-           If the search querery needs to be improved, the documentation below will help: 
+           If the search query needs to be improved, the documentation below will help: 
            https://pubmed.ncbi.nlm.nih.gov/help/#citation-matcher-auto-search
-         
+         */
 
-         String searchString = "";     
+         String searchString = "";
 
          for(int i = 1; i < searchFor.size(); i++)
          {
@@ -285,11 +271,11 @@ public class AbstractFinder {
 
               searchString = searchFor.get(0) + " " + searchFor.get(i);
 
-              
+              /*
                 Uses the searchString (author's name + title of article) to search PubMed using a heuristic search on PubMed
                 This most likely fails, but since PubMed defaults to an auto search if the heuristic search fails
                 It still allows us to find the article we are searching for
-              
+              */
               doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + java.net.URLEncoder.encode(searchString, "UTF-8")).get(); 
         
               // Selects the first instance of the class "identifier doi" and look for the anchor element
@@ -300,7 +286,7 @@ public class AbstractFinder {
 
               Element doi_element = doc.selectFirst("span.identifier.doi a");
 
-              doi_text = doi_element.text(); // gets only the text of the doi text from the paragraph (<p>) HTML element
+              doi_text = doi_element.text(); // gets only the text of the doi text from the anchor (<a>) element from the span element that have the specific class
               // For more info: https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#text(java.lang.String)
 
               doi_List.add(doi_text);
@@ -315,13 +301,21 @@ public class AbstractFinder {
                doi_List.add(doi_text);
             }
           }
-        } catch (IOException e) {
-        e.printStackTrace();
-          }
-       */
+       } 
+       catch (IOException e) {
+          e.printStackTrace();
+       }
 
-       //return doi_List;
-       return doi_text;
+       int count = 0;
+       for (int k = 0; k < doi.size(); k++)
+       {
+          if (doi_List.get(k).equals("no doi"))
+             count++;
+       }
+
+       System.out.println("Number of publications that did not have a DOI on PubMed: " + count);
+
+       return doi_List;
     }
 
     public static String EstablishFilePath() throws Exception {
