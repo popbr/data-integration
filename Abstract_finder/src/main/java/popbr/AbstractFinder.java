@@ -243,9 +243,13 @@ public class AbstractFinder {
        
     }
 
-    public static ArrayList<String> RetrieveDOI(ArrayList<String> searchFor) throws Exception // takes the same thing as our RetrieveAbstract method
+    // Param: ArrayList<String> searchFor
+    // Return Type: ArrayList<String>
+    public static String RetrieveDOI() throws Exception // takes the same thing as our RetrieveAbstract method
     {
        String doi_text = " "; // Will be overwritten by the doi if we succeed.
+       try{
+       
     
        Document doc; // creates a new Document object that we will use to extract the html page and then extract the doi text
 
@@ -253,9 +257,13 @@ public class AbstractFinder {
 
        doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + java.net.URLEncoder.encode(searchString, "UTF-8")).get();
 
-       doi_text = doi_element.text();
-
        Element doi_element = doc.selectFirst(".identifier doi a");
+
+       doi_text = doi_element.text();
+       }
+       catch (NullPointerException npe) {
+          npe.printStackTrace();
+       }
 
        //ArrayList<String> doi_List = new ArrayList<String>(); // creates a list that we will store our abstracts in
 
