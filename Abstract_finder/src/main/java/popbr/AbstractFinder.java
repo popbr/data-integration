@@ -40,13 +40,13 @@ public class AbstractFinder {
 
        ArrayList<String> searchList = Read_From_Excel(); // will return a searchList that has the author's name and all of the titles for our search query
     
-       ArrayList<String> abstractList = RetrieveAbstract(searchList); //takes a few minutes to accomplish due to having to search on the Internet
+       //ArrayList<String> abstractList = RetrieveAbstract(searchList); //takes a few minutes to accomplish due to having to search on the Internet
 
        ArrayList<String> doiList = RetrieveDOI(searchList); //may take the same time as the RetrieveAbstract method --> 3 minutes
 
-       Write_To_Excel(abstractList); // Currently only does one sheet at a time and needs to be manually updated
+       //Write_To_Excel(abstractList); // Currently only does one sheet at a time and needs to be manually updated
 
-       //Write_To_Excel_DOI(doiList); // Need to write the method, but need to figure out where the DOI should go
+       Write_To_Excel_DOI(doiList); // Need to write the method, but need to figure out where the DOI should go
 
        System.out.println("Thanks for coming! Your abstracts should be in your Excel file now");
        
@@ -101,7 +101,7 @@ public class AbstractFinder {
               abstractList.add(abstracttext);
             }
             catch (NullPointerException npe) {
-               abstracttext = "no abstract";
+               abstracttext = "no abstract on PubMed";
                abstractList.add(abstracttext);
             }
             catch (MalformedURLException mue) {
@@ -208,7 +208,7 @@ public class AbstractFinder {
            // Using the size of the list allows us to still run the code
            // May need to rerun since this is often caused by connection issues
            int rows = writingList.size(); // SocketTimeoutException causing it to not work in some cases
-           int cols = sheet.getRow(1).getLastCellNum(); //gets the number of columns in the sheet
+           int cols = sheet.getRow(0).getLastCellNum(); //gets the number of columns in the sheet
 
            XSSFRow row = sheet.getRow(0);
 
@@ -226,13 +226,13 @@ public class AbstractFinder {
                     {
                        int abIndex = j - 1; // allows us to access the correct abstract in our list
                        row = sheet.getRow(j); // sets us on the right row 
-                       row.createCell(i, CellType.STRING).setCellValue(writingList.get(abIndex)); // 10 is number of the column that contains "Abstract"
+                       row.createCell(i, CellType.STRING).setCellValue(writingList.get(abIndex));
                        // we then "create" a cell which has a cell type of String, which allows us to write our abstract to the cell.
                     }
                  }
               }
            }
-            String AbstractFile2 = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator + "Abstacts2.xlsx";
+           String AbstractFile2 = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator + "Abstacts2.xlsx";
 
            FileOutputStream out = new FileOutputStream(new File(AbstractFile2));
            wb.write(out);
@@ -241,8 +241,7 @@ public class AbstractFinder {
        }
        catch (Exception e) {
           e.printStackTrace();
-       }
-       
+       }   
     }
 
     public static ArrayList<String> RetrieveDOI(ArrayList<String> searchFor) throws Exception // takes the same thing as our RetrieveAbstract method
@@ -291,8 +290,8 @@ public class AbstractFinder {
 
               doi_List.add(doi_text);
             }
-            catch (NullPointerException npe) {
-               doi_text = "no doi";
+            catch (NullPointerException npe) { //may want to improve this to search other things (may even write another method to get called here)
+               doi_text = "no doi on PubMed";
                doi_List.add(doi_text);
             }
             catch (MalformedURLException mue) {
@@ -307,15 +306,52 @@ public class AbstractFinder {
        }
 
        int count = 0;
-       for (int k = 0; k < doi.size(); k++)
+       for (int k = 0; k < doi_List.size(); k++)
        {
-          if (doi_List.get(k).equals("no doi"))
+          if (doi_List.get(k).equals("no doi on PubMed"))
              count++;
        }
 
        System.out.println("Number of publications that did not have a DOI on PubMed: " + count);
 
        return doi_List;
+    }
+
+    public static void Write_To_Excel_DOI(ArrayList<String> writingList) throws Exception
+    {
+       /*
+         Since we do not know where the DOIs should go yet, I am just going to write to a blank excel for the current situation
+       */
+       try
+       {
+          String BasePath = EstablishFilePath();
+          //String AbstractFile = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator + "Publication_Abstracts_Only_Dataset_9-26-23.xlsx";
+          //FileInputStream fins = new FileInputStream(new File(AbstractFile));
+
+          XSSFWorkbook wb = new XSSFWorkbook(); // creates a blank workbook
+          
+          XSSFSheet sheet = wb.createSheet("Test Sheet");
+
+          int rows = writingList.size(); // SocketTimeoutException causing it to not work in some cases
+          //int cols = sheet.getRow(0).getLastCellNum(); //gets the number of columns in the sheet (throws an error because it is null)
+
+          XSSFRow row = sheet.createRow(0);
+
+          for (int i = 0; i < rows; i++)
+          {
+             int abIndex = i; // allows us to access the correct doi in our list
+             row = sheet.createRow(i);
+             row.createCell(0, CellType.STRING).setCellValue(writingList.get(abIndex));
+          }
+          String doiFile = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator + "doiTest.xlsx";
+
+          FileOutputStream out = new FileOutputStream(new File(doiFile));
+          wb.write(out);
+          out.close();
+       }
+       catch (Exception e) {
+          e.printStackTrace();
+       }
     }
 
     public static String EstablishFilePath() throws Exception {
