@@ -188,7 +188,7 @@ public class AbstractFinder {
        return searchList;
     }
 
-    public static void Write_To_Excel(ArrayList<String> writingList) throws Exception {
+    public static void Write_To_Excel(ArrayList<String> writingList, ArrayList<String> doiList) throws Exception {
         try {
             String BasePath = EstablishFilePath();
             String AbstractFile = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator + "Publication_Abstracts_Only_Dataset_9-26-23.xlsx";
@@ -208,6 +208,7 @@ public class AbstractFinder {
            // Using the size of the list allows us to still run the code
            // May need to rerun since this is often caused by connection issues
            int rows = writingList.size(); // SocketTimeoutException causing it to not work in some cases
+           int doiRows = doiList.size();
            int cols = sheet.getRow(0).getLastCellNum(); //gets the number of columns in the sheet
 
            XSSFRow row = sheet.getRow(0);
@@ -230,8 +231,20 @@ public class AbstractFinder {
                        // we then "create" a cell which has a cell type of String, which allows us to write our abstract to the cell.
                     }
                  }
+                 /*
+                 if (valueOfCell.toUpperCase().equals("DOI"))
+                 {
+                    for (int l = 1; l <= rows; l++;)
+                    {
+                       int doiIndex = l - 1; // allows us to access the correct abstract for each row, since row would be 1 more than the actual index
+                       row = sheet.getRow(l); // sets us on the correct row
+                       row.createCell(i, CellType.STRING).setCellValue(doiList.get(doiIndex));
+                    }
+                 }
+                 */
               }
            }
+
            String AbstractFile2 = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator + "Abstacts2.xlsx";
 
            FileOutputStream out = new FileOutputStream(new File(AbstractFile2));
