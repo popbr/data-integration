@@ -22,16 +22,6 @@ import java.util.Scanner;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 
-/*
-// Those classes clash with Jsoup's classes, 
-// I am commenting them out for now,
-// as well as the methods using them.
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
-*/
-
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.net.MalformedURLException;
@@ -46,10 +36,9 @@ import org.jsoup.select.Elements;
 public class AbstractFinder {
     public static void main(String[] args) throws Exception { 
        
-       System.out.println(EstablishFilePath()); //need to figure out exactly what to do
-       // can improve this a bit maybe, will ask
        System.out.println("Welcome to Abstract Finder.");
-
+       System.out.println(RetrieveDOI());
+       /*
        ArrayList<String> searchList = Read_From_Excel(); // will return a searchList that has the author's name and all of the titles for our search query
     
        ArrayList<String> abstractList = RetrieveAbstract(searchList); //takes a few minutes to accomplish due to having to search on the Internet    
@@ -57,6 +46,7 @@ public class AbstractFinder {
        Write_To_Excel(abstractList); // Currently only does one sheet at a time and needs to be manually updated
 
        System.out.println("Thanks for coming! Your abstracts should be in your Excel file now");
+       */
 
        System.exit(0);
     }
@@ -93,7 +83,6 @@ public class AbstractFinder {
                 This most likely fails, but since PubMed defaults to an auto search if the heuristic search fails
                 It still allows us to find the article we are searching for
               */
-              System.out.print("https://pubmed.ncbi.nlm.nih.gov/?term=" + java.net.URLEncoder.encode(searchString, "UTF-8"));
               doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + java.net.URLEncoder.encode(searchString, "UTF-8")).get(); 
         
               // Selects the id "abstract" and look for the paragraph element of the first occurrence of the id abstract
@@ -252,6 +241,79 @@ public class AbstractFinder {
           e.printStackTrace();
        }
        
+    }
+
+    public static ArrayList<String> RetrieveDOI(ArrayList<String> searchFor) throws Exception // takes the same thing as our RetrieveAbstract method
+    {
+       String doi_text = " "; // Will be overwritten by the doi if we succeed.
+    
+       Document doc; // creates a new Document object that we will use to extract the html page and then extract the doi text
+
+       String searchString = "Alfred Bothwell Identification of a ribonuclease P-like activity from human KB cells";
+
+       doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + java.net.URLEncoder.encode(searchString, "UTF-8")).get();
+
+       doi_text = doi_element.text();
+
+       Element doi_element = doc.selectFirst(".identifier doi a");
+
+       //ArrayList<String> doi_List = new ArrayList<String>(); // creates a list that we will store our abstracts in
+
+       /*
+       try 
+       {
+         /*
+           Our current searchstring uses the author's name + the name of an article from our searchFor list.
+           This currently works for most cases since all test cases provide 1 search result
+           If the search querery needs to be improved, the documentation below will help: 
+           https://pubmed.ncbi.nlm.nih.gov/help/#citation-matcher-auto-search
+         */
+
+         String searchString = "";     
+
+         for(int i = 1; i < searchFor.size(); i++)
+         {
+            try {
+
+              searchString = searchFor.get(0) + " " + searchFor.get(i);
+
+              /*
+                Uses the searchString (author's name + title of article) to search PubMed using a heuristic search on PubMed
+                This most likely fails, but since PubMed defaults to an auto search if the heuristic search fails
+                It still allows us to find the article we are searching for
+              */
+              doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + java.net.URLEncoder.encode(searchString, "UTF-8")).get(); 
+        
+              // Selects the first instance of the class "identifier doi" and look for the anchor element
+              // This may cause a problem if there is an element with this name that comes before this doi identifier
+              // It is near the top of the HTML page, so it should be okay to only select the first
+              // More documentation: https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#selectFirst(java.lang.String)
+              // More documentation: https://jsoup.org/cookbook/extracting-data/selector-syntax
+
+              Element doi_element = doc.selectFirst(".identifier doi a");
+
+              doi_text = doi_element.text(); // gets only the text of the doi text from the paragraph (<p>) HTML element
+              // For more info: https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#text(java.lang.String)
+
+              doi_List.add(doi_text);
+            }
+            catch (NullPointerException npe) {
+               doi_text = "no doi";
+               doi_List.add(doi_text);
+            }
+            catch (MalformedURLException mue) {
+               mue.printStackTrace();
+               doi_text = "error";
+               doi_List.add(doi_text);
+            }
+          }
+        } catch (IOException e) {
+        e.printStackTrace();
+          }
+       */
+
+       //return doi_List;
+       return doi_text;
     }
 
     public static String EstablishFilePath() throws Exception {
