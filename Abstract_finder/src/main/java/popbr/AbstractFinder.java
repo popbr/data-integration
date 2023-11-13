@@ -257,7 +257,7 @@ public class AbstractFinder {
 
        doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + java.net.URLEncoder.encode(searchString, "UTF-8")).get();
 
-       Element doi_element = doc.selectFirst(".identifier doi a");
+       Element doi_element = doc.selectFirst(".identifier a");
 
        doi_text = doi_element.text();
        }
@@ -298,7 +298,7 @@ public class AbstractFinder {
               // More documentation: https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#selectFirst(java.lang.String)
               // More documentation: https://jsoup.org/cookbook/extracting-data/selector-syntax
 
-              Element doi_element = doc.selectFirst(".identifier doi a");
+              Element doi_element = doc.selectFirst("span.identifier.doi a");
 
               doi_text = doi_element.text(); // gets only the text of the doi text from the paragraph (<p>) HTML element
               // For more info: https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#text(java.lang.String)
