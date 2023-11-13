@@ -68,7 +68,7 @@ public class AbstractFinder {
            This currently works for most cases since all test cases provide 1 search result
            If the search querery needs to be improved, the documentation below will help: 
            https://pubmed.ncbi.nlm.nih.gov/help/#citation-matcher-auto-search
-         
+         */
 
          String searchString = "";     
 
@@ -262,12 +262,12 @@ public class AbstractFinder {
        /*
        try 
        {
-         /*
+         
            Our current searchstring uses the author's name + the name of an article from our searchFor list.
            This currently works for most cases since all test cases provide 1 search result
            If the search querery needs to be improved, the documentation below will help: 
            https://pubmed.ncbi.nlm.nih.gov/help/#citation-matcher-auto-search
-         */
+         
 
          String searchString = "";     
 
@@ -277,11 +277,11 @@ public class AbstractFinder {
 
               searchString = searchFor.get(0) + " " + searchFor.get(i);
 
-              /*
+              
                 Uses the searchString (author's name + title of article) to search PubMed using a heuristic search on PubMed
                 This most likely fails, but since PubMed defaults to an auto search if the heuristic search fails
                 It still allows us to find the article we are searching for
-              */
+              
               doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + java.net.URLEncoder.encode(searchString, "UTF-8")).get(); 
         
               // Selects the first instance of the class "identifier doi" and look for the anchor element
