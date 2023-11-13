@@ -68,7 +68,7 @@ public class AbstractFinder {
            This currently works for most cases since all test cases provide 1 search result
            If the search querery needs to be improved, the documentation below will help: 
            https://pubmed.ncbi.nlm.nih.gov/help/#citation-matcher-auto-search
-         */
+         
 
          String searchString = "";     
 
