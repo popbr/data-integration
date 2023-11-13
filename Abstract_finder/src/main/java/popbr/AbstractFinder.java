@@ -40,13 +40,13 @@ public class AbstractFinder {
 
        ArrayList<String> searchList = Read_From_Excel(); // will return a searchList that has the author's name and all of the titles for our search query
     
-       //ArrayList<String> abstractList = RetrieveAbstract(searchList); //takes a few minutes to accomplish due to having to search on the Internet
+       ArrayList<String> abstractList = RetrieveAbstract(searchList); //takes a few minutes to accomplish due to having to search on the Internet
 
        ArrayList<String> doiList = RetrieveDOI(searchList); //may take the same time as the RetrieveAbstract method --> 3 minutes
 
-       //Write_To_Excel(abstractList); // Currently only does one sheet at a time and needs to be manually updated
+       Write_To_Excel(abstractList); // Currently only does one sheet at a time and needs to be manually updated
 
-       Write_To_Excel_DOI(doiList); // Need to write the method, but need to figure out where the DOI should go
+       Write_To_Excel_DOI(doiList); // Need to write the method, but need to figure out where the DOI should go (may be integrated with the existing method)
 
        System.out.println("Thanks for coming! Your abstracts should be in your Excel file now");
        
@@ -188,7 +188,8 @@ public class AbstractFinder {
        return searchList;
     }
 
-    public static void Write_To_Excel(ArrayList<String> writingList, ArrayList<String> doiList) throws Exception {
+    //Second Param: , ArrayList<String> doiList
+    public static void Write_To_Excel(ArrayList<String> writingList) throws Exception {
         try {
             String BasePath = EstablishFilePath();
             String AbstractFile = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator + "Publication_Abstracts_Only_Dataset_9-26-23.xlsx";
@@ -208,7 +209,7 @@ public class AbstractFinder {
            // Using the size of the list allows us to still run the code
            // May need to rerun since this is often caused by connection issues
            int rows = writingList.size(); // SocketTimeoutException causing it to not work in some cases
-           int doiRows = doiList.size();
+           //int doiRows = doiList.size();
            int cols = sheet.getRow(0).getLastCellNum(); //gets the number of columns in the sheet
 
            XSSFRow row = sheet.getRow(0);
