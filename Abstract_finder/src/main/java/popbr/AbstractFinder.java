@@ -27,31 +27,42 @@ import org.jsoup.select.Elements;
 public class AbstractFinder {
     public static void main(String[] args) throws Exception { 
        
-       System.out.println("Welcome to Abstract Finder.");
+       System.out.println("Welcome to Abstract/DOI Finder.");
 
        ArrayList<String> searchList = Read_From_Excel(); // will return a searchList that has the author's name and all of the titles for our search query
     
-       ArrayList<String> abstractList = RetrieveAbstract(searchList); //takes a few minutes to accomplish due to having to search on the Internet
+       ArrayList<ArrayList<String>> contentList = RetrieveAbstract(searchList); //takes a few minutes to accomplish due to having to search on the Internet
 
-       ArrayList<String> doiList = RetrieveDOI(searchList); //may take the same time as the RetrieveAbstract method --> 3 minutes
+       //ArrayList<String> doiList = RetrieveDOI(searchList); //may take the same time as the RetrieveAbstract method --> 3 minutes
 
-       Write_To_Excel(abstractList); // Currently only does one sheet at a time and needs to be manually updated
+       Write_To_Excel(contentList); // Currently only does one sheet at a time and needs to be manually updated
 
-       Write_To_Excel_DOI(doiList); // Need to write the method, but need to figure out where the DOI should go (may be integrated with the existing method)
+       //Write_To_Excel_DOI(doiList); // Need to write the method, but need to figure out where the DOI should go (may be integrated with the existing method)
 
-       System.out.println("Thanks for coming! Your abstracts should be in your Excel file now");
+       System.out.println("Thanks for coming! Your abstracts and DOIs should be in your Excel file now");
        
        System.exit(0);
     }
     
-    public static ArrayList<String> RetrieveAbstract(ArrayList<String> searchFor)
+    // make the new return type ArrayList<ArrayList<String>> to return two lists, so we can make this program a bit more efficient
+    // need to figure out how to differentiate between what threw an error (we now are doing two things that can throw a NullPointerException 
+    // and we don't want the error to crash the program because of the amount of entries we have --> right now, I'm just making it set the text for both to not having
+    // one, even if it does have one, but not the other
+    // one idea --> have a boolean variable for each to see how far it made it into the program
+    public static ArrayList<ArrayList<String>> RetrieveAbstract(ArrayList<String> searchFor)
     {
     
        String abstracttext = " "; // Will be overwritten by the abstract if we succeed.
+
+       String doiText = " "; // Will be overwritten by the DOI if we succeed
     
        Document doc; // creates a new Document object that we will use to extract the html page and then extract the abstract text
 
        ArrayList<String> abstractList = new ArrayList<String>(); // creates a list that we will store our abstracts in
+
+       ArrayList<String> doiList = new ArrayList<String>(); // creates a list to store the doi in
+
+       ArrayList<ArrayList<String>> returnedList = new ArrayList<ArrayList<String>>();
 
 
        try 
@@ -86,35 +97,51 @@ public class AbstractFinder {
 
               Element abstractelement = doc.selectFirst("#abstract p");
 
+              Element doiElement = doc.selectFirst("span.identifier.doi a");
+
               abstracttext = abstractelement.text(); // gets only the text of the abstract from the paragraph (<p>) HTML element
               // For more info: https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#text(java.lang.String)
 
+              doiText = doiElement.text();
+              System.out.println(doiText);
+
               abstractList.add(abstracttext);
+              doiList.add(doiText);
             }
             catch (NullPointerException npe) {
                abstracttext = "no abstract on PubMed";
                abstractList.add(abstracttext);
+               doiText = "no doi on PubMed";
+               doiList.add(doiText);
             }
             catch (MalformedURLException mue) {
                mue.printStackTrace();
                abstracttext = "error";
                abstractList.add(abstracttext);
+               doiText = "error";
+               doiList.add(doiText);
             }
        }
      } catch (IOException e) {
         e.printStackTrace();
     }
-            int count = 0;
+            int count = 0, doiCount = 0;
             for (int k = 0; k < abstractList.size(); k++)
             {
-               if (abstractList.get(k).equals("no abstract"))
-               {
+               if (abstractList.get(k).equals("no abstract on PubMed"))
                   count++;
-               }
+               if (doiList.get(k).equals("no doi on PubMed"))
+                  doiCount++;
             }
     System.out.println("Number of publications that did not have an abstract on PubMed: " + count);
+    System.out.println("Number of publications that did not have a DOI on PubMed: " + doiCount);
 
-    return abstractList;
+    returnedList.add(abstractList);
+    returnedList.add(doiList);
+
+    return returnedList;
+
+    //return abstractList;
     
     }
 
@@ -179,11 +206,15 @@ public class AbstractFinder {
        return searchList;
     }
 
-    //Second Param: , ArrayList<String> doiList
-    public static void Write_To_Excel(ArrayList<String> writingList) throws Exception {
+    // old params: ArrayList<String> writingList, ArrayList<String> doiList
+    // new param because of new modified method: ArrayList<ArrayList<String>>
+    public static void Write_To_Excel(ArrayList<ArrayList<String>> writeList) throws Exception {
         try {
             String BasePath = EstablishFilePath();
             String AbstractFile = BasePath + File.separator + "target" + File.separator + "downloads" + File.separator + "Publication_Abstracts_Only_Dataset_9-26-23.xlsx";
+
+           ArrayList<String> abstractList = writeList.get(0);
+           ArrayList<String> doiList = writeList.get(1); 
 
            FileInputStream fins = new FileInputStream(new File(AbstractFile)); 
 
@@ -199,8 +230,8 @@ public class AbstractFinder {
            // SocketTimeoutException causing it to not work in some cases
            // Using the size of the list allows us to still run the code
            // May need to rerun since this is often caused by connection issues
-           int rows = writingList.size(); // SocketTimeoutException causing it to not work in some cases
-           //int doiRows = doiList.size();
+           int rows = abstractList.size(); // SocketTimeoutException causing it to not work in some cases
+           int doiRows = doiList.size();
            int cols = sheet.getRow(0).getLastCellNum(); //gets the number of columns in the sheet
 
            XSSFRow row = sheet.getRow(0);
@@ -213,20 +244,22 @@ public class AbstractFinder {
               if (cell.getCellType() == CellType.STRING)
               {
                  String valueOfCell = cell.getStringCellValue();
+                 System.out.println(valueOfCell);
+
                  if (valueOfCell.toLowerCase().equals("abstract"))
                  {
                     for (int j = 1; j <= rows; j++)
                     {
                        int abIndex = j - 1; // allows us to access the correct abstract in our list
                        row = sheet.getRow(j); // sets us on the right row 
-                       row.createCell(i, CellType.STRING).setCellValue(writingList.get(abIndex));
+                       row.createCell(i, CellType.STRING).setCellValue(abstractList.get(abIndex));
                        // we then "create" a cell which has a cell type of String, which allows us to write our abstract to the cell.
                     }
                  }
                  /*
                  if (valueOfCell.toUpperCase().equals("DOI"))
                  {
-                    for (int l = 1; l <= rows; l++;)
+                    for (int l = 1; l <= doiRows; l++)
                     {
                        int doiIndex = l - 1; // allows us to access the correct abstract for each row, since row would be 1 more than the actual index
                        row = sheet.getRow(l); // sets us on the correct row
@@ -234,6 +267,7 @@ public class AbstractFinder {
                     }
                  }
                  */
+
               }
            }
 
@@ -249,6 +283,7 @@ public class AbstractFinder {
        }   
     }
 
+    /*
     public static ArrayList<String> RetrieveDOI(ArrayList<String> searchFor) throws Exception // takes the same thing as our RetrieveAbstract method
     {
 
@@ -260,12 +295,12 @@ public class AbstractFinder {
 
        try 
        {
-         /*
+         
            Our current searchstring uses the author's name + the name of an article from our searchFor list.
            This currently works for most cases since all test cases provide 1 search result
            If the search query needs to be improved, the documentation below will help: 
            https://pubmed.ncbi.nlm.nih.gov/help/#citation-matcher-auto-search
-         */
+         
 
          String searchString = "";
 
@@ -275,11 +310,11 @@ public class AbstractFinder {
 
               searchString = searchFor.get(0) + " " + searchFor.get(i);
 
-              /*
+              
                 Uses the searchString (author's name + title of article) to search PubMed using a heuristic search on PubMed
                 This most likely fails, but since PubMed defaults to an auto search if the heuristic search fails
                 It still allows us to find the article we are searching for
-              */
+              
               doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + java.net.URLEncoder.encode(searchString, "UTF-8")).get(); 
         
               // Selects the first instance of the class "identifier doi" and look for the anchor element
@@ -321,6 +356,7 @@ public class AbstractFinder {
 
        return doi_List;
     }
+    */
 
     public static void Write_To_Excel_DOI(ArrayList<String> writingList) throws Exception
     {
