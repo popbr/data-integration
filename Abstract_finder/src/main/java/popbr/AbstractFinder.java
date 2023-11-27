@@ -33,11 +33,7 @@ public class AbstractFinder {
     
        ArrayList<ArrayList<String>> contentList = RetrieveAbstract(searchList); //takes a few minutes to accomplish due to having to search on the Internet
 
-       //ArrayList<String> doiList = RetrieveDOI(searchList); //may take the same time as the RetrieveAbstract method --> 3 minutes
-
        Write_To_Excel(contentList); // Currently only does one sheet at a time and needs to be manually updated
-
-       //Write_To_Excel_DOI(doiList); // Need to write the method, but need to figure out where the DOI should go (may be integrated with the existing method)
 
        System.out.println("Thanks for coming! Your abstracts and DOIs should be in your Excel file now");
        
@@ -64,6 +60,7 @@ public class AbstractFinder {
 
        ArrayList<ArrayList<String>> returnedList = new ArrayList<ArrayList<String>>();
 
+       boolean hasAbstract = false, hasDOI = false; //declares and initializes them
 
        try 
        {
@@ -79,6 +76,9 @@ public class AbstractFinder {
          for(int i = 1; i < searchFor.size(); i++)
          {
             try {
+
+              hasAbstract = false; //resets them for each loop in case they got set to true
+              hasDOI = false;
 
               searchString = searchFor.get(0) + " " + searchFor.get(i);
 
@@ -102,12 +102,18 @@ public class AbstractFinder {
               abstracttext = abstractelement.text(); // gets only the text of the abstract from the paragraph (<p>) HTML element
               // For more info: https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#text(java.lang.String)
 
+              abstractList.add(abstracttext);
+
+              hasAbstract = true; //if we make it to this part, we will have an abstract (no exception thrown)
+
               doiText = doiElement.text();
 
-              abstractList.add(abstracttext);
               doiList.add(doiText);
+
+              hasDOI = true; //if we make it to this part, we will have a DOI (no exception thrown)
+
             }
-            catch (NullPointerException npe) {
+            catch (NullPointerException npe) { //need to implement the boolean checking 
                abstracttext = "no abstract on PubMed";
                abstractList.add(abstracttext);
                doiText = "no doi on PubMed";
