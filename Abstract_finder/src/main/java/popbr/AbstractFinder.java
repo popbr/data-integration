@@ -103,7 +103,6 @@ public class AbstractFinder {
               // For more info: https://jsoup.org/apidocs/org/jsoup/nodes/Element.html#text(java.lang.String)
 
               doiText = doiElement.text();
-              System.out.println(doiText);
 
               abstractList.add(abstracttext);
               doiList.add(doiText);
@@ -140,8 +139,6 @@ public class AbstractFinder {
     returnedList.add(doiList);
 
     return returnedList;
-
-    //return abstractList;
     
     }
 
@@ -244,7 +241,6 @@ public class AbstractFinder {
               if (cell.getCellType() == CellType.STRING)
               {
                  String valueOfCell = cell.getStringCellValue();
-                 System.out.println(valueOfCell);
 
                  if (valueOfCell.toLowerCase().equals("abstract"))
                  {
@@ -255,8 +251,8 @@ public class AbstractFinder {
                        row.createCell(i, CellType.STRING).setCellValue(abstractList.get(abIndex));
                        // we then "create" a cell which has a cell type of String, which allows us to write our abstract to the cell.
                     }
+                    row = sheet.getRow(0); //sets the row back to 0 after running
                  }
-                 /*
                  if (valueOfCell.toUpperCase().equals("DOI"))
                  {
                     for (int l = 1; l <= doiRows; l++)
@@ -265,9 +261,8 @@ public class AbstractFinder {
                        row = sheet.getRow(l); // sets us on the correct row
                        row.createCell(i, CellType.STRING).setCellValue(doiList.get(doiIndex));
                     }
+                    row = sheet.getRow(0); //sets the row back to 0 after running
                  }
-                 */
-
               }
            }
 
