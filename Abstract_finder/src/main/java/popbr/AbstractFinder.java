@@ -31,7 +31,7 @@ public class AbstractFinder {
 
        ArrayList<String> searchList = Read_From_Excel(); // will return a searchList that has the author's name and all of the titles for our search query
     
-       ArrayList<ArrayList<String>> contentList = RetrieveAbstract(searchList); //takes a few minutes to accomplish due to having to search on the Internet
+       ArrayList<ArrayList<String>> contentList = RetrieveData(searchList); //takes a few minutes to accomplish due to having to search on the Internet
 
        Write_To_Excel(contentList); // Currently only does one sheet at a time and needs to be manually updated
 
@@ -45,7 +45,7 @@ public class AbstractFinder {
     // and we don't want the error to crash the program because of the amount of entries we have --> right now, I'm just making it set the text for both to not having
     // one, even if it does have one, but not the other
     // one idea --> have a boolean variable for each to see how far it made it into the program
-    public static ArrayList<ArrayList<String>> RetrieveAbstract(ArrayList<String> searchFor)
+    public static ArrayList<ArrayList<String>> RetrieveData(ArrayList<String> searchFor)
     {
     
        String abstracttext = " "; // Will be overwritten by the abstract if we succeed.
@@ -114,10 +114,31 @@ public class AbstractFinder {
 
             }
             catch (NullPointerException npe) { //need to implement the boolean checking 
+               /*
                abstracttext = "no abstract on PubMed";
                abstractList.add(abstracttext);
                doiText = "no doi on PubMed";
                doiList.add(doiText);
+               */
+               if (Boolean.FALSE.equals(hasAbstract))
+               {
+                  abstracttext = "no abstract on PubMed";
+                  abstractList.add(abstracttext);
+                  try 
+                  {
+                     doiText = RetrieveDOI(searchString);
+                  }
+                  catch (Exception e)
+                  {
+                     e.printStackTrace();
+                  }
+                  doiList.add(doiText);
+               }
+               if (Boolean.FALSE.equals(hasDOI) && hasAbstract) // the abstractList will already have the abstract so you do not want to double add it to the list
+               {
+                  doiText = "no doi on PubMed";
+                  doiList.add(doiText);
+               }
             }
             catch (MalformedURLException mue) {
                mue.printStackTrace();
@@ -282,6 +303,24 @@ public class AbstractFinder {
        catch (Exception e) {
           e.printStackTrace();
        }   
+    }
+
+    public static String RetrieveDOI(String search) throws Exception {
+       String searchString = search;
+       String doiText = " ";
+       Document doc;
+       try
+       {
+          doc = Jsoup.connect("https://pubmed.ncbi.nlm.nih.gov/?term=" + java.net.URLEncoder.encode(searchString, "UTF-8")).get();
+          Element doiElement = doc.selectFirst("span.identifier.doi a");
+          doiText = doiElement.text();
+       }
+       catch (NullPointerException npe) 
+       {
+          doiText = "no doi on PubMed";
+          return doiText;
+       }
+       return doiText;
     }
 
     public static String EstablishFilePath() throws Exception {
